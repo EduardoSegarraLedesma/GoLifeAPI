@@ -3,9 +3,5 @@ instance_class: F1
 
 entrypoint: java -jar target/GoLifeAPI-1.0.jar
 
-handlers:
-  - url: /.*
-    script: auto
-
 automatic_scaling:
-  max_instances: 1  # Ajusta según tus necesidades
+  max_instances: 1
