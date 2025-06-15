@@ -23,9 +23,13 @@ jobs:
       run: mvn clean package
 
     - name: Replace env vars in app.yaml
-         run: |
-          sed -i "s|DB_CONNECTION_STRING_PLACEHOLDER|${{ secrets.DB_CONNECTION_STRING }}|g" app.yaml
-          sed -i "s|DB_NAME_PLACEHOLDER|${{ secrets.DB_NAME }}|g" app.yaml
+      env:
+        DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+      run: |
+        sed -i "s|DB_CONNECTION_STRING_PLACEHOLDER|$DB_CONNECTION_STRING|g" app.yaml
+        sed -i "s|DB_NAME_PLACEHOLDER|$DB_NAME|g" app.yaml
+
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
