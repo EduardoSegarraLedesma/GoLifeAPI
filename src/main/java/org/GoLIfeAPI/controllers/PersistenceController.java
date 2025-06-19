@@ -6,17 +6,16 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
+
+import org.GoLIfeAPI.Models.User;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 public class PersistenceController {
 
-    //private static final String CONNECTION_STRING = "mongodb+srv://golifepfg:GoLife_PFG_1@prod-golife-euwest-01.by5tqpp.mongodb.net/?retryWrites=true&w=majority&appName=prod-golife-euwest-01";
-    //private static final String DATABASE_NAME = "GoLife";
-   private static final String CONNECTION_STRING = System.getenv("DB_CONNECTION_STRING");
-   private static final String DATABASE_NAME = System.getenv("DB_NAME");
-    private MongoClient mongoClient = null;
+    private static final String CONNECTION_STRING = System.getenv("DB_CONNECTION_STRING");
+    private static final String DATABASE_NAME = System.getenv("DB_NAME");
+    private MongoClient mongoClient;
 
     private static PersistenceController instance = null;
 
@@ -38,14 +37,31 @@ public class PersistenceController {
         mongoClient = MongoClients.create(settings);
     }
 
-    // Metodo para obtener la base de datos
-    public MongoDatabase getDatabase() {
-        return mongoClient.getDatabase(DATABASE_NAME);
+    public Document createUser(User user, String uid) {
+        user.setId(uid);
+        mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection("Users")
+                .insertOne(user.toDocument());
+        return getUser(uid);
     }
 
-    // Metodo para obtener una colección
-    public MongoCollection<Document> getCollection(String collectionName) {
-        return getDatabase().getCollection(collectionName);
+    public Document getUser(String id) {
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection("Users")
+                .find(new Document("id", id)).first();
+    }
+
+    public void deleteUser(String id) {
+        mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection("Users")
+                .deleteOne(new Document("id", id));
+    }
+
+    public Document getGoal(String id) {
+        ObjectId objectId = new ObjectId(id);
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection("Goals")
+                .find(new Document("_id", objectId)).first();
     }
 
     // Cierra el cliente Mongo
