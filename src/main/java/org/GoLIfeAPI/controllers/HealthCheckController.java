@@ -14,11 +14,6 @@ public class HealthCheckController {
         return ResponseEntity.ok(Map.of("message", "GoLifeAPI is ready!"));
     }
 
-    @GetMapping("/_ah/start")
-    public ResponseEntity<Map<String, String>> start() {
-        return ResponseEntity.ok(Map.of("message", "App is warming up"));
-    }
-
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> healthCheck() {
         return ResponseEntity.ok(Map.of("status", "healthy"));
