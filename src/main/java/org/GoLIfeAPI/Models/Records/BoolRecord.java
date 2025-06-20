@@ -5,23 +5,23 @@ import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 
-public class BoolRecord {
+public class BoolRecord extends Record {
 
     private boolean valorBool;
-    private LocalDate fecha;
 
     public BoolRecord() {
+        super();
     }
 
     public BoolRecord(boolean valorBool, LocalDate fecha) {
+        super(fecha);
         this.valorBool = valorBool;
-        this.fecha = fecha;
     }
 
+    @Override
     public Document toDocument() {
-        return new Document("_id", new ObjectId()) // ID autogenerado
-                .append("valorBool", valorBool)
-                .append("fecha", fecha.toString()); // formato "yyyy-MM-dd"
+        return new Document("valorBool", valorBool)
+                .append("fecha", fecha.toString());
     }
 
     public boolean isValorBool() {
@@ -30,14 +30,6 @@ public class BoolRecord {
 
     public void setValorBool(boolean valorBool) {
         this.valorBool = valorBool;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
     }
 
 }

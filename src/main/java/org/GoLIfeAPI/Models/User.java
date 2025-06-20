@@ -15,14 +15,12 @@ public class User {
     private List<Goal> metas;
 
     public User() {
-        metas = new ArrayList<>();
     }
 
     public User(String id, String apellidos, String nombre) {
         this.id = id;
         this.apellidos = apellidos;
         this.nombre = nombre;
-        metas = new ArrayList<>();
     }
 
     public Document toDocument(){
@@ -32,7 +30,7 @@ public class User {
         doc.append("apellidos", apellidos);
         if (metas != null) {
             List<Document> metasDocs = metas.stream()
-                    .map(Goal::toDocument)
+                    .map(Goal::toParcialDocument)
                     .collect(Collectors.toList());
             doc.append("metas", metasDocs);
         } else {
@@ -71,5 +69,19 @@ public class User {
 
     public void setMetas(List<Goal> metas) {
         this.metas = metas;
+    }
+
+    public void addMeta(Goal meta) {
+        if (metas == null) {
+            metas = new ArrayList<>();
+        }
+        metas.add(meta);
+    }
+
+    public boolean removeMeta(Goal meta) {
+        if (metas != null) {
+            return metas.remove(meta);
+        }
+        return false;
     }
 }

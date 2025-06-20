@@ -1,8 +1,13 @@
 package org.GoLIfeAPI.Models.Goals;
 
+import org.GoLIfeAPI.Models.Records.Record;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Goal {
 
@@ -10,17 +15,21 @@ public abstract class Goal {
         Dias, Semanas, Meses, Años, Indefinido
     }
 
+    protected ObjectId _id;
+    protected String uid;
     protected String nombre;
     protected String descripcion;
     protected LocalDate fecha;
-    protected int finalizado;
+    protected Boolean finalizado;
     protected int duracionValor;
     protected Duracion duracionUnidad;
+    protected List<Record> registros;
 
     public Goal() {
     }
 
-    public Goal(String nombre, String descripcion, LocalDate fecha, int finalizado, int duracionValor, Duracion duracionUnidad) {
+    public Goal(String uid,String nombre, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
+        this.uid = uid;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.fecha = fecha;
@@ -31,15 +40,50 @@ public abstract class Goal {
 
     public Document toDocument() {
         return new Document()
+                .append("uid", uid)
                 .append("nombre", nombre)
                 .append("descripcion", descripcion)
                 .append("fecha", fecha != null ? fecha.toString() : null)
                 .append("finalizado", finalizado)
                 .append("duracionValor", duracionValor)
-                .append("duracionUnidad", duracionUnidad != null ? duracionUnidad.name() : null);
+                .append("duracionUnidad", duracionUnidad != null ? duracionUnidad.name() : null)
+                .append("registros", getListaRegistros());
     }
 
-    // Getters y setters
+    public Document toParcialDocument() {
+        return new Document()
+                .append("_id", _id)
+                .append("nombre", nombre)
+                .append("descripcion", descripcion)
+                .append("finalizado", finalizado);
+    }
+
+    private List<Document> getListaRegistros() {
+        if (registros != null) {
+            List<Document> registrosDocs = registros.stream()
+                    .map(Record::toDocument)
+                    .collect(Collectors.toList());
+            return registrosDocs;
+        } else {
+            return List.of();
+        }
+    }
+
+    public ObjectId get_id() {
+        return _id;
+    }
+
+    public void set_id(ObjectId _id) {
+        this._id = _id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public Duracion getDuracionUnidad() {
         return duracionUnidad;
@@ -57,11 +101,11 @@ public abstract class Goal {
         this.duracionValor = duracionValor;
     }
 
-    public int getFinalizado() {
+    public Boolean getFinalizado() {
         return finalizado;
     }
 
-    public void setFinalizado(int finalizado) {
+    public void setFinalizado(Boolean finalizado) {
         this.finalizado = finalizado;
     }
 
@@ -87,5 +131,27 @@ public abstract class Goal {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public List<Record> getRegistros() {
+        return registros;
+    }
+
+    public void setRegistros(List<Record> registros) {
+        this.registros = registros;
+    }
+
+    public void addRegistro(Record registro) {
+        if (registros == null) {
+            registros = new ArrayList<>();
+        }
+        registros.add(registro);
+    }
+
+    public boolean removeRegistro(Record registro) {
+        if (registros != null) {
+            return registros.remove(registro);
+        }
+        return false;
     }
 }

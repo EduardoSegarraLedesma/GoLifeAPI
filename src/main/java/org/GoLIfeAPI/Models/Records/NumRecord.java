@@ -5,22 +5,22 @@ import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 
-public class NumRecord {
+public class NumRecord extends Record {
 
     private Float valorNum;
-    private LocalDate fecha;
 
     public NumRecord() {
+        super();
     }
 
     public NumRecord(Float valorNum, LocalDate fecha) {
+        super(fecha);
         this.valorNum = valorNum;
-        this.fecha = fecha;
     }
 
+    @Override
     public Document toDocument() {
-        return new Document("_id", new ObjectId())
-                .append("valorNum", valorNum)
+        return new Document("valorNum", valorNum)
                 .append("fecha", fecha.toString());
     }
 
@@ -32,11 +32,4 @@ public class NumRecord {
         this.valorNum = valorNum;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
 }
