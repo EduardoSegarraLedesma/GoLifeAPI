@@ -25,7 +25,7 @@ public class UsersRestController extends BaseRestController {
         String uid = validation.getBody().toString();
 
         Document doc = persistenceService.createUser(user, uid);
-        if (doc != null) return ResponseEntity.ok(doc.toJson());
+        if (doc != null) return ResponseEntity.status(HttpStatus.CREATED).body(doc.toJson());
         else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido crear al usuario");
     }
 

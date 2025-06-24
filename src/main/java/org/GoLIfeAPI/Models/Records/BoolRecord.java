@@ -1,7 +1,6 @@
 package org.GoLIfeAPI.Models.Records;
 
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 

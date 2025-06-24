@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 
 public abstract class Goal {
 
+    public enum Tipo {
+        Num, Bool
+    }
+
     public enum Duracion {
         Dias, Semanas, Meses, Años, Indefinido
     }
@@ -18,6 +22,7 @@ public abstract class Goal {
     protected ObjectId _id;
     protected String uid;
     protected String nombre;
+    protected Tipo tipo;
     protected String descripcion;
     protected LocalDate fecha;
     protected Boolean finalizado;
@@ -26,11 +31,13 @@ public abstract class Goal {
     protected List<Record> registros;
 
     public Goal() {
+        this.tipo = Tipo.Bool;
     }
 
-    public Goal(String uid,String nombre, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
+    public Goal(String uid, String nombre, Tipo tipo, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
         this.uid = uid;
         this.nombre = nombre;
+        this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
         this.finalizado = finalizado;
@@ -42,11 +49,12 @@ public abstract class Goal {
         return new Document()
                 .append("uid", uid)
                 .append("nombre", nombre)
+                .append("tipo", tipo)
                 .append("descripcion", descripcion)
-                .append("fecha", fecha != null ? fecha.toString() : null)
+                .append("fecha", fecha)
                 .append("finalizado", finalizado)
                 .append("duracionValor", duracionValor)
-                .append("duracionUnidad", duracionUnidad != null ? duracionUnidad.name() : null)
+                .append("duracionUnidad", duracionUnidad)
                 .append("registros", getListaRegistros());
     }
 
@@ -54,8 +62,10 @@ public abstract class Goal {
         return new Document()
                 .append("_id", _id)
                 .append("nombre", nombre)
-                .append("descripcion", descripcion)
-                .append("finalizado", finalizado);
+                .append("tipo", tipo)
+                .append("finalizado", finalizado)
+                .append("duracionValor", duracionValor)
+                .append("duracionUnidad", duracionUnidad);
     }
 
     private List<Document> getListaRegistros() {
@@ -83,6 +93,14 @@ public abstract class Goal {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public Tipo getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(Tipo tipo) {
+        this.tipo = tipo;
     }
 
     public Duracion getDuracionUnidad() {

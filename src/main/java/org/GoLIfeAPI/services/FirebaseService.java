@@ -16,7 +16,7 @@ import java.io.IOException;
 public class FirebaseService {
 
     @PostConstruct
-    private void initializeFirebase() {
+    private void initializeFirebaseService() {
         try {
             FileInputStream serviceAccount = new FileInputStream("src/main/resources/firebase/serviceAccountKey.json");
             FirebaseOptions options = new FirebaseOptions.Builder()
@@ -25,7 +25,6 @@ public class FirebaseService {
             FirebaseApp.initializeApp(options);
         } catch (IOException e) {
             System.err.println("Error al inicializar Firebase: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("No se pudo inicializar Firebase", e);
         }
     }

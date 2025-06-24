@@ -11,7 +11,7 @@ public class BoolGoal extends Goal {
     }
 
     public BoolGoal(String uid, String nombre, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
-        super(uid, nombre, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
+        super(uid, nombre, Tipo.Bool, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
     }
 
     @Override
