@@ -1,18 +1,15 @@
-package org.GoLIfeAPI.controllers;
+package org.GoLIfeAPI.controllers.REST;
 
 import org.GoLIfeAPI.services.FirebaseService;
-import org.GoLIfeAPI.services.PersistenceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public abstract class BaseRestController {
 
     private final FirebaseService firebaseService;
-    protected final PersistenceService persistenceService;
 
-    public BaseRestController(FirebaseService firebaseService, PersistenceService persistenceService) {
+    public BaseRestController(FirebaseService firebaseService) {
         this.firebaseService = firebaseService;
-        this.persistenceService = persistenceService;
     }
 
     protected ResponseEntity<?> validateToken(String token) {

@@ -29,6 +29,17 @@ public class FirebaseService {
         }
     }
 
+    public boolean isAvailable() {
+        try {
+            FirebaseAuth.getInstance().getUser("invalidUID");
+            return true;
+        } catch (FirebaseAuthException e) {
+            return e.getAuthErrorCode() != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String verifyBearerToken(String token) {
         try {
             if (token != null && token.startsWith("Bearer ")) {
@@ -36,7 +47,7 @@ public class FirebaseService {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
                 return decodedToken.getUid();
             } else {
-               return null;
+                return null;
             }
         } catch (FirebaseAuthException e) {
             return null;
@@ -51,6 +62,4 @@ public class FirebaseService {
             return false;
         }
     }
-
-
 }

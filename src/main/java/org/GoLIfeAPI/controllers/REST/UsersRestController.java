@@ -1,8 +1,8 @@
-package org.GoLIfeAPI.controllers;
+package org.GoLIfeAPI.controllers.REST;
 
 import org.GoLIfeAPI.Models.User;
+import org.GoLIfeAPI.controllers.Persistence.UserPersistenceController;
 import org.GoLIfeAPI.services.FirebaseService;
-import org.GoLIfeAPI.services.PersistenceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +13,12 @@ import org.bson.Document;
 @RequestMapping("/api/users")
 public class UsersRestController extends BaseRestController {
 
-    public UsersRestController(FirebaseService firebaseService, PersistenceService persistenceService) {
-        super(firebaseService, persistenceService);
+    private final UserPersistenceController userPersistenceController;
+
+    public UsersRestController(FirebaseService firebaseService,
+                               UserPersistenceController userPersistenceController) {
+        super(firebaseService);
+        this.userPersistenceController = userPersistenceController;
     }
 
     @PostMapping
@@ -24,7 +28,7 @@ public class UsersRestController extends BaseRestController {
         if (!validation.getStatusCode().is2xxSuccessful()) return validation;
         String uid = validation.getBody().toString();
 
-        Document doc = persistenceService.createUser(user, uid);
+        Document doc = userPersistenceController.create(user, uid);
         if (doc != null) return ResponseEntity.status(HttpStatus.CREATED).body(doc.toJson());
         else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido crear al usuario");
     }
@@ -35,7 +39,7 @@ public class UsersRestController extends BaseRestController {
         if (!validation.getStatusCode().is2xxSuccessful()) return validation;
         String uid = validation.getBody().toString();
 
-        Document doc = persistenceService.readUser(uid);
+        Document doc = userPersistenceController.read(uid);
         if (doc != null) return ResponseEntity.ok(doc.toJson());
         else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se ha encontrado al usuario");
     }
@@ -46,7 +50,7 @@ public class UsersRestController extends BaseRestController {
         if (!validation.getStatusCode().is2xxSuccessful()) return validation;
         String uid = validation.getBody().toString();
 
-        if (persistenceService.deleteUser(uid)) return ResponseEntity.ok("Usuario eliminado exitosamente");
+        if (userPersistenceController.delete(uid)) return ResponseEntity.ok("Usuario eliminado exitosamente");
         else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido eliminar al usuario");
     }
 }
