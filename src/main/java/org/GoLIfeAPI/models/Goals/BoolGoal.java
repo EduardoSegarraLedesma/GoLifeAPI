@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.Models.Goals;
+package org.GoLIfeAPI.models.Goals;
 
 import org.bson.Document;
 

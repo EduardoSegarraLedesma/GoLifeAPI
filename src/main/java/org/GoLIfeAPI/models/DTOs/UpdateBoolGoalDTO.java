@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.Models.DTOs;
+package org.GoLIfeAPI.models.DTOs;
 
 public class UpdateBoolGoalDTO extends UpdateGoalDTO {
     public UpdateBoolGoalDTO() {

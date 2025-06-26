@@ -1,10 +1,18 @@
-package org.GoLIfeAPI.Models.DTOs;
+package org.GoLIfeAPI.models.DTOs;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import org.bson.Document;
 
 public class UpdateNumGoalDTO extends UpdateGoalDTO {
 
+    @NotNull(message = "El valor objetivo es obligatorio")
+    @Positive(message = "El valor objetivo debe ser un número positivo")
     private Float valorObjetivo;
+    @NotBlank(message = "La unidad no puede estar vacía")
+    @Size(max = 20, message = "La unidad no debe tener más de 20 caracteres")
     private String unidad;
 
     public UpdateNumGoalDTO() {

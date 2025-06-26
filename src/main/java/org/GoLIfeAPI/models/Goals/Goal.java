@@ -1,10 +1,12 @@
-package org.GoLIfeAPI.Models.Goals;
+package org.GoLIfeAPI.models.Goals;
 
-import org.GoLIfeAPI.Models.Records.Record;
+import jakarta.validation.constraints.*;
+import org.GoLIfeAPI.models.Records.Record;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,23 +17,34 @@ public abstract class Goal {
         Num, Bool
     }
 
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
     public enum Duracion {
         Dias, Semanas, Meses, Años, Indefinido
     }
 
     protected ObjectId _id;
     protected String uid;
+    @NotBlank(message = "El nombre de la meta es obligatorio")
+    @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
     protected String nombre;
+    @NotNull(message = "El tipo de meta es obligatorio")
     protected Tipo tipo;
+    @Size(max = 300, message = "La descripción no puede superar los 300 caracteres")
     protected String descripcion;
+    @NotNull(message = "La fecha de inicio es obligatoria")
     protected LocalDate fecha;
     protected Boolean finalizado;
+    @Min(value = 0, message = "La duración no puede ser negativa")
+    @Max(value = 10000, message = "La duración es demasiado grande")
     protected int duracionValor;
+    @NotNull(message = "La unidad de duración es obligatoria")
     protected Duracion duracionUnidad;
     protected List<Record> registros;
 
     public Goal() {
         this.tipo = Tipo.Bool;
+        finalizado = false;
     }
 
     public Goal(String uid, String nombre, Tipo tipo, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
@@ -51,7 +64,7 @@ public abstract class Goal {
                 .append("nombre", nombre)
                 .append("tipo", tipo)
                 .append("descripcion", descripcion)
-                .append("fecha", fecha)
+                .append("fecha", fecha.format(formatter))
                 .append("finalizado", finalizado)
                 .append("duracionValor", duracionValor)
                 .append("duracionUnidad", duracionUnidad)

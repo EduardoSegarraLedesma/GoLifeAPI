@@ -1,6 +1,8 @@
-package org.GoLIfeAPI.Models;
+package org.GoLIfeAPI.models;
 
-import org.GoLIfeAPI.Models.Goals.Goal;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.GoLIfeAPI.models.Goals.Goal;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -10,7 +12,10 @@ import java.util.stream.Collectors;
 public class User {
 
     private String id;
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String nombre;
+    @Size(min = 0, max = 50, message = "Los apellidos deben tener entre 0 y 50 caracteres")
     private String apellidos;
     private List<Goal> metas;
 

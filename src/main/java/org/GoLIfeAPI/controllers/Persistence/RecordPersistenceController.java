@@ -1,7 +1,7 @@
 package org.GoLIfeAPI.controllers.Persistence;
 
 import com.mongodb.client.ClientSession;
-import org.GoLIfeAPI.Models.Records.Record;
+import org.GoLIfeAPI.models.Records.Record;
 import org.GoLIfeAPI.services.MongoService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +21,9 @@ public class RecordPersistenceController extends BasePersistenceController {
             session.startTransaction();
             if (mongoService.insertOneEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME,
                     RECORD_LIST_NAME, record.toDocument())) {
-                Document doc = mongoService.findOneById(mid, GOAL_COLLECTION_NAME);
                 session.commitTransaction();
                 session.close();
-                return doc;
+                return mongoService.findOneById(mid, GOAL_COLLECTION_NAME);
             } else throw new Exception();
         } catch (Exception e) {
             session.abortTransaction();
@@ -33,12 +32,12 @@ public class RecordPersistenceController extends BasePersistenceController {
         }
     }
 
-    public Boolean delete(String mid, String rid) {
+    public Boolean delete(String mid, String date) {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            if (mongoService.deleteOneEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME,
-                    RECORD_LIST_NAME, rid)) {
+            if (mongoService.deleteOneEmbeddedDocByParentIdSonKey(session,
+                    mid, GOAL_COLLECTION_NAME, RECORD_LIST_NAME, "fecha", date)) {
                 session.commitTransaction();
                 session.close();
                 return true;
@@ -49,5 +48,4 @@ public class RecordPersistenceController extends BasePersistenceController {
             return false;
         }
     }
-
 }

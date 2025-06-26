@@ -1,7 +1,7 @@
 package org.GoLIfeAPI.controllers.Persistence;
 
 import com.mongodb.client.ClientSession;
-import org.GoLIfeAPI.Models.User;
+import org.GoLIfeAPI.models.User;
 import org.GoLIfeAPI.services.FirebaseService;
 import org.GoLIfeAPI.services.MongoService;
 import org.bson.Document;
@@ -26,10 +26,9 @@ public class UserPersistenceController extends BasePersistenceController {
             user.setId(uid);
             String objectId = mongoService.insertOne(session, user.toDocument(), USER_COLLECTION_NAME);
             if (objectId != null && !objectId.isBlank()) {
-                Document doc = mongoService.findOneById(objectId, USER_COLLECTION_NAME);
                 session.commitTransaction();
                 session.close();
-                return doc;
+                return mongoService.findOneById(objectId, USER_COLLECTION_NAME);
             } else throw new Exception();
         } catch (Exception e) {
             session.abortTransaction();

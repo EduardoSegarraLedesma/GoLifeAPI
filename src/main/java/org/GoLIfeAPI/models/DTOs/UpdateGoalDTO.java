@@ -1,13 +1,18 @@
-package org.GoLIfeAPI.Models.DTOs;
+package org.GoLIfeAPI.models.DTOs;
 
-import org.GoLIfeAPI.Models.Goals.Goal;
+import jakarta.validation.constraints.*;
+import org.GoLIfeAPI.models.Goals.Goal;
 import org.bson.Document;
 
 public abstract class UpdateGoalDTO {
 
+    @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
     protected String nombre;
+    @Size(max = 300, message = "La descripción no puede superar los 300 caracteres")
     protected String descripcion;
     protected Boolean finalizado;
+    @Min(value = 0, message = "La duración no puede ser negativa")
+    @Max(value = 10000, message = "La duración es demasiado grande")
     protected int duracionValor;
     protected Goal.Duracion duracionUnidad;
 

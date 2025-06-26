@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class MongoService {
@@ -52,7 +53,11 @@ public class MongoService {
         try {
             Document result = mongoClient.getDatabase("admin")
                     .runCommand(new Document("ping", 1));
-            return result != null;
+            Object okValue = result.get("ok");
+            if (okValue instanceof Number) {
+                return ((Number) okValue).doubleValue() == 1.0;
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }
@@ -68,20 +73,15 @@ public class MongoService {
         InsertOneResult result = mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .insertOne(session, doc);
-        return result.getInsertedId().asObjectId().getValue().toString();
+        return Objects.requireNonNull(result.getInsertedId()).asObjectId().getValue().toString();
     }
 
     public Boolean insertOneEmbeddedDocByParentId(ClientSession session, String id, String collection,
-                                                   String listKey, Document doc) {
-        UpdateResult result = mongoClient.getDatabase(DATABASE_NAME)
-                .getCollection(collection)
-                .updateOne(session,
-                        new Document("_id", new ObjectId(id)),
-                        new Document("$push", new Document(listKey, doc)));
-        return result.getModifiedCount() == 1;
+                                                  String listKey, Document doc) {
+        return insertOneEmbeddedDocByParentKey(session, "_id", new ObjectId(id), collection, listKey, doc);
     }
 
-    public Boolean insertOneEmbeddedDocByFieldKey(ClientSession session, String key, String value,
+    public Boolean insertOneEmbeddedDocByParentKey(ClientSession session, String key, Object value,
                                                    String collection, String listKey, Document doc) {
         UpdateResult result = mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
@@ -110,9 +110,9 @@ public class MongoService {
         return result.getModifiedCount() == 1;
     }
 
-    public Boolean updateOneEmbeddedDocByFieldKey(ClientSession session, String key, String value,
-                                                   String collection, String listKey, String docId,
-                                                   Document doc) {
+    public Boolean updateOneEmbeddedDocByParentKeySonId(ClientSession session, String key, String value,
+                                                        String collection, String listKey, String docId,
+                                                        Document doc) {
         List<Bson> updates = new ArrayList<>();
         for (String fieldName : doc.keySet()) {
             updates.add(Updates.set(listKey + ".$." + fieldName, doc.get(fieldName)));
@@ -145,18 +145,24 @@ public class MongoService {
         return result.getDeletedCount() > 0;
     }
 
-    public Boolean deleteOneEmbeddedDocByParentId(ClientSession session, String id, String collection,
-                                                   String listKey, String docId) {
-        return deleteOneEmbeddedDocByFieldKey(session, "_id", new ObjectId(id), collection, listKey, docId);
+
+    public Boolean deleteOneEmbeddedDocByParentKeySonId(ClientSession session, String key, Object value,
+                                                        String collection, String listKey, String listId) {
+        return deleteOneEmbeddedDocByParentKeySonKey(session, key, value, collection, listKey, "_id", new ObjectId(listId));
     }
 
-    public Boolean deleteOneEmbeddedDocByFieldKey(ClientSession session, String key, Object value,
-                                                   String collection, String listKey, String docId) {
+    public Boolean deleteOneEmbeddedDocByParentIdSonKey(ClientSession session, String id,
+                                                        String collection, String listKey, String listField, String listValue) {
+        return deleteOneEmbeddedDocByParentKeySonKey(session, "_id", new ObjectId(id), collection, listKey, listField, listValue);
+    }
+
+    public Boolean deleteOneEmbeddedDocByParentKeySonKey(ClientSession session, String key, Object value,
+                                                         String collection, String listKey, String fieldKey, Object fieldValue) {
         UpdateResult result = mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .updateOne(session,
                         Filters.eq(key, value),
-                        Updates.pull(listKey, Filters.eq("_id", new ObjectId(docId))));
+                        Updates.pull(listKey, Filters.eq(fieldKey, fieldValue)));
         return result.getModifiedCount() == 1;
     }
 }

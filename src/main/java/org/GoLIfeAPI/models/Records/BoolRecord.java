@@ -1,11 +1,13 @@
-package org.GoLIfeAPI.Models.Records;
+package org.GoLIfeAPI.models.Records;
 
+import jakarta.validation.constraints.NotNull;
 import org.bson.Document;
 
 import java.time.LocalDate;
 
 public class BoolRecord extends Record {
 
+    @NotNull(message = "El check no puede estar vacio")
     private boolean valorBool;
 
     public BoolRecord() {
@@ -19,8 +21,8 @@ public class BoolRecord extends Record {
 
     @Override
     public Document toDocument() {
-        return new Document("valorBool", valorBool)
-                .append("fecha", fecha.toString());
+        return new Document("fecha", fecha.format(formatter))
+                .append("valorBool", valorBool);
     }
 
     public boolean isValorBool() {
