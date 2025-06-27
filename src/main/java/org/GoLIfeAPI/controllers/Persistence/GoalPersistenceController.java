@@ -25,7 +25,7 @@ public class GoalPersistenceController extends BasePersistenceController {
             String objectId = mongoService.insertOne(session, goal.toDocument(), GOAL_COLLECTION_NAME);
             if (objectId != null && !objectId.isBlank()) {
                 goal.set_id(new ObjectId(objectId));
-                if (mongoService.insertOneEmbeddedDocByParentKey(session, "id", uid, USER_COLLECTION_NAME,
+                if (mongoService.insertOneEmbeddedDocByParentKey(session, "uid", uid, USER_COLLECTION_NAME,
                         GOAL_LIST_NAME, goal.toParcialDocument())) {
                     session.commitTransaction();
                     session.close();
@@ -51,7 +51,7 @@ public class GoalPersistenceController extends BasePersistenceController {
             if (!mongoService.updateOneById(session, mid, GOAL_COLLECTION_NAME, update.toDocument())) {
                 Document parcialDoc = update.toParcialDocument();
                 if (!parcialDoc.isEmpty()) {
-                    if (mongoService.updateOneEmbeddedDocByParentKeySonId(session, "id", uid, USER_COLLECTION_NAME,
+                    if (mongoService.updateOneEmbeddedDocByParentKeySonId(session, "uid", uid, USER_COLLECTION_NAME,
                             GOAL_LIST_NAME, mid, update.toParcialDocument())) {
                         session.commitTransaction();
                         session.close();
@@ -71,7 +71,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         try {
             session.startTransaction();
             if (mongoService.deleteOneById(session, mid, GOAL_COLLECTION_NAME)) {
-                if (mongoService.deleteOneEmbeddedDocByParentKeySonId(session, "id", uid, USER_COLLECTION_NAME,
+                if (mongoService.deleteOneEmbeddedDocByParentKeySonId(session, "uid", uid, USER_COLLECTION_NAME,
                         GOAL_LIST_NAME, mid)) {
                     session.commitTransaction();
                     session.close();

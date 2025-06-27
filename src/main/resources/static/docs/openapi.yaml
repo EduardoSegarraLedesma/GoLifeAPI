@@ -1,0 +1,1326 @@
+openapi: 3.0.3
+
+info:
+  title: GoLife API
+  version: 1.0
+
+tags:
+  - name: Health
+    description: Endpoints de comprobación de estado
+  - name: Users
+    description: Endpoints de gestión de usuarios
+  - name: Goals
+    description: Endpoints de gestión de metas
+  - name: Records
+    description: Endpoints de gestión de registros
+
+servers:
+  - url: http://localhost:8080
+  - url: https://golife-462914.oa.r.appspot.com
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Health ---------->
+  /api/health:
+    get:
+      tags:
+        - Health
+      summary: Estado de salud de la aplicación
+      security: []
+      responses:
+        "200":
+          description: Todos los servicios disponibles
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+        "503":
+          description: Algún servicio no está disponible
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Algunos servicios no estan disponibles
+        "500":
+          description: Error interno al comprobar la salud
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Comprobacion de salud fallida: Error Interno"
+
+  # Users ---------->
+  /api/users:
+    post:
+      tags:
+        - Users
+      summary: Crear un nuevo usuario
+      description: Crea un usuario asociado al token del solicitante.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        "201":
+          description: Usuario creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                _id:
+                  $oid: "6857f34820733b423ddc3827"
+                uid: "RAMUUu5pCqVWSbETgHg4S62AIKM2"
+                nombre: "Juan"
+                apellidos: "Pérez"
+                metas: [ ]
+        "400":
+          description: Datos de usuario inválidos (se devuelve el primer error de validación)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                NombreObligatorio:
+                  summary: Falla NotBlank en nombre
+                  value: "El nombre es obligatorio"
+                NombreTamaño:
+                  summary: Falla Size en nombre
+                  value: "El nombre debe tener entre 2 y 50 caracteres"
+                ApellidosTamaño:
+                  summary: Falla Size en apellidos
+                  value: "Los apellidos deben tener entre 0 y 50 caracteres"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "409":
+          description: El usuario ya existe
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "El usuario ya existe"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido crear al usuario
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: No se ha podido crear al usuario
+    get:
+      tags:
+        - Users
+      summary: Obtener datos del usuario actual
+      description: Recupera el usuario asociado al token Bearer
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: No se ha encontrado al usuario
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: No se ha encontrado al usuario
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags:
+        - Users
+      summary: Eliminar el usuario actual
+      description: Elimina el usuario asociado al token Bearer
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Usuario eliminado exitosamente
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Usuario eliminado exitosamente"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido eliminar al usuario
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No se ha podido eliminar al usuario"
+
+  # Goals ---------->
+  /api/metas/bool:
+    post:
+      tags:
+        - Goals
+      summary: Crear una nueva meta booleana
+      description: Crea una meta de tipo booleano asociada al usuario del token Bearer.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBoolGoalRequest'
+      responses:
+        "201":
+          description: Meta booleana creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoolGoal'
+        "400":
+          description: Datos de la meta no válidos (primer error de validación)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                MissingName:
+                  summary: Nombre ausente
+                  value: "El nombre de la meta es obligatorio"
+                NameTooLong:
+                  summary: Nombre demasiado largo
+                  value: "El nombre no puede superar los 50 caracteres"
+                DescriptionTooLong:
+                  summary: Descripción demasiado larga
+                  value: "La descripción no puede superar los 300 caracteres"
+                MissingDate:
+                  summary: Fecha ausente
+                  value: "La fecha de inicio es obligatoria"
+                DurationNegative:
+                  summary: Duración negativa
+                  value: "La duración no puede ser negativa"
+                DurationTooLarge:
+                  summary: Duración excesiva
+                  value: "La duración es demasiado grande, maximo 10000"
+                MissingDurationUnit:
+                  summary: Unidad de duración ausente
+                  value: "La unidad de duración es obligatoria"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido crear la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No se ha podido crear la meta"
+  /api/metas/num:
+    post:
+      tags:
+        - Goals
+      summary: Crear una nueva meta numérica
+      description: Crea una meta de tipo numérico asociada al usuario del token Bearer.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNumGoalRequest'
+      responses:
+        "201":
+          description: Meta numérica creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NumGoal'
+        "400":
+          description: Datos de la meta no válidos (primer error de validación)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                MissingName:
+                  summary: Nombre ausente
+                  value: "El nombre de la meta es obligatorio"
+                NameTooLong:
+                  summary: Nombre demasiado largo
+                  value: "El nombre no puede superar los 50 caracteres"
+                DescriptionTooLong:
+                  summary: Descripción demasiado larga
+                  value: "La descripción no puede superar los 300 caracteres"
+                MissingDate:
+                  summary: Fecha ausente
+                  value: "La fecha de inicio es obligatoria"
+                DurationNegative:
+                  summary: Duración negativa
+                  value: "La duración no puede ser negativa"
+                DurationTooLarge:
+                  summary: Duración excesiva
+                  value: "La duración es demasiado grande, maximo 10000"
+                MissingDurationUnit:
+                  summary: Unidad de duración ausente
+                  value: "La unidad de duración es obligatoria"
+                MissingValorObjetivo:
+                  summary: Valor objetivo ausente
+                  value: "El valor objetivo es obligatorio"
+                ValorObjetivoNotPositive:
+                  summary: Valor objetivo no positivo
+                  value: "El valor objetivo debe ser un número positivo"
+                MissingUnidad:
+                  summary: Unidad ausente
+                  value: "La unidad es obligatoria"
+                UnidadTooLong:
+                  summary: Unidad demasiado larga
+                  value: "La unidad no debe tener más de 20 caracteres"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido crear la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "No se ha podido crear la meta"
+  /api/metas/{mid}:
+    get:
+      tags:
+        - Goals
+      summary: Obtener una meta por su identificador
+      description: Recupera la meta (booleana o numérica) asociada al usuario del token Bearer.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+      responses:
+        "200":
+          description: Meta encontrada
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BoolGoal'
+                  - $ref: '#/components/schemas/NumGoal'
+                discriminator:
+                  propertyName: tipo
+                  mapping:
+                    Bool: '#/components/schemas/BoolGoal'
+                    Num: '#/components/schemas/NumGoal'
+              examples:
+                BoolGoalExample:
+                  summary: Ejemplo de meta booleana
+                  value:
+                    _id:
+                      $oid: "60f5a4b2e1d3f5c1a4e9d8b7"
+                    uid: "user123"
+                    nombre: "Caminar cada día"
+                    tipo: "Bool"
+                    descripcion: "Meta de caminar diariamente al menos 30 minutos"
+                    fecha: "2025-06-27"
+                    finalizado: false
+                    duracionValor: 30
+                    duracionUnidad: "Dias"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorBool: true
+                NumGoalExample:
+                  summary: Ejemplo de meta numérica
+                  value:
+                    _id:
+                      $oid: "70a6b5c3d4e5f6a7b8c9d0e1"
+                    uid: "user123"
+                    nombre: "Perder peso"
+                    tipo: "Num"
+                    descripcion: "Meta de reducir 5 kg en 3 meses"
+                    fecha: "2025-06-27"
+                    finalizado: false
+                    duracionValor: 3
+                    duracionUnidad: "Meses"
+                    valorObjetivo: 5.0
+                    unidad: "kg"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorNum: 4.8
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: No se ha encontrado la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta no encontrada"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+    patch:
+      tags:
+        - Goals
+      summary: Actualizar parcialmente una meta
+      description: Aplica los campos proporcionados al DTO apropiado (Bool o Num) según el tipo de la meta.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchGoalRequest'
+            examples:
+              MaxPatchExample:
+                summary: Todos los campos posibles, aplicables a NumGoal
+                value:
+                  nombre: "Beber agua cada mañana"
+                  descripcion: "Meta completa con todos los campos"
+                  duracionValor: 15
+                  duracionUnidad: "Semanas"
+                  valorObjetivo: 2.5
+                  unidad: "litros"
+              MinPatchExample:
+                summary: Un único campo mínimo
+                value:
+                  descripcion: "Actualización mínima: solo descripción"
+              BoolOnlyPatchExample:
+                summary: Solo campos aplicables a BoolGoal
+                value:
+                  nombre: "Beber agua cada mañana"
+                  descripcion: "Meta completa con todos los campos"
+                  duracionValor: 15
+                  duracionUnidad: "Semanas"
+      responses:
+        "200":
+          description: Meta actualizada correctamente
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BoolGoal'
+                  - $ref: '#/components/schemas/NumGoal'
+                discriminator:
+                  propertyName: tipo
+                  mapping:
+                    Bool: '#/components/schemas/BoolGoal'
+                    Num: '#/components/schemas/NumGoal'
+        "400":
+          description: Error en la petición (primer error de validación)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                MalformedJSON:
+                  summary: JSON malformado o inválido
+                  value: "JSON malformado o inválido"
+                UnsupportedType:
+                  summary: Tipo de meta no soportado - No posible, pero por si acaso
+                  value: "Tipo de meta no soportado"
+                NameTooLong:
+                  summary: Nombre demasiado largo
+                  value: "El nombre no puede superar los 50 caracteres"
+                DescriptionTooLong:
+                  summary: Descripción demasiado larga
+                  value: "La descripción no puede superar los 300 caracteres"
+                DurationNegative:
+                  summary: Duración negativa
+                  value: "La duración no puede ser negativa"
+                DurationTooLarge:
+                  summary: Duración excesiva
+                  value: "La duración es demasiado grande, maximo 10000"
+                ValorObjetivoNotPositive:
+                  summary: Valor objetivo no positivo
+                  value: "El valor objetivo debe ser un número positivo"
+                UnidadTooLong:
+                  summary: Unidad demasiado larga
+                  value: "La unidad no debe tener más de 20 caracteres"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: No se ha encontrado la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta no encontrada"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: Error interno al actualizar la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                UpdateFailed:
+                  summary: Persistencia fallida
+                  value: "No se ha podido actualizar la meta"
+                InternalError:
+                  summary: Excepción no controlada
+                  value: "Error interno"
+    delete:
+      tags:
+        - Goals
+      summary: Eliminar una meta
+      description: Elimina la meta (booleana o numérica) asociada al usuario del token Bearer.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+      responses:
+        "200":
+          description: Meta eliminada exitosamente
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta eliminada exitosamente"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: Meta no encontrada
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta no encontrada"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: Error interno al eliminar la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No se ha podido eliminar la meta"
+
+  /api/metas/{mid}/finalizar:
+    post:
+      tags:
+        - Goals
+      summary: Marcar una meta como finalizada
+      description: Establece `finalizado = true` en la meta indicada, sea booleana o numérica.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+      responses:
+        "200":
+          description: Meta actualizada correctamente
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BoolGoal'
+                  - $ref: '#/components/schemas/NumGoal'
+                discriminator:
+                  propertyName: tipo
+                  mapping:
+                    Bool: '#/components/schemas/BoolGoal'
+                    Num: '#/components/schemas/NumGoal'
+              examples:
+                BoolGoalFinalized:
+                  summary: Meta booleana finalizada
+                  value:
+                    _id:
+                      $oid: "60f5a4b2e1d3f5c1a4e9d8b7"
+                    uid: "user123"
+                    nombre: "Caminar cada día"
+                    tipo: "Bool"
+                    descripcion: "Meta de caminar diariamente al menos 30 minutos"
+                    fecha: "2025-06-27"
+                    finalizado: true
+                    duracionValor: 30
+                    duracionUnidad: "Dias"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorBool: true
+                NumGoalFinalized:
+                  summary: Meta numérica finalizada
+                  value:
+                    _id:
+                      $oid: "70a6b5c3d4e5f6a7b8c9d0e1"
+                    uid: "user123"
+                    nombre: "Perder peso"
+                    tipo: "Num"
+                    descripcion: "Meta de reducir 5 kg en 3 meses"
+                    fecha: "2025-06-27"
+                    finalizado: true
+                    duracionValor: 3
+                    duracionUnidad: "Meses"
+                    valorObjetivo: 5.0
+                    unidad: "kg"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorNum: 4.8
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: No se ha encontrado la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta no encontrada"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido actualizar la meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No se ha podido actualizar la meta"
+
+  # Records -------->
+  /api/metas/{mid}/registros:
+    post:
+      tags:
+        - Records
+      summary: Crear un registro para una meta
+      description: Crea un registro (booleano o numérico) asociado a la meta indicada y devuelve la meta completa actualizada.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/BoolRecord'
+                - $ref: '#/components/schemas/NumRecord'
+            examples:
+              BoolRecordExample:
+                summary: Registro booleano
+                value:
+                  fecha: "2025-06-28"
+                  valorBool: true
+              NumRecordExample:
+                summary: Registro numérico
+                value:
+                  fecha: "2025-06-28"
+                  valorNum: 4.8
+      responses:
+        "200":
+          description: Meta completa con el nuevo registro
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BoolGoal'
+                  - $ref: '#/components/schemas/NumGoal'
+                discriminator:
+                  propertyName: tipo
+                  mapping:
+                    Bool: '#/components/schemas/BoolGoal'
+                    Num: '#/components/schemas/NumGoal'
+              examples:
+                BoolGoalWithNewRecord:
+                  summary: Meta booleana con registro añadido
+                  value:
+                    _id:
+                      $oid: "60f5a4b2e1d3f5c1a4e9d8b7"
+                    uid: "user123"
+                    nombre: "Caminar cada día"
+                    tipo: "Bool"
+                    descripcion: "Meta de caminar diariamente al menos 30 minutos"
+                    fecha: "2025-06-27"
+                    finalizado: false
+                    duracionValor: 30
+                    duracionUnidad: "Dias"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorBool: true
+                      - fecha: "2025-06-28"
+                        valorBool: true
+                NumGoalWithNewRecord:
+                  summary: Meta numérica con registro añadido
+                  value:
+                    _id:
+                      $oid: "70a6b5c3d4e5f6a7b8c9d0e1"
+                    uid: "user123"
+                    nombre: "Perder peso"
+                    tipo: "Num"
+                    descripcion: "Meta de reducir 5 kg en 3 meses"
+                    fecha: "2025-06-27"
+                    finalizado: false
+                    duracionValor: 3
+                    duracionUnidad: "Meses"
+                    valorObjetivo: 5.0
+                    unidad: "kg"
+                    registros:
+                      - fecha: "2025-06-27"
+                        valorNum: 4.8
+                      - fecha: "2025-06-28"
+                        valorNum: 4.6
+        "400":
+          description: Error en la petición (primer error de validación)
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                MalformedJSON:
+                  summary: JSON malformado o inválido
+                  value: "JSON malformado o inválido"
+                UnsupportedType:
+                  summary: Tipo de meta no soportado - No posible, pero por si acaso
+                  value: "Tipo de meta no soportado"
+                DateBeforeStart:
+                  summary: Fecha anterior a la inicial
+                  value: "La fecha del registro no puede ser anterior a la fecha inicial de la meta"
+                MissingDate:
+                  summary: Fecha vacía
+                  value: "La fecha no puede estar vacia"
+                MissingBoolValue:
+                  summary: Valor booleano ausente
+                  value: "El check no puede estar vacio"
+                MissingNumValue:
+                  summary: Valor numérico ausente
+                  value: "El valor del registro no puede ser nulo"
+                NumValueNegative:
+                  summary: Valor numérico negativo
+                  value: "El valor del registro debe ser cero o positivo"
+                NumValueFormat:
+                  summary: Formato numérico inválido
+                  value: "Formato inválido: máximo 8 cifras enteras y 2 decimales"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: Meta no encontrada
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Meta no encontrada"
+        "409":
+          description: Ya existe un registro para la fecha indicada
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Ya existe un registro para la fecha: 2025-06-28"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: No se ha podido crear el registro
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                CreateFailed:
+                  summary: Persistencia fallida
+                  value: "No se ha podido crear el registro"
+                InternalError:
+                  summary: Excepción no controlada
+                  value: "Error interno"
+
+  /api/metas/{mid}/registros/{fecha}:
+    delete:
+      tags:
+        - Records
+      summary: Eliminar un registro de una meta
+      description: Elimina el registro de la fecha indicada de la meta (booleano o numérico) y devuelve un mensaje de confirmación.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: mid
+          in: path
+          description: Identificador de la meta (ObjectId MongoDB)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "60f5a4b2e1d3f5c1a4e9d8b7"
+        - name: fecha
+          in: path
+          description: Fecha del registro a eliminar (ISO 8601)
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2025-06-28"
+      responses:
+        "200":
+          description: Registro eliminado exitosamente
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Registro eliminado exitosamente"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: No autorizado para acceder a esta meta
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No autorizado para acceder a esta meta"
+        "404":
+          description: Meta o Registro no encontrados
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                RecordNotFound:
+                  summary: Fecha sin registro
+                  value: "Registro no encontrado"
+                GoalNotFound:
+                  summary: Meta inexistente
+                  value: "Meta no encontrada"
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
+        "500":
+          description: Error interno al eliminar el registro
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                DeleteFailed:
+                  summary: Persistencia fallida
+                  value: "No se ha podido eliminar el registro"
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    CreateUserRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          description: Nombre del usuario
+          minLength: 2
+          maxLength: 50
+          example: "Ana"
+        apellidos:
+          type: string
+          description: Apellidos del usuario (puede ir vacío)
+          minLength: 0
+          maxLength: 50
+          example: "García"
+      required:
+        - nombre
+
+    CreateBoolGoalRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          description: Nombre de la meta
+          minLength: 1
+          maxLength: 50
+          example: "Beber 2 litros de agua"
+        descripcion:
+          type: string
+          description: Descripción de la meta
+          maxLength: 300
+          example: "Recordar beber suficiente agua diariamente"
+        fecha:
+          type: string
+          format: date
+          description: Fecha de inicio de la meta (ISO 8601)
+          example: "2025-06-19"
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 30
+        duracionUnidad:
+          type: string
+          description: Unidad de duración
+          enum:
+            - Dias
+            - Semanas
+            - Meses
+            - Años
+            - Indefinido
+          example: "Dias"
+      required:
+        - nombre
+        - fecha
+        - duracionValor
+        - duracionUnidad
+
+    CreateNumGoalRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          description: Nombre de la meta
+          minLength: 1            # NotBlank
+          maxLength: 50
+          example: "Beber agua"
+        descripcion:
+          type: string
+          description: Descripción de la meta
+          maxLength: 300
+          example: "Beber al menos 2 litros de agua al día"
+        fecha:
+          type: string
+          format: date
+          description: Fecha de inicio de la meta (ISO 8601)
+          example: "2025-06-19"
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 7
+        duracionUnidad:
+          type: string
+          description: Unidad de duración
+          enum:
+            - Dias
+            - Semanas
+            - Meses
+            - Años
+            - Indefinido
+          example: "Dias"
+        valorObjetivo:
+          type: number
+          format: float
+          description: Valor objetivo numérico (positivo)
+          minimum: 0.01
+          example: 2.0
+        unidad:
+          type: string
+          description: Unidad de medida para el valor objetivo
+          minLength: 1
+          maxLength: 20
+          example: "litros"
+      required:
+        - nombre
+        - fecha
+        - duracionValor
+        - duracionUnidad
+        - valorObjetivo
+        - unidad
+
+    PatchGoalRequest:
+      type: object
+      description: Propiedades de la meta que se pueden actualizar (al menos una)
+      properties:
+        nombre:
+          type: string
+          description: Nuevo nombre de la meta
+          maxLength: 50
+          example: "Nuevo nombre"
+        descripcion:
+          type: string
+          description: Nueva descripción de la meta
+          maxLength: 300
+          example: "Descripción actualizada"
+        duracionValor:
+          type: integer
+          description: Nueva cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 15
+        duracionUnidad:
+          type: string
+          description: Nueva unidad de duración
+          enum:
+            - Dias
+            - Semanas
+            - Meses
+            - Años
+            - Indefinido
+          example: "Semanas"
+        valorObjetivo:
+          type: number
+          format: float
+          description: Nuevo valor objetivo para metas numéricas
+          minimum: 0
+          example: 10.5
+        unidad:
+          type: string
+          description: Nueva unidad para el valor objetivo
+          minLength: 1
+          maxLength: 20
+          example: "kg"
+      minProperties: 1
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: objectId
+          description: Identificador interno de MongoDB (24 hexadecimales)
+          pattern: '^[a-fA-F0-9]{24}$'
+          example: "60f5a4b2e1d3f5c1a4e9d8b7"
+        uid:
+          type: string
+          readOnly: true
+          example: "BIBIUu5pCqVWSbETgHg4S62XLPM2"
+        nombre:
+          type: string
+          description: Nombre del usuario
+          minLength: 2
+          maxLength: 50
+          example: "Juan"
+        apellidos:
+          type: string
+          description: Apellidos del usuario (puede ir vacío)
+          minLength: 0
+          maxLength: 50
+          example: "Pérez"
+        metas:
+          type: array
+          description: Lista de metas parciales del Usurio (Num o Bool)
+          items:
+            $ref: '#/components/schemas/PartialGoal'
+      required:
+        - _id
+        - id
+        - nombre
+        - apellidos
+        - metas
+
+    PartialGoal:
+      type: object
+      properties:
+        _id:
+          type: object
+          description: Identificador interno de MongoDB (24 hexadecimales)
+          properties:
+            $oid:
+              type: string
+              pattern: '^[a-fA-F0-9]{24}$'
+              example: "60f5a4b2e1d3f5c1a4e9d8b7"
+          required:
+            - $oid
+        nombre:
+          type: string
+          description: Nombre de la meta
+          maxLength: 50
+          example: "Caminar cada día"
+        tipo:
+          type: string
+          enum: [ Num, Bool ]
+          description: Tipo de la meta (Num o Bool)
+          example: "Bool"
+        finalizado:
+          type: boolean
+          description: Indica si la meta está completada
+          example: false
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 30
+        duracionUnidad:
+          type: string
+          enum: [ Dias, Semanas, Meses, Años, Indefinido ]
+          description: Unidad de duración
+          example: "Dias"
+      required:
+        - _id
+        - nombre
+        - tipo
+        - finalizado
+        - duracionValor
+        - duracionUnidad
+
+    BoolGoal:
+      type: object
+      properties:
+        _id:
+          type: object
+          description: Identificador interno de MongoDB (24 hexadecimales)
+          properties:
+            $oid:
+              type: string
+              pattern: '^[a-fA-F0-9]{24}$'
+              example: "60f5a4b2e1d3f5c1a4e9d8b7"
+          required:
+            - $oid
+        uid:
+          type: string
+          description: Identificador del usuario propietario
+          example: "user123"
+        nombre:
+          type: string
+          description: Nombre de la meta
+          maxLength: 50
+          example: "Caminar cada día"
+        tipo:
+          type: string
+          enum: [Bool]
+          description: Tipo de la meta
+          example: "Bool"
+        descripcion:
+          type: string
+          description: Descripción de la meta
+          maxLength: 300
+          example: "Meta de caminar diariamente al menos 30 minutos"
+        fecha:
+          type: string
+          format: date
+          description: Fecha de inicio de la meta (ISO 8601)
+          example: "2025-06-27"
+        finalizado:
+          type: boolean
+          description: Indica si la meta está completada
+          example: false
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 30
+        duracionUnidad:
+          type: string
+          enum: [Dias, Semanas, Meses, Años, Indefinido]
+          description: Unidad de duración
+          example: "Dias"
+        registros:
+          type: array
+          description: Lista de registros asociados (solo BoolRecord)
+          items:
+            $ref: '#/components/schemas/BoolRecord'
+      required:
+        - _id
+        - uid
+        - nombre
+        - tipo
+        - fecha
+        - duracionValor
+        - duracionUnidad
+        - registros
+
+    NumGoal:
+      type: object
+      properties:
+        _id:
+          type: object
+          description: Identificador interno de MongoDB (24 hexadecimales)
+          properties:
+            $oid:
+              type: string
+              pattern: '^[a-fA-F0-9]{24}$'
+              example: "60f5a4b2e1d3f5c1a4e9d8b7"
+          required:
+            - $oid
+        uid:
+          type: string
+          description: Identificador del usuario propietario
+          example: "user123"
+        nombre:
+          type: string
+          description: Nombre de la meta
+          maxLength: 50
+          example: "Perder peso"
+        tipo:
+          type: string
+          enum: [ Num ]
+          description: Tipo de la meta
+          example: "Num"
+        descripcion:
+          type: string
+          description: Descripción de la meta
+          maxLength: 300
+          example: "Meta de reducir 5 kg en 3 meses"
+        fecha:
+          type: string
+          format: date
+          description: Fecha de inicio de la meta (ISO 8601)
+          example: "2025-06-27"
+        finalizado:
+          type: boolean
+          description: Indica si la meta está completada
+          example: false
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          minimum: 0
+          maximum: 10000
+          example: 3
+        duracionUnidad:
+          type: string
+          enum: [ Dias, Semanas, Meses, Años, Indefinido ]
+          description: Unidad de duración
+          example: "Meses"
+        valorObjetivo:
+          type: number
+          format: float
+          description: Valor objetivo numérico (positivo)
+          minimum: 0
+          example: 5.0
+        unidad:
+          type: string
+          maxLength: 20
+          description: Unidad de medida para el valor objetivo
+          example: "kg"
+        registros:
+          type: array
+          description: Lista de registros asociados (solo NumRecord)
+          items:
+            $ref: '#/components/schemas/NumRecord'
+      required:
+        - _id
+        - uid
+        - nombre
+        - tipo
+        - fecha
+        - duracionValor
+        - duracionUnidad
+        - valorObjetivo
+        - unidad
+        - registros
+
+    BoolRecord:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date
+          description: Fecha del registro (ISO 8601)
+        valorBool:
+          type: boolean
+          description: Check de verdadero/falso
+      required:
+        - fecha
+        - valorBool
+
+    NumRecord:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date
+          description: Fecha del registro (ISO 8601)
+        valorNum:
+          type: number
+          format: float
+          description: Valor numérico (>= 0, hasta 2 decimales)
+          minimum: 0
+          maximum: 99999999.99
+          multipleOf: 0.01
+      required:
+        - fecha
+        - valorNum
+
+  responses:
+    Unauthorized:
+      description: Unauthorized – falta el encabezado Authorization o token inválido
+      content:
+        text/plain:
+          schema:
+            type: string
+          examples:
+            InvalidToken:
+              summary: Token inválido
+              value: "Token inválido"
+            MissingHeader:
+              summary: Falta el encabezado Authorization
+              value: "Falta el encabezado Authorization"
+    TooManyRequests:
+      description: Too Many Requests – rate limit excedido
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Demasiadas peticiones. Espera un momento por favor"

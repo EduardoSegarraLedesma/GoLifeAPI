@@ -22,8 +22,8 @@ public class NumGoal extends Goal {
         this.tipo = Tipo.Num;
     }
 
-    public NumGoal(String uid, String nombre, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad, Float valorObjetivo, String unidad) {
-        super(uid, nombre, Tipo.Num, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
+    public NumGoal(String uid, String nombre, String descripcion, LocalDate fecha, int duracionValor, Duracion duracionUnidad, Float valorObjetivo, String unidad) {
+        super(uid, nombre, Tipo.Num, descripcion, fecha, duracionValor, duracionUnidad);
         this.valorObjetivo = valorObjetivo;
         this.unidad = unidad;
     }

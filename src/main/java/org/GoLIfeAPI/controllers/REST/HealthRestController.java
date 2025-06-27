@@ -1,6 +1,5 @@
 package org.GoLIfeAPI.controllers.REST;
 
-import io.swagger.v3.oas.annotations.Operation;
 import org.GoLIfeAPI.services.FirebaseService;
 import org.GoLIfeAPI.services.MongoService;
 import org.springframework.http.HttpStatus;
@@ -20,12 +19,6 @@ public class HealthRestController {
         this.mongoService = mongoService;
         this.firebaseService = firebaseService;
     }
-
-    @Operation(
-            summary = "Estado de salud de la aplicación",
-            description = "Comprueba que la API está viva y respondiendo",
-            security = {}
-    )
 
     @GetMapping()
     public ResponseEntity<?> healthCheck() {

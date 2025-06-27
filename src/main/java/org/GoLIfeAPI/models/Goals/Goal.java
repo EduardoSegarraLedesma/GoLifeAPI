@@ -28,7 +28,6 @@ public abstract class Goal {
     @NotBlank(message = "El nombre de la meta es obligatorio")
     @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
     protected String nombre;
-    @NotNull(message = "El tipo de meta es obligatorio")
     protected Tipo tipo;
     @Size(max = 300, message = "La descripción no puede superar los 300 caracteres")
     protected String descripcion;
@@ -36,7 +35,7 @@ public abstract class Goal {
     protected LocalDate fecha;
     protected Boolean finalizado;
     @Min(value = 0, message = "La duración no puede ser negativa")
-    @Max(value = 10000, message = "La duración es demasiado grande")
+    @Max(value = 10000, message = "La duración es demasiado grande, maximo 10000")
     protected int duracionValor;
     @NotNull(message = "La unidad de duración es obligatoria")
     protected Duracion duracionUnidad;
@@ -47,13 +46,12 @@ public abstract class Goal {
         finalizado = false;
     }
 
-    public Goal(String uid, String nombre, Tipo tipo, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
+    public Goal(String uid, String nombre, Tipo tipo, String descripcion, LocalDate fecha, int duracionValor, Duracion duracionUnidad) {
         this.uid = uid;
         this.nombre = nombre;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
-        this.finalizado = finalizado;
         this.duracionValor = duracionValor;
         this.duracionUnidad = duracionUnidad;
     }

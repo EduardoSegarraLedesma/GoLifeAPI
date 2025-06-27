@@ -12,7 +12,7 @@ public abstract class UpdateGoalDTO {
     protected String descripcion;
     protected Boolean finalizado;
     @Min(value = 0, message = "La duración no puede ser negativa")
-    @Max(value = 10000, message = "La duración es demasiado grande")
+    @Max(value = 10000, message = "La duración es demasiado grande, maximo 10000")
     protected int duracionValor;
     protected Goal.Duracion duracionUnidad;
 
@@ -25,7 +25,7 @@ public abstract class UpdateGoalDTO {
         if (nombre != null && !nombre.isBlank()) doc.append("nombre", nombre);
         if (descripcion != null && !descripcion.isBlank()) doc.append("descripcion", descripcion);
         if (finalizado != null) doc.append("finalizado", finalizado);
-        if (duracionValor >= 1) doc.append("duracionValor", duracionValor);
+        if (duracionValor >= 0) doc.append("duracionValor", duracionValor);
         if (duracionUnidad != null) doc.append("duracionUnidad", duracionUnidad);
         return doc;
     }

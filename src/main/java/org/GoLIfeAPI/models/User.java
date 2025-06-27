@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class User {
 
-    private String id;
+    private String uid;
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String nombre;
@@ -23,14 +23,14 @@ public class User {
     }
 
     public User(String id, String apellidos, String nombre) {
-        this.id = id;
+        this.uid = id;
         this.apellidos = apellidos;
         this.nombre = nombre;
     }
 
     public Document toDocument(){
         Document doc = new Document();
-        doc.append("id", id);
+        doc.append("uid", uid);
         doc.append("nombre", nombre);
         doc.append("apellidos", apellidos);
         if (metas != null) {
@@ -44,12 +44,12 @@ public class User {
         return doc;
     }
 
-    public String getId() {
-        return id;
+    public String getUid() {
+        return uid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getApellidos() {

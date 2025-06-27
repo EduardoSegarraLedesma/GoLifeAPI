@@ -2,19 +2,21 @@ package org.GoLIfeAPI.controllers.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.GoLIfeAPI.models.DTOs.*;
-import org.GoLIfeAPI.models.Goals.*;
 import org.GoLIfeAPI.controllers.Persistence.GoalPersistenceController;
+import org.GoLIfeAPI.models.DTOs.UpdateBoolGoalDTO;
+import org.GoLIfeAPI.models.DTOs.UpdateGoalDTO;
+import org.GoLIfeAPI.models.DTOs.UpdateNumGoalDTO;
+import org.GoLIfeAPI.models.Goals.BoolGoal;
+import org.GoLIfeAPI.models.Goals.Goal;
+import org.GoLIfeAPI.models.Goals.NumGoal;
 import org.GoLIfeAPI.utils.GoalValidationHelper;
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/metas")
 public class GoalRestController {
@@ -44,8 +46,8 @@ public class GoalRestController {
     public ResponseEntity<?> getMeta(HttpServletRequest request,
                                      @PathVariable("mid") String mid) {
         String uid = (String) request.getAttribute("uid");
-        Document meta = goalValidationHelper.validateAndGetGoal(uid, mid);
-        return ResponseEntity.ok(meta.toJson());
+        Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
+        return ResponseEntity.ok(goal.toJson());
     }
 
     @PostMapping("/{mid}/finalizar")
@@ -64,10 +66,9 @@ public class GoalRestController {
                                        @RequestBody String jsonBody) {
         String uid = (String) request.getAttribute("uid");
         try {
-            Document meta = goalValidationHelper.validateAndGetGoal(uid, mid);
-            String tipo = meta.getString("tipo");
+            Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
+            String tipo = goal.getString("tipo");
             ObjectMapper objectMapper = goalValidationHelper.getObjectMapper();
-
             if ("Bool".equalsIgnoreCase(tipo)) {
                 UpdateBoolGoalDTO updateDTO = objectMapper.readValue(jsonBody, UpdateBoolGoalDTO.class);
                 goalValidationHelper.validateDTO(updateDTO);

@@ -23,7 +23,7 @@ public class UserPersistenceController extends BasePersistenceController {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            user.setId(uid);
+            user.setUid(uid);
             String objectId = mongoService.insertOne(session, user.toDocument(), USER_COLLECTION_NAME);
             if (objectId != null && !objectId.isBlank()) {
                 session.commitTransaction();
@@ -39,14 +39,14 @@ public class UserPersistenceController extends BasePersistenceController {
     }
 
     public Document read(String id) {
-        return mongoService.findOneByKey("id", id, USER_COLLECTION_NAME);
+        return mongoService.findOneByKey("uid", id, USER_COLLECTION_NAME);
     }
 
     public Boolean delete(String id) {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            if (mongoService.deleteOneByKey(session, "id", id, USER_COLLECTION_NAME)) {
+            if (mongoService.deleteOneByKey(session, "uid", id, USER_COLLECTION_NAME)) {
                 if (mongoService.deleteManyByKey(session, "uid", id, GOAL_COLLECTION_NAME)) {
                     if (firebaseService.deleteFirebaseUser(id)) {
                         session.commitTransaction();

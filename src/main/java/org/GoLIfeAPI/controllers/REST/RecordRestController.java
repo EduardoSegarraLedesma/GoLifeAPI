@@ -2,12 +2,11 @@ package org.GoLIfeAPI.controllers.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+import org.GoLIfeAPI.controllers.Persistence.RecordPersistenceController;
 import org.GoLIfeAPI.models.Records.BoolRecord;
 import org.GoLIfeAPI.models.Records.NumRecord;
 import org.GoLIfeAPI.models.Records.Record;
-import org.GoLIfeAPI.controllers.Persistence.RecordPersistenceController;
 import org.GoLIfeAPI.utils.GoalValidationHelper;
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/metas/{mid}/registros")
 public class RecordRestController {
@@ -63,8 +61,14 @@ public class RecordRestController {
                                             @PathVariable("mid") String mid,
                                             @PathVariable("fecha") LocalDate fecha) {
         String uid = (String) request.getAttribute("uid");
-        goalValidationHelper.validateAndGetGoal(uid, mid);
-        if (recordPersistenceController.delete(mid, fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+        Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
+
+        List<Document> records = (List<Document>) goal.get("registros");
+        String date = fecha.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        boolean exists = records.stream().anyMatch(reg -> date.equals(reg.getString("fecha")));
+        if(!exists) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registro no encontrado");
+
+        if (recordPersistenceController.delete(mid, date))
             return ResponseEntity.ok("Registro eliminado exitosamente");
         else
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido eliminar el Registro");
@@ -83,7 +87,7 @@ public class RecordRestController {
         String newDate = record.getFecha().format(DateTimeFormatter.ISO_LOCAL_DATE);
         boolean exists = records.stream().anyMatch(reg -> newDate.equals(reg.getString("fecha")));
         if (exists)
-            return ResponseEntity.badRequest().body("Ya existe un registro para la fecha: " + newDate);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un registro para la fecha: " + newDate);
 
         Document doc = recordPersistenceController.create(record, mid);
         if (doc != null) {

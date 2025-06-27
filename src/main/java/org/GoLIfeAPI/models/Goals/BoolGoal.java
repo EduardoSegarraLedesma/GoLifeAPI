@@ -10,8 +10,8 @@ public class BoolGoal extends Goal {
         super();
     }
 
-    public BoolGoal(String uid, String nombre, String descripcion, LocalDate fecha, Boolean finalizado, int duracionValor, Duracion duracionUnidad) {
-        super(uid, nombre, Tipo.Bool, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
+    public BoolGoal(String uid, String nombre, String descripcion, LocalDate fecha, int duracionValor, Duracion duracionUnidad) {
+        super(uid, nombre, Tipo.Bool, descripcion, fecha, duracionValor, duracionUnidad);
     }
 
     @Override

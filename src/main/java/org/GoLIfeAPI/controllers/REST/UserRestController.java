@@ -1,24 +1,21 @@
 package org.GoLIfeAPI.controllers.REST;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.GoLIfeAPI.models.User;
 import org.GoLIfeAPI.controllers.Persistence.UserPersistenceController;
+import org.GoLIfeAPI.models.User;
+import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.bson.Document;
-
-@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/users")
-public class UsersRestController {
+public class UserRestController {
 
     private final UserPersistenceController userPersistenceController;
 
-    public UsersRestController(
+    public UserRestController(
             UserPersistenceController userPersistenceController) {
         this.userPersistenceController = userPersistenceController;
     }
@@ -27,7 +24,9 @@ public class UsersRestController {
     public ResponseEntity<?> postUser(HttpServletRequest request,
                                       @Valid @RequestBody User user) {
         String uid = (String) request.getAttribute("uid");
-        Document doc = userPersistenceController.create(user, uid);
+        Document doc = userPersistenceController.read(uid);
+        if (doc != null) return ResponseEntity.status(HttpStatus.CONFLICT).body("El usuario ya existe");
+        doc = userPersistenceController.create(user, uid);
         if (doc != null) return ResponseEntity.status(HttpStatus.CREATED).body(doc.toJson());
         else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido crear al usuario");
     }
