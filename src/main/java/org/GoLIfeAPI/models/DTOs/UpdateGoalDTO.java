@@ -1,5 +1,6 @@
 package org.GoLIfeAPI.models.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.GoLIfeAPI.models.Goals.Goal;
 import org.bson.Document;
@@ -10,6 +11,7 @@ public abstract class UpdateGoalDTO {
     protected String nombre;
     @Size(max = 300, message = "La descripción no puede superar los 300 caracteres")
     protected String descripcion;
+    @JsonIgnore
     protected Boolean finalizado;
     @Min(value = 0, message = "La duración no puede ser negativa")
     @Max(value = 10000, message = "La duración es demasiado grande, maximo 10000")

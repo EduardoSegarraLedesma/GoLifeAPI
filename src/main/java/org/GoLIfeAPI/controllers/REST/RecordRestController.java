@@ -2,7 +2,6 @@ package org.GoLIfeAPI.controllers.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.GoLIfeAPI.controllers.Persistence.RecordPersistenceController;
 import org.GoLIfeAPI.models.Records.BoolRecord;
 import org.GoLIfeAPI.models.Records.NumRecord;
@@ -11,6 +10,7 @@ import org.GoLIfeAPI.utils.GoalValidationHelper;
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -32,10 +32,9 @@ public class RecordRestController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> postRegistro(HttpServletRequest request,
+    public ResponseEntity<?> postRegistro(@AuthenticationPrincipal String uid,
                                           @PathVariable("mid") String mid,
                                           @RequestBody String jsonBody) {
-        String uid = (String) request.getAttribute("uid");
         try {
             Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
             String tipo = goal.getString("tipo");
@@ -57,12 +56,10 @@ public class RecordRestController {
     }
 
     @DeleteMapping("/{fecha}")
-    public ResponseEntity<?> deleteRegistro(HttpServletRequest request,
+    public ResponseEntity<?> deleteRegistro(@AuthenticationPrincipal String uid,
                                             @PathVariable("mid") String mid,
                                             @PathVariable("fecha") LocalDate fecha) {
-        String uid = (String) request.getAttribute("uid");
         Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
-
         List<Document> records = (List<Document>) goal.get("registros");
         String date = fecha.format(DateTimeFormatter.ISO_LOCAL_DATE);
         boolean exists = records.stream().anyMatch(reg -> date.equals(reg.getString("fecha")));

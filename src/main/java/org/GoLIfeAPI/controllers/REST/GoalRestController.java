@@ -2,7 +2,6 @@ package org.GoLIfeAPI.controllers.REST;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.GoLIfeAPI.controllers.Persistence.GoalPersistenceController;
 import org.GoLIfeAPI.models.DTOs.UpdateBoolGoalDTO;
@@ -15,6 +14,7 @@ import org.GoLIfeAPI.utils.GoalValidationHelper;
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,29 +31,27 @@ public class GoalRestController {
     }
 
     @PostMapping("/bool")
-    public ResponseEntity<?> postMetaBool(HttpServletRequest request,
+    public ResponseEntity<?> postMetaBool(@AuthenticationPrincipal String uid,
                                           @Valid @RequestBody BoolGoal goal) {
-        return postMeta((String) request.getAttribute("uid"), goal);
+        return postMeta(uid, goal);
     }
 
     @PostMapping("/num")
-    public ResponseEntity<?> postMetaNum(HttpServletRequest request,
+    public ResponseEntity<?> postMetaNum(@AuthenticationPrincipal String uid,
                                          @Valid @RequestBody NumGoal goal) {
-        return postMeta((String) request.getAttribute("uid"), goal);
+        return postMeta(uid, goal);
     }
 
     @GetMapping("/{mid}")
-    public ResponseEntity<?> getMeta(HttpServletRequest request,
+    public ResponseEntity<?> getMeta(@AuthenticationPrincipal String uid,
                                      @PathVariable("mid") String mid) {
-        String uid = (String) request.getAttribute("uid");
         Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
         return ResponseEntity.ok(goal.toJson());
     }
 
     @PostMapping("/{mid}/finalizar")
-    public ResponseEntity<?> postMetaFinalizar(HttpServletRequest request,
+    public ResponseEntity<?> postMetaFinalizar(@AuthenticationPrincipal String uid,
                                                @PathVariable("mid") String mid) {
-        String uid = (String) request.getAttribute("uid");
         goalValidationHelper.validateAndGetGoal(uid, mid);
         UpdateBoolGoalDTO update = new UpdateBoolGoalDTO();
         update.setFinalizado(true);
@@ -61,10 +59,9 @@ public class GoalRestController {
     }
 
     @PatchMapping("/{mid}")
-    public ResponseEntity<?> patchMeta(HttpServletRequest request,
+    public ResponseEntity<?> patchMeta(@AuthenticationPrincipal String uid,
                                        @PathVariable("mid") String mid,
                                        @RequestBody String jsonBody) {
-        String uid = (String) request.getAttribute("uid");
         try {
             Document goal = goalValidationHelper.validateAndGetGoal(uid, mid);
             String tipo = goal.getString("tipo");
@@ -88,9 +85,8 @@ public class GoalRestController {
     }
 
     @DeleteMapping("/{mid}")
-    public ResponseEntity<?> deleteMeta(HttpServletRequest request,
+    public ResponseEntity<?> deleteMeta(@AuthenticationPrincipal String uid,
                                         @PathVariable("mid") String mid) {
-        String uid = (String) request.getAttribute("uid");
         goalValidationHelper.validateAndGetGoal(uid, mid);
         if (goalPersistenceController.delete(mid, uid)) return ResponseEntity.ok("Meta eliminado exitosamente");
         else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No se ha podido eliminar la Meta");

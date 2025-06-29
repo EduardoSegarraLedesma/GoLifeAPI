@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: GoLife API
-  version: 1.0
+  version: "1.0"
 
 tags:
   - name: Health
@@ -23,7 +23,7 @@ security:
 
 paths:
   # Health ---------->
-  /api/health:
+  /api/salud:
     get:
       tags:
         - Health
@@ -53,7 +53,7 @@ paths:
                 example: "Comprobacion de salud fallida: Error Interno"
 
   # Users ---------->
-  /api/users:
+  /api/usuarios:
     post:
       tags:
         - Users

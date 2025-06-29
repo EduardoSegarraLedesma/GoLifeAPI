@@ -3,12 +3,12 @@ package org.GoLIfeAPI.security;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bucket;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,11 +37,15 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
-        String uid = (String) request.getAttribute("uid");
-
-        Bucket bucket = userBuckets.get(uid, k -> createNewBucket());
-
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String uid = (auth != null && auth.isAuthenticated())
+                ? auth.getName()
+                : null;
+        if (uid == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        Bucket bucket = userBuckets.get(uid, key -> createNewBucket());
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
@@ -50,16 +54,4 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             response.getWriter().write("Demasiadas peticiones. Espera un momento por favor.");
         }
     }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/api/health")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")
-                || path.startsWith("/swagger-resources")
-                || path.startsWith("/webjars")
-                || path.equals("/docs/openapi.yaml");
-    }
-
 }

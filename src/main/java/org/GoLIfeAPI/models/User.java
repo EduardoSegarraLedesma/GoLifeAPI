@@ -1,7 +1,5 @@
 package org.GoLIfeAPI.models;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.GoLIfeAPI.models.Goals.Goal;
 import org.bson.Document;
 
@@ -12,18 +10,15 @@ import java.util.stream.Collectors;
 public class User {
 
     private String uid;
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String nombre;
-    @Size(min = 0, max = 50, message = "Los apellidos deben tener entre 0 y 50 caracteres")
     private String apellidos;
     private List<Goal> metas;
 
     public User() {
     }
 
-    public User(String id, String apellidos, String nombre) {
-        this.uid = id;
+    public User(String uid, String apellidos, String nombre) {
+        this.uid = uid;
         this.apellidos = apellidos;
         this.nombre = nombre;
     }
