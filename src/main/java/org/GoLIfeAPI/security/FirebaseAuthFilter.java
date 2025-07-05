@@ -4,23 +4,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.GoLIfeAPI.services.FirebaseService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.GoLIfeAPI.infrastructure.FirebaseService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 
-@Component
 public class FirebaseAuthFilter extends OncePerRequestFilter {
 
     private final FirebaseService firebaseService;
 
-    @Autowired
     public FirebaseAuthFilter(FirebaseService firebaseService) {
         this.firebaseService = firebaseService;
     }
@@ -37,8 +33,7 @@ public class FirebaseAuthFilter extends OncePerRequestFilter {
             response.getWriter().write("Falta el encabezado Authorization");
             return;
         }
-        String token = authHeader.substring(7);
-        String uid = firebaseService.verifyBearerToken(token);
+        String uid = firebaseService.verifyBearerToken(authHeader);
         if (uid == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token inválido");

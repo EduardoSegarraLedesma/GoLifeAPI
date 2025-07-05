@@ -1,22 +1,23 @@
 package org.GoLIfeAPI.security;
 
+import org.GoLIfeAPI.infrastructure.FirebaseService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
-    private final FirebaseAuthFilter firebaseAuthFilter;
+    private final FirebaseService firebaseService;
     private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityConfig(FirebaseAuthFilter firebaseAuthFilter,
+    public SecurityConfig(FirebaseService firebaseService,
                           RateLimitingFilter rateLimitingFilter) {
-        this.firebaseAuthFilter = firebaseAuthFilter;
+        this.firebaseService = firebaseService;
         this.rateLimitingFilter = rateLimitingFilter;
     }
 
@@ -25,31 +26,26 @@ public class SecurityConfig {
     public SecurityFilterChain publicSecurityChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher(
-                        "/api/salud/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-resources/**",
-                        "/openapi.yaml"
+                        "/api/salud", "/api/salud/**",
+                        "/swagger-ui.html", "/swagger-ui/**",
+                        "/v3/api-docs/**", "/swagger-resources/**",
+                        "/openapi.yaml", "/favicon.ico"
                 )
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                );
+                .authorizeHttpRequests(a -> a.anyRequest().permitAll());
         return http.build();
     }
 
     @Bean
     @Order(2)
-    public SecurityFilterChain apiSecurityChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/**")
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+        FirebaseAuthFilter firebaseAuthFilter = new FirebaseAuthFilter(firebaseService);
+        http.securityMatcher("/**")
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
                 .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(rateLimitingFilter, FirebaseAuthFilter.class)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
-                );
+                .addFilterAfter(rateLimitingFilter, FirebaseAuthFilter.class);
         return http.build();
     }
 }
