@@ -17,19 +17,25 @@ public class GoalPersistenceController extends BasePersistenceController {
         super(mongoService);
     }
 
-    public Document create(Document goal, Document partialGoal, String uid) {
+    public Document create(Document goal, Document partialGoal, Document userStatsUpdate, String uid) {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            String objectId = mongoService.insertOne(session, goal, GOAL_COLLECTION_NAME);
+            String objectId = mongoService.insertDoc(session, goal, GOAL_COLLECTION_NAME);
             if (objectId != null && !objectId.isBlank()) {
                 partialGoal.put("_id", new ObjectId(objectId));
-                Document userDoc = mongoService.insertOneEmbeddedDocByParentKey(session, "uid", uid, USER_COLLECTION_NAME,
+                Document userDoc = mongoService.insertEmbeddedDocInListByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
                         GOAL_LIST_NAME, partialGoal);
+                if (userDoc == null) throw new Exception();
+                userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
+                        USER_STATS_NAME, userStatsUpdate);
                 if (userDoc == null) throw new Exception();
                 session.commitTransaction();
                 session.close();
-                return mongoService.findOneById(objectId, GOAL_COLLECTION_NAME);
+                Document composedDoc = new Document();
+                composedDoc.append(USER_STATS_NAME, userDoc.get(USER_STATS_NAME, Document.class));
+                composedDoc.append("meta", mongoService.findDocById(objectId, GOAL_COLLECTION_NAME));
+                return composedDoc;
             } else throw new Exception();
         } catch (Exception e) {
             session.abortTransaction();
@@ -40,22 +46,33 @@ public class GoalPersistenceController extends BasePersistenceController {
 
     public Document read(String id) {
         try {
-            return mongoService.findOneById(id, GOAL_COLLECTION_NAME);
+            return mongoService.findDocById(id, GOAL_COLLECTION_NAME);
         } catch (Exception e) {
             throw new RuntimeException("Error interno al leer la meta", e);
         }
     }
 
-    public Document update(Document goal, Document partialGoal, String uid, String mid) {
+    public Document update(Document goal, Document partialGoal, Document userStatsUpdate, String uid, String mid) {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            Document goalDoc = mongoService.findOneAndUpdateOneById(session, mid, GOAL_COLLECTION_NAME, goal);
+            Document goalDoc = mongoService.updateDocById(session, mid, GOAL_COLLECTION_NAME, goal);
             if (goalDoc == null) throw new NotFoundException("");
             if (!partialGoal.isEmpty()) {
-                Document userDoc = mongoService.updateOneEmbeddedDocByParentKeySonId(session, "uid", uid,
+                Document userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
                         USER_COLLECTION_NAME, GOAL_LIST_NAME, mid, partialGoal);
                 if (userDoc == null) throw new NotFoundException("");
+                if (userStatsUpdate != null) {
+                    userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
+                            USER_STATS_NAME, userStatsUpdate);
+                    if (userDoc == null) throw new Exception();
+                    Document composedDoc = new Document();
+                    composedDoc.append(USER_STATS_NAME, userDoc.get(USER_STATS_NAME, Document.class));
+                    composedDoc.append("meta", goalDoc);
+                    session.commitTransaction();
+                    session.close();
+                    return composedDoc;
+                }
                 session.commitTransaction();
                 session.close();
                 return goalDoc;
@@ -71,17 +88,22 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
-    public void delete(String mid, String uid) {
+    public Document delete(Document userStatsUpdate, String uid, String mid) {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            DeleteResult deleteGoal = mongoService.deleteOneById(session, mid, GOAL_COLLECTION_NAME);
+            DeleteResult deleteGoal = mongoService.deleteDocById(session, mid, GOAL_COLLECTION_NAME);
             if (!deleteGoal.wasAcknowledged()) throw new Exception();
             if (deleteGoal.getDeletedCount() == 0) throw new NotFoundException("");
-            Document userDoc = mongoService.deleteOneEmbeddedDocByParentKeySonId(session, "uid", uid, USER_COLLECTION_NAME,
+            Document userDoc = mongoService.removeEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
                     GOAL_LIST_NAME, mid);
             if (userDoc == null) throw new NotFoundException("");
+            userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
+                    USER_STATS_NAME, userStatsUpdate);
+            if (userDoc == null) throw new Exception();
             session.commitTransaction();
+            session.close();
+            return userDoc.get(USER_STATS_NAME, Document.class);
         } catch (NotFoundException e) {
             session.abortTransaction();
             session.close();

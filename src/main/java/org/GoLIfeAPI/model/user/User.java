@@ -13,17 +13,27 @@ public class User {
     private String nombre;
     private String apellidos;
     private List<Goal> metas;
+    private UserStats estadisticas;
 
     public User() {
+        estadisticas = new UserStats();
     }
 
     public User(String uid, String apellidos, String nombre) {
         this.uid = uid;
         this.apellidos = apellidos;
         this.nombre = nombre;
+        this.estadisticas = new UserStats();
     }
 
-    public Document toDocument(){
+    public User(String uid, String apellidos, String nombre, int totalMetas, int totalMetasFinalizadas) {
+        this.uid = uid;
+        this.apellidos = apellidos;
+        this.nombre = nombre;
+        this.estadisticas = new UserStats(totalMetas, totalMetasFinalizadas);
+    }
+
+    public Document toDocument() {
         Document doc = new Document();
         doc.append("uid", uid);
         doc.append("nombre", nombre);
@@ -36,6 +46,7 @@ public class User {
         } else {
             doc.append("metas", List.of());
         }
+        doc.append("estadisticas", estadisticas.toDocument());
         return doc;
     }
 
@@ -83,5 +94,13 @@ public class User {
             return metas.remove(meta);
         }
         return false;
+    }
+
+    public UserStats getEstadisticas() {
+        return estadisticas;
+    }
+
+    public void setEstadisticas(UserStats estadisticas) {
+        this.estadisticas = estadisticas;
     }
 }

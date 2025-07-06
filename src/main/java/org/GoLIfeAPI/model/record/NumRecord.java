@@ -1,27 +1,18 @@
 package org.GoLIfeAPI.model.record;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
 import org.bson.Document;
 
 import java.time.LocalDate;
 
 public class NumRecord extends Record {
 
-    @NotNull(message = "El valor del registro no puede ser nulo")
-    @PositiveOrZero(message = "El valor del registro debe ser cero o positivo")
-    @Digits(integer = 8, fraction = 2, message = "Formato inválido: máximo 8 cifras enteras y 2 decimales")
     private Float valorNum;
 
     public NumRecord() {
         super();
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public NumRecord(
-            @JsonProperty(value = "valorNum", required = true)Float valorNum,
-            LocalDate fecha) {
+    public NumRecord(Float valorNum, LocalDate fecha) {
         super(fecha);
         this.valorNum = valorNum;
     }
@@ -39,5 +30,4 @@ public class NumRecord extends Record {
     public void setValorNum(Float valorNum) {
         this.valorNum = valorNum;
     }
-
 }

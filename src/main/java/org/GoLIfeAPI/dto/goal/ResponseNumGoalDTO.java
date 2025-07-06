@@ -1,7 +1,7 @@
 package org.GoLIfeAPI.dto.goal;
 
+import org.GoLIfeAPI.dto.record.ResponseNumRecordDTO;
 import org.GoLIfeAPI.model.goal.Goal;
-import org.GoLIfeAPI.model.record.NumRecord;
 
 import java.util.List;
 
@@ -9,15 +9,11 @@ public class ResponseNumGoalDTO extends ResponseGoalDTO {
 
     private Float valorObjetivo;
     private String unidad;
-    private List<NumRecord> registros;
-
-    public ResponseNumGoalDTO() {
-        super();
-    }
+    private List<ResponseNumRecordDTO> registros;
 
     public ResponseNumGoalDTO(String _id, String nombre, Goal.Tipo tipo,
                               String descripcion, String fecha, Boolean finalizado,
-                              int duracionValor, Goal.Duracion duracionUnidad, List<NumRecord> registros,
+                              int duracionValor, Goal.Duracion duracionUnidad, List<ResponseNumRecordDTO> registros,
                               Float valorObjetivo, String unidad) {
         super(_id, nombre, tipo, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
         this.valorObjetivo = valorObjetivo;
@@ -25,27 +21,15 @@ public class ResponseNumGoalDTO extends ResponseGoalDTO {
         this.registros = registros;
     }
 
-    public List<NumRecord> getRegistros() {
+    public List<ResponseNumRecordDTO> getRegistros() {
         return registros;
-    }
-
-    public void setRegistros(List<NumRecord> registros) {
-        this.registros = registros;
     }
 
     public String getUnidad() {
         return unidad;
     }
 
-    public void setUnidad(String unidad) {
-        this.unidad = unidad;
-    }
-
     public Float getValorObjetivo() {
         return valorObjetivo;
-    }
-
-    public void setValorObjetivo(Float valorObjetivo) {
-        this.valorObjetivo = valorObjetivo;
     }
 }

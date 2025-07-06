@@ -6,10 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import org.GoLIfeAPI.dto.composed.ResponseBoolGoalUserStatsDTO;
+import org.GoLIfeAPI.dto.composed.ResponseNumGoalUserStatsDTO;
 import org.GoLIfeAPI.dto.goal.*;
+import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.model.goal.Goal;
 import org.GoLIfeAPI.service.GoalService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,16 +41,16 @@ public class GoalRestController {
     }
 
     @PostMapping("/bool")
-    public ResponseEntity<ResponseBoolGoalDTO> postMetaBool(@AuthenticationPrincipal String uid,
-                                                            @Valid @RequestBody CreateBoolGoalDTO createBoolGoalDTO) {
+    public ResponseEntity<ResponseBoolGoalUserStatsDTO> postMetaBool(@AuthenticationPrincipal String uid,
+                                                                     @Valid @RequestBody CreateBoolGoalDTO createBoolGoalDTO) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(goalService.createBoolGoal(createBoolGoalDTO, uid));
     }
 
     @PostMapping("/num")
-    public ResponseEntity<ResponseNumGoalDTO> postMetaNum(@AuthenticationPrincipal String uid,
-                                                          @Valid @RequestBody CreateNumGoalDTO createNumGoalDTO) {
+    public ResponseEntity<ResponseNumGoalUserStatsDTO> postMetaNum(@AuthenticationPrincipal String uid,
+                                                                   @Valid @RequestBody CreateNumGoalDTO createNumGoalDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(goalService.createNumGoal(createNumGoalDTO, uid));
     }
@@ -88,11 +92,10 @@ public class GoalRestController {
         }
     }
 
-    @DeleteMapping("/{mid}")
-    public ResponseEntity<?> deleteMeta(@AuthenticationPrincipal String uid,
-                                        @PathVariable("mid") String mid) {
-        goalService.deleteGoal(uid, mid);
-        return ResponseEntity.ok("Meta eliminado exitosamente");
+    @DeleteMapping(path = "/{mid}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseUserStatsDTO> deleteMeta(@AuthenticationPrincipal String uid,
+                                                           @PathVariable("mid") String mid) {
+        return ResponseEntity.ok(goalService.deleteGoal(uid, mid));
     }
 
     // Auxiliary Methods

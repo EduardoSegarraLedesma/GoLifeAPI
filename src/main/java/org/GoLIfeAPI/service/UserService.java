@@ -1,6 +1,6 @@
 package org.GoLIfeAPI.service;
 
-import org.GoLIfeAPI.dto.goal.PartialGoalDTO;
+import org.GoLIfeAPI.dto.goal.ResponsePartialGoalDTO;
 import org.GoLIfeAPI.dto.user.CreateUserDTO;
 import org.GoLIfeAPI.dto.user.PatchUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
@@ -20,10 +20,13 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserPersistenceController userPersistenceController;
+    private final StatsService statsService;
 
     @Autowired
-    public UserService(UserPersistenceController userPersistenceController) {
+    public UserService(UserPersistenceController userPersistenceController,
+                       StatsService statsService) {
         this.userPersistenceController = userPersistenceController;
+        this.statsService = statsService;
     }
 
     public ResponseUserDTO createUser(CreateUserDTO dto, String uid) {
@@ -46,27 +49,28 @@ public class UserService {
 
     private ResponseUserDTO mapToResponseUserDTO(Document doc) {
         List<Document> partialGoals = doc.getList("metas", Document.class);
-        List<PartialGoalDTO> metas = Collections.emptyList();
+        List<ResponsePartialGoalDTO> partialGoalDTOs = Collections.emptyList();
         if (partialGoals != null) {
-            metas = partialGoals.stream().map(d -> {
-                        ObjectId id = d.getObjectId("_id");
-                        String nombre = d.getString("nombre");
-                        Goal.Tipo tipo = Goal.Tipo.valueOf(d.getString("tipo"));
-                        String fecha = d.getString("fecha");
-                        Boolean finalizado = d.getBoolean("finalizado");
-                        int duracionValor = d.getInteger("duracionValor");
-                        Goal.Duracion durUnidad = Goal.Duracion.valueOf(d.getString("duracionUnidad"));
-                        return new PartialGoalDTO(
-                                id,
-                                nombre,
-                                tipo,
-                                fecha,
-                                finalizado,
-                                duracionValor,
-                                durUnidad
-                        );
-                    }).collect(Collectors.toList());
+            partialGoalDTOs = partialGoals.stream().map(d -> {
+                ObjectId id = d.getObjectId("_id");
+                String nombre = d.getString("nombre");
+                Goal.Tipo tipo = Goal.Tipo.valueOf(d.getString("tipo"));
+                String fecha = d.getString("fecha");
+                Boolean finalizado = d.getBoolean("finalizado");
+                int duracionValor = d.getInteger("duracionValor");
+                Goal.Duracion durUnidad = Goal.Duracion.valueOf(d.getString("duracionUnidad"));
+                return new ResponsePartialGoalDTO(
+                        id,
+                        nombre,
+                        tipo,
+                        fecha,
+                        finalizado,
+                        duracionValor,
+                        durUnidad
+                );
+            }).collect(Collectors.toList());
         }
-        return new ResponseUserDTO(doc.getString("nombre"), doc.getString("apellidos"), metas);
+        return new ResponseUserDTO(doc.getString("nombre"), doc.getString("apellidos"),
+                partialGoalDTOs, statsService.mapEmbeddedToResponseUserStatsDTO(doc));
     }
 }

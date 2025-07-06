@@ -1,25 +1,18 @@
 package org.GoLIfeAPI.model.record;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
 import org.bson.Document;
 
 import java.time.LocalDate;
 
 public class BoolRecord extends Record {
 
-    @NotNull(message = "El check no puede estar vacio")
     private boolean valorBool;
 
     public BoolRecord() {
         super();
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public BoolRecord(
-            @JsonProperty(value = "valorBool", required = true) boolean valorBool,
-            LocalDate fecha) {
+    public BoolRecord(boolean valorBool, LocalDate fecha) {
         super(fecha);
         this.valorBool = valorBool;
     }
@@ -37,5 +30,4 @@ public class BoolRecord extends Record {
     public void setValorBool(boolean valorBool) {
         this.valorBool = valorBool;
     }
-
 }

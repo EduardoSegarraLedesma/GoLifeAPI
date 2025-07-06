@@ -70,22 +70,24 @@ public class MongoService {
         return mongoClient.startSession();
     }
 
-    // Low Level Query Methods
+    // Low Level Query Methods:
 
-    public String insertOne(ClientSession session, Document doc, String collection) throws Exception {
+    // Insert new Document in Collection ->
+    public String insertDoc(ClientSession session, Document doc, String collection) {
         InsertOneResult result = mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .insertOne(session, doc);
         return result.getInsertedId().asObjectId().getValue().toString();
     }
 
-    public Document insertOneEmbeddedDocByParentId(ClientSession session, String id, String collection,
-                                                   String listKey, Document doc) {
-        return insertOneEmbeddedDocByParentKey(session, "_id", new ObjectId(id), collection, listKey, doc);
+    // Insert new Document in Embedded Document List ->
+    public Document insertEmbeddedDocInListByParentId(ClientSession session, String id,
+                                                      String collection, String listKey, Document doc) {
+        return insertEmbeddedDocInListByParentKey(session, "_id", new ObjectId(id), collection, listKey, doc);
     }
 
-    public Document insertOneEmbeddedDocByParentKey(ClientSession session, String key, Object value,
-                                                    String collection, String listKey, Document doc) {
+    public Document insertEmbeddedDocInListByParentKey(ClientSession session, String key, Object value,
+                                                       String collection, String listKey, Document doc) {
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .findOneAndUpdate(session,
@@ -94,21 +96,25 @@ public class MongoService {
                         opts);
     }
 
-    public Document findOneById(String id, String collection) {
-        return findOneByKey("_id", new ObjectId(id), collection);
+    // Get Document ->
+    public Document findDocById(String id, String collection) {
+        return findDocByKey("_id", new ObjectId(id), collection);
     }
 
-    public Document findOneByKey(String key, Object value, String collection) {
+    public Document findDocByKey(String key, Object value, String collection) {
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .find(new Document(key, value)).first();
     }
 
-    public Document findOneAndUpdateOneById(ClientSession session, String id, String collection, Document update) {
-        return findOneAndUpdateOneByKey(session, "_id", new ObjectId(id), collection, update);
+    // Update Document and Get Document ->
+    public Document updateDocById(ClientSession session, String id,
+                                  String collection, Document update) {
+        return updateDocByKey(session, "_id", new ObjectId(id), collection, update);
     }
 
-    public Document findOneAndUpdateOneByKey(ClientSession session, String key, Object value, String collection, Document update) {
+    public Document updateDocByKey(ClientSession session, String key, Object value,
+                                   String collection, Document update) {
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .findOneAndUpdate(session,
@@ -117,13 +123,46 @@ public class MongoService {
                         opts);
     }
 
-    public Document updateOneEmbeddedDocByParentKeySonId(ClientSession session, String key, String value,
-                                                         String collection, String listKey, String docId,
-                                                         Document doc) {
-        List<Bson> updates = new ArrayList<>();
-        for (String fieldName : doc.keySet()) {
-            updates.add(Updates.set(listKey + ".$." + fieldName, doc.get(fieldName)));
-        }
+    // Update Embedded Document and get Full Parent Document ->
+    public Document updateSetEmbeddedDocByParentId(ClientSession session, String id,
+                                                   String collection, String embeddedKey, Document update) {
+        return updateSetEmbeddedDocByParentKey(session, "_id", new ObjectId(id), collection, embeddedKey, update);
+    }
+
+    public Document updateSetEmbeddedDocByParentKey(ClientSession session, String key, Object value,
+                                                    String collection, String embeddedKey, Document update) {
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(collection)
+                .findOneAndUpdate(session,
+                        new Document(key, value),
+                        new Document("$set",
+                                new Document(embeddedKey, update)),
+                        opts);
+    }
+
+    public Document updateIncEmbeddedDocByParentId(ClientSession session, String id,
+                                                   String collection, String embeddedKey, Document update) {
+
+        return updateIncEmbeddedDocByParentKey(session, "_id", new ObjectId(id), collection, embeddedKey, update);
+    }
+
+    public Document updateIncEmbeddedDocByParentKey(ClientSession session, String key, Object value,
+                                                    String collection, String embeddedKey, Document update) {
+
+        List<Bson> updates = prepareIncInEmbeddedDoc(embeddedKey, update);
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(collection)
+                .findOneAndUpdate(session,
+                        new Document(key, value),
+                        Updates.combine(updates),
+                        opts);
+    }
+
+    // Update Embedded Document in Document List and get Full Parent Document ->
+    public Document updateEmbeddedDocInListByParentKeySonId(ClientSession session, String key, String value,
+                                                            String collection, String listKey, String docId,
+                                                            Document update) {
+        List<Bson> updates = prepareSetInEmbeddedDocList(listKey, update);
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .findOneAndUpdate(session,
@@ -134,42 +173,62 @@ public class MongoService {
                         opts);
     }
 
-    public DeleteResult deleteOneById(ClientSession session, String id, String collection) {
-        return deleteOneByKey(session, "_id", new ObjectId(id), collection);
+    // Delete Embedded Document in Document List and get Full Parent Document ->
+    public Document removeEmbeddedDocInListByParentKeySonId(ClientSession session, String key, Object value,
+                                                            String collection, String listKey, String listId) {
+        return removeEmbeddedDocInListByParentKeySonKey(session, key, value, collection, listKey, "_id", new ObjectId(listId));
     }
 
-    public DeleteResult deleteOneByKey(ClientSession session, String key, Object value, String collection) {
-        DeleteResult result = mongoClient.getDatabase(DATABASE_NAME)
-                .getCollection(collection)
-                .deleteOne(session, new Document(key, value));
-        return result;
+    public Document removeEmbeddedDocInListByParentIdSonKey(ClientSession session, String id,
+                                                            String collection, String listKey,
+                                                            String listField, String listValue) {
+        return removeEmbeddedDocInListByParentKeySonKey(session, "_id", new ObjectId(id), collection, listKey, listField, listValue);
     }
 
-    public DeleteResult deleteManyByKey(ClientSession session, String key, String value, String collection) {
-        DeleteResult result = mongoClient.getDatabase(DATABASE_NAME)
-                .getCollection(collection)
-                .deleteMany(session, new Document(key, value));
-        return result;
-    }
-
-
-    public Document deleteOneEmbeddedDocByParentKeySonId(ClientSession session, String key, Object value,
-                                                         String collection, String listKey, String listId) {
-        return deleteOneEmbeddedDocByParentKeySonKey(session, key, value, collection, listKey, "_id", new ObjectId(listId));
-    }
-
-    public Document deleteOneEmbeddedDocByParentIdSonKey(ClientSession session, String id,
-                                                         String collection, String listKey, String listField, String listValue) {
-        return deleteOneEmbeddedDocByParentKeySonKey(session, "_id", new ObjectId(id), collection, listKey, listField, listValue);
-    }
-
-    public Document deleteOneEmbeddedDocByParentKeySonKey(ClientSession session, String key, Object value,
-                                                          String collection, String listKey, String fieldKey, Object fieldValue) {
+    public Document removeEmbeddedDocInListByParentKeySonKey(ClientSession session,
+                                                             String key, Object value,
+                                                             String collection, String listKey,
+                                                             String fieldKey, Object fieldValue) {
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .findOneAndUpdate(session,
                         Filters.eq(key, value),
                         Updates.pull(listKey, Filters.eq(fieldKey, fieldValue)),
                         opts);
+    }
+
+    // Delete Document/s ->
+    public DeleteResult deleteDocById(ClientSession session, String id, String collection) {
+        return deleteDocByKey(session, "_id", new ObjectId(id), collection);
+    }
+
+    public DeleteResult deleteDocByKey(ClientSession session, String key, Object value, String collection) {
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(collection)
+                .deleteOne(session, new Document(key, value));
+    }
+
+    public DeleteResult deleteManyDocsByKey(ClientSession session, String key, String value, String collection) {
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(collection)
+                .deleteMany(session, new Document(key, value));
+    }
+
+    // Operation Preparation Methods:
+
+    public List<Bson> prepareSetInEmbeddedDocList(String listKey, Document update) {
+        List<Bson> updates = new ArrayList<>();
+        for (String fieldName : update.keySet()) {
+            updates.add(Updates.set(listKey + ".$." + fieldName, update.get(fieldName)));
+        }
+        return updates;
+    }
+
+    public List<Bson> prepareIncInEmbeddedDoc(String embeddedKey, Document update) {
+        List<Bson> updates = new ArrayList<>();
+        for (String fieldName : update.keySet()) {
+            updates.add(Updates.inc(embeddedKey + "." + fieldName, update.getInteger(fieldName)));
+        }
+        return updates;
     }
 }

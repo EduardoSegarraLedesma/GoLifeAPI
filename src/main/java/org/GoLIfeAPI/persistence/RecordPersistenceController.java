@@ -2,7 +2,6 @@ package org.GoLIfeAPI.persistence;
 
 import com.mongodb.client.ClientSession;
 import org.GoLIfeAPI.exception.NotFoundException;
-import org.GoLIfeAPI.model.record.Record;
 import org.GoLIfeAPI.infrastructure.MongoService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class RecordPersistenceController extends BasePersistenceController {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            Document goalDoc = mongoService.insertOneEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME,
+            Document goalDoc = mongoService.insertEmbeddedDocInListByParentId(session, mid, GOAL_COLLECTION_NAME,
                     RECORD_LIST_NAME, record);
             if (goalDoc == null) throw new NotFoundException("");
             session.commitTransaction();
@@ -41,7 +40,7 @@ public class RecordPersistenceController extends BasePersistenceController {
         ClientSession session = mongoService.getSession();
         try {
             session.startTransaction();
-            Document goalDoc = mongoService.deleteOneEmbeddedDocByParentIdSonKey(session,
+            Document goalDoc = mongoService.removeEmbeddedDocInListByParentIdSonKey(session,
                     mid, GOAL_COLLECTION_NAME, RECORD_LIST_NAME, "fecha", date);
             if (goalDoc == null) throw new NotFoundException("");
             session.commitTransaction();

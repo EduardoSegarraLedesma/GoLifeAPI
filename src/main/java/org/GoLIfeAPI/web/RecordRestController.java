@@ -8,9 +8,9 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
+import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
+import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.model.goal.Goal;
-import org.GoLIfeAPI.model.record.BoolRecord;
-import org.GoLIfeAPI.model.record.NumRecord;
 import org.GoLIfeAPI.service.RecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class RecordRestController {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false);
-              //  .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+        //  .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
         this.validator = validator;
     }
 
@@ -48,12 +48,12 @@ public class RecordRestController {
                                           @RequestBody JsonNode jsonBody) {
         try {
             if (tipo.toString().equalsIgnoreCase("Bool")) {
-                BoolRecord boolRecord = objectMapper.treeToValue(jsonBody, BoolRecord.class);
+                CreateBoolRecordDTO boolRecord = objectMapper.treeToValue(jsonBody, CreateBoolRecordDTO.class);
                 validateDTO(boolRecord);
                 ResponseBoolGoalDTO updated = recordService.createBoolRecord(boolRecord, uid, mid);
                 return ResponseEntity.ok(updated);
             } else if (tipo.toString().equalsIgnoreCase("Num")) {
-                NumRecord numRecord = objectMapper.treeToValue(jsonBody, NumRecord.class);
+                CreateNumRecordDTO numRecord = objectMapper.treeToValue(jsonBody, CreateNumRecordDTO.class);
                 validateDTO(numRecord);
                 ResponseNumGoalDTO updated = recordService.createNumRecord(numRecord, uid, mid);
                 return ResponseEntity.ok(updated);

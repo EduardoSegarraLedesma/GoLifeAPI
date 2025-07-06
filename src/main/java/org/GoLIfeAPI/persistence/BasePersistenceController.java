@@ -5,6 +5,8 @@ import org.GoLIfeAPI.infrastructure.MongoService;
 public abstract class BasePersistenceController {
 
     protected static final String USER_COLLECTION_NAME = "Users";
+    protected static final String USER_ID_NAME = "uid";
+    protected static final String USER_STATS_NAME = "estadisticas";
     protected static final String GOAL_COLLECTION_NAME = "Goals";
     protected static final String GOAL_LIST_NAME = "metas";
     protected static final String RECORD_LIST_NAME = "registros";

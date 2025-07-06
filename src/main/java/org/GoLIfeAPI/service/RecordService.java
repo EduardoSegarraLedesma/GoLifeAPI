@@ -2,6 +2,8 @@ package org.GoLIfeAPI.service;
 
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
+import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
+import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.model.record.BoolRecord;
@@ -28,25 +30,26 @@ public class RecordService {
         this.goalService = goalService;
     }
 
-    public ResponseBoolGoalDTO createBoolRecord(BoolRecord record, String uid, String mid) {
+    public ResponseBoolGoalDTO createBoolRecord(CreateBoolRecordDTO dto, String uid, String mid) {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         if (!goalDoc.getString("tipo").equalsIgnoreCase("Bool"))
             throw new BadRequestException("Tipo de Registro incorrecto para la meta");
-        validateRecord(goalDoc, record);
-        return goalService.mapToResponseBoolGoalDTO(recordPersistenceController.create(record.toDocument(), mid));
+        BoolRecord boolRecord = dto.toEntity();
+        validateRecord(goalDoc, boolRecord);
+        return goalService.mapToResponseBoolGoalDTO(recordPersistenceController.create(boolRecord.toDocument(), mid));
     }
 
-    public ResponseNumGoalDTO createNumRecord(NumRecord record, String uid, String mid) {
+    public ResponseNumGoalDTO createNumRecord(CreateNumRecordDTO dto, String uid, String mid) {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         if (!goalDoc.getString("tipo").equalsIgnoreCase("Num"))
             throw new BadRequestException("Tipo de Registro incorrecto para la meta");
-        validateRecord(goalDoc, record);
-        return goalService.mapToResponseNumGoalDTO(recordPersistenceController.create(record.toDocument(), mid));
+        NumRecord numRecord = dto.toEntity();
+        validateRecord(goalDoc, numRecord);
+        return goalService.mapToResponseNumGoalDTO(recordPersistenceController.create(numRecord.toDocument(), mid));
     }
 
     public Object deleteRecord(String uid, String mid, LocalDate date) {
         goalService.validateAndGetGoal(uid, mid);
-
         return goalService.mapToResponseGoalDTO(
                 recordPersistenceController.delete(mid,
                         LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString()));
