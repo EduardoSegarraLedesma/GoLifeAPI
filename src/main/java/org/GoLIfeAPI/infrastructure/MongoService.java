@@ -66,7 +66,7 @@ public class MongoService {
         }
     }
 
-    public ClientSession getSession() {
+    public ClientSession getStartedSession() {
         return mongoClient.startSession();
     }
 
@@ -131,19 +131,13 @@ public class MongoService {
 
     public Document updateSetEmbeddedDocByParentKey(ClientSession session, String key, Object value,
                                                     String collection, String embeddedKey, Document update) {
+       List<Bson> updates = prepareSetInEmbeddedDoc(embeddedKey, update);
         return mongoClient.getDatabase(DATABASE_NAME)
                 .getCollection(collection)
                 .findOneAndUpdate(session,
                         new Document(key, value),
-                        new Document("$set",
-                                new Document(embeddedKey, update)),
+                        Updates.combine(updates),
                         opts);
-    }
-
-    public Document updateIncEmbeddedDocByParentId(ClientSession session, String id,
-                                                   String collection, String embeddedKey, Document update) {
-
-        return updateIncEmbeddedDocByParentKey(session, "_id", new ObjectId(id), collection, embeddedKey, update);
     }
 
     public Document updateIncEmbeddedDocByParentKey(ClientSession session, String key, Object value,
@@ -228,6 +222,14 @@ public class MongoService {
         List<Bson> updates = new ArrayList<>();
         for (String fieldName : update.keySet()) {
             updates.add(Updates.inc(embeddedKey + "." + fieldName, update.getInteger(fieldName)));
+        }
+        return updates;
+    }
+
+    public List<Bson> prepareSetInEmbeddedDoc(String embeddedKey, Document update) {
+        List<Bson> updates = new ArrayList<>();
+        for (String fieldName : update.keySet()) {
+            updates.add(Updates.set(embeddedKey + "." + fieldName, update.get(fieldName)));
         }
         return updates;
     }

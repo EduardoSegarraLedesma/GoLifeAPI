@@ -2,14 +2,14 @@ package org.GoLIfeAPI.dto.record;
 
 public class ResponseNumRecordDTO extends ResponseRecordDTO {
 
-    private Float valorNum;
+    private Double valorNum;
 
-    public ResponseNumRecordDTO(Float valorNum, String fecha) {
+    public ResponseNumRecordDTO(Double valorNum, String fecha) {
         super(fecha);
         this.valorNum = valorNum;
     }
 
-    public Float getValorNum() {
+    public Double getValorNum() {
         return valorNum;
     }
 }

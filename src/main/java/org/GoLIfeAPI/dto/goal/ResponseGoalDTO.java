@@ -1,45 +1,45 @@
 package org.GoLIfeAPI.dto.goal;
 
-import org.GoLIfeAPI.model.goal.Goal;
-import org.GoLIfeAPI.model.record.BoolRecord;
-import org.bson.types.ObjectId;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import org.GoLIfeAPI.model.Enums;
 
 public abstract class ResponseGoalDTO {
 
     protected String _id;
     protected String nombre;
-    protected Goal.Tipo tipo;
+    protected Enums.Tipo tipo;
     protected String descripcion;
     protected String fecha;
     protected Boolean finalizado;
     protected int duracionValor;
-    protected Goal.Duracion duracionUnidad;
+    protected Enums.Duracion duracionUnidad;
+    protected ResponseGoalStatsDTO estadisticas;
 
-    public ResponseGoalDTO(String _id, String nombre, Goal.Tipo tipo,
-                           String descripcion, String fecha,Boolean finalizado,
-                           int duracionValor, Goal.Duracion duracionUnidad) {
+    public ResponseGoalDTO(String _id, String nombre, Enums.Tipo tipo,
+                           String descripcion, String fecha, Boolean finalizado,
+                           int duracionValor, Enums.Duracion duracionUnidad, ResponseGoalStatsDTO estadisticas) {
         this._id = _id;
         this.nombre = nombre;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
         this.finalizado = finalizado;
-        this.duracionValor = duracionValor;
         this.duracionUnidad = duracionUnidad;
+        if (this.duracionUnidad.toString().equalsIgnoreCase("Indefinido"))
+            this.duracionValor = -1;
+        else
+            this.duracionValor = duracionValor;
+        this.estadisticas = estadisticas;
     }
 
     public String get_id() {
         return _id;
     }
 
-    public Goal.Tipo getTipo() {
+    public Enums.Tipo getTipo() {
         return tipo;
     }
 
-    public Goal.Duracion getDuracionUnidad() {
+    public Enums.Duracion getDuracionUnidad() {
         return duracionUnidad;
     }
 
@@ -61,5 +61,9 @@ public abstract class ResponseGoalDTO {
 
     public String getDescripcion() {
         return descripcion;
+    }
+
+    public ResponseGoalStatsDTO getEstadisticas() {
+        return estadisticas;
     }
 }

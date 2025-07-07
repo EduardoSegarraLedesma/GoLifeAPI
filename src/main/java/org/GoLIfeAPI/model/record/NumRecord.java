@@ -6,13 +6,13 @@ import java.time.LocalDate;
 
 public class NumRecord extends Record {
 
-    private Float valorNum;
+    private Double valorNum;
 
     public NumRecord() {
         super();
     }
 
-    public NumRecord(Float valorNum, LocalDate fecha) {
+    public NumRecord(Double valorNum, LocalDate fecha) {
         super(fecha);
         this.valorNum = valorNum;
     }
@@ -23,11 +23,11 @@ public class NumRecord extends Record {
                 .append("valorNum", valorNum);
     }
 
-    public Float getValorNum() {
+    public Double getValorNum() {
         return valorNum;
     }
 
-    public void setValorNum(Float valorNum) {
+    public void setValorNum(Double valorNum) {
         this.valorNum = valorNum;
     }
 }

@@ -13,15 +13,15 @@ public class CreateNumRecordDTO extends CreateRecordDTO {
 
     @NotNull(message = "El valor del registro no puede ser nulo")
     @PositiveOrZero(message = "El valor del registro debe ser cero o positivo")
-    @Digits(integer = 8, fraction = 2, message = "Formato inválido: máximo 8 cifras enteras y 2 decimales")
-    private Float valorNum;
+    @Digits(integer = 13, fraction = 2, message = "Formato inválido: máximo 13 cifras enteras y 2 decimales")
+    private Double valorNum;
 
     public CreateNumRecordDTO() {
         super();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public CreateNumRecordDTO(@JsonProperty(value = "valorNum", required = true) Float valorNum,
+    public CreateNumRecordDTO(@JsonProperty(value = "valorNum", required = true) Double valorNum,
                               LocalDate fecha) {
         super(fecha);
         this.valorNum = valorNum;
@@ -31,11 +31,11 @@ public class CreateNumRecordDTO extends CreateRecordDTO {
         return new NumRecord(valorNum, fecha);
     }
 
-    public Float getValorNum() {
+    public Double getValorNum() {
         return valorNum;
     }
 
-    public void setValorNum(Float valorNum) {
+    public void setValorNum(Double valorNum) {
         this.valorNum = valorNum;
     }
 }

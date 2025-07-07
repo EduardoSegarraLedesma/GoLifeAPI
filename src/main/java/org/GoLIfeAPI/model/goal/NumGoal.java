@@ -1,23 +1,26 @@
 package org.GoLIfeAPI.model.goal;
 
+import org.GoLIfeAPI.model.Enums;
 import org.bson.Document;
 
 import java.time.LocalDate;
 
 public class NumGoal extends Goal {
 
-    private Float valorObjetivo;
+    private Double valorObjetivo;
     private String unidad;
 
-    public NumGoal() {
-        super();
-        this.tipo = Tipo.Num;
+    public NumGoal(LocalDate fechaFin) {
+        super(fechaFin);
+        this.tipo = Enums.Tipo.Num;
     }
 
     public NumGoal(String uid, String nombre, String descripcion,
                    LocalDate fecha, Boolean finalizado, int duracionValor,
-                   Duracion duracionUnidad, Float valorObjetivo, String unidad) {
-        super(uid, nombre, Tipo.Num, descripcion, fecha, finalizado, duracionValor, duracionUnidad);
+                   Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin,
+                   Double valorObjetivo, String unidad) {
+        super(uid, nombre, Enums.Tipo.Num, descripcion, fecha,
+                finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
         this.valorObjetivo = valorObjetivo;
         this.unidad = unidad;
     }
@@ -30,11 +33,11 @@ public class NumGoal extends Goal {
         return doc;
     }
 
-    public Float getValorObjetivo() {
+    public Double getValorObjetivo() {
         return valorObjetivo;
     }
 
-    public void setValorObjetivo(Float valorObjetivo) {
+    public void setValorObjetivo(Double valorObjetivo) {
         this.valorObjetivo = valorObjetivo;
     }
 
@@ -45,5 +48,4 @@ public class NumGoal extends Goal {
     public void setUnidad(String unidad) {
         this.unidad = unidad;
     }
-
 }

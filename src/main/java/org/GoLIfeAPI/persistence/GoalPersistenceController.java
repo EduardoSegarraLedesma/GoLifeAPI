@@ -18,7 +18,7 @@ public class GoalPersistenceController extends BasePersistenceController {
     }
 
     public Document create(Document goal, Document partialGoal, Document userStatsUpdate, String uid) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
             String objectId = mongoService.insertDoc(session, goal, GOAL_COLLECTION_NAME);
@@ -28,12 +28,12 @@ public class GoalPersistenceController extends BasePersistenceController {
                         GOAL_LIST_NAME, partialGoal);
                 if (userDoc == null) throw new Exception();
                 userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
-                        USER_STATS_NAME, userStatsUpdate);
+                        STATS_NAME, userStatsUpdate);
                 if (userDoc == null) throw new Exception();
                 session.commitTransaction();
                 session.close();
                 Document composedDoc = new Document();
-                composedDoc.append(USER_STATS_NAME, userDoc.get(USER_STATS_NAME, Document.class));
+                composedDoc.append(STATS_NAME, userDoc.get(STATS_NAME, Document.class));
                 composedDoc.append("meta", mongoService.findDocById(objectId, GOAL_COLLECTION_NAME));
                 return composedDoc;
             } else throw new Exception();
@@ -52,31 +52,41 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
-    public Document update(Document goal, Document partialGoal, Document userStatsUpdate, String uid, String mid) {
-        ClientSession session = mongoService.getSession();
+    public Document update(Document goal, Document goalStatsUpdate,
+                           Document partialGoalUpdate, Document userStatsUpdate, String uid, String mid) {
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
+            // Goal
             Document goalDoc = mongoService.updateDocById(session, mid, GOAL_COLLECTION_NAME, goal);
             if (goalDoc == null) throw new NotFoundException("");
-            if (!partialGoal.isEmpty()) {
-                Document userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
-                        USER_COLLECTION_NAME, GOAL_LIST_NAME, mid, partialGoal);
+            // Goal Stats in Goal
+            if (goalStatsUpdate != null && !goalStatsUpdate.isEmpty()) {
+                goalDoc = mongoService.updateSetEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME, STATS_NAME, goalStatsUpdate);
+                if (goalDoc == null) throw new NotFoundException("");
+            }
+            // Partial Goal in User
+            Document userDoc;
+            if (partialGoalUpdate != null && !partialGoalUpdate.isEmpty()) {
+                userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
+                        USER_COLLECTION_NAME, GOAL_LIST_NAME, mid, partialGoalUpdate);
                 if (userDoc == null) throw new NotFoundException("");
-                if (userStatsUpdate != null) {
-                    userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
-                            USER_STATS_NAME, userStatsUpdate);
-                    if (userDoc == null) throw new Exception();
-                    Document composedDoc = new Document();
-                    composedDoc.append(USER_STATS_NAME, userDoc.get(USER_STATS_NAME, Document.class));
-                    composedDoc.append("meta", goalDoc);
-                    session.commitTransaction();
-                    session.close();
-                    return composedDoc;
-                }
+            }
+            // User Stats in User
+            if (userStatsUpdate != null && !userStatsUpdate.isEmpty()) {
+                userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
+                        STATS_NAME, userStatsUpdate);
+                if (userDoc == null) throw new Exception();
+                Document composedDoc = new Document();
+                composedDoc.append(STATS_NAME, userDoc.get(STATS_NAME, Document.class));
+                composedDoc.append("meta", goalDoc);
                 session.commitTransaction();
                 session.close();
-                return goalDoc;
-            } else throw new Exception();
+                return composedDoc;
+            }
+            session.commitTransaction();
+            session.close();
+            return goalDoc;
         } catch (NotFoundException e) {
             session.abortTransaction();
             session.close();
@@ -89,7 +99,7 @@ public class GoalPersistenceController extends BasePersistenceController {
     }
 
     public Document delete(Document userStatsUpdate, String uid, String mid) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
             DeleteResult deleteGoal = mongoService.deleteDocById(session, mid, GOAL_COLLECTION_NAME);
@@ -99,11 +109,11 @@ public class GoalPersistenceController extends BasePersistenceController {
                     GOAL_LIST_NAME, mid);
             if (userDoc == null) throw new NotFoundException("");
             userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
-                    USER_STATS_NAME, userStatsUpdate);
+                    STATS_NAME, userStatsUpdate);
             if (userDoc == null) throw new Exception();
             session.commitTransaction();
             session.close();
-            return userDoc.get(USER_STATS_NAME, Document.class);
+            return userDoc.get(STATS_NAME, Document.class);
         } catch (NotFoundException e) {
             session.abortTransaction();
             session.close();

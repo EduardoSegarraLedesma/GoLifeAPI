@@ -23,11 +23,13 @@ public class RecordService {
 
     private final RecordPersistenceController recordPersistenceController;
     private final GoalService goalService;
+    private final StatsService statsService;
 
     @Autowired
-    public RecordService(RecordPersistenceController recordPersistenceController, GoalService goalService) {
+    public RecordService(RecordPersistenceController recordPersistenceController, GoalService goalService, StatsService statsService) {
         this.recordPersistenceController = recordPersistenceController;
         this.goalService = goalService;
+        this.statsService = statsService;
     }
 
     public ResponseBoolGoalDTO createBoolRecord(CreateBoolRecordDTO dto, String uid, String mid) {
@@ -36,7 +38,12 @@ public class RecordService {
             throw new BadRequestException("Tipo de Registro incorrecto para la meta");
         BoolRecord boolRecord = dto.toEntity();
         validateRecord(goalDoc, boolRecord);
-        return goalService.mapToResponseBoolGoalDTO(recordPersistenceController.create(boolRecord.toDocument(), mid));
+        return goalService.mapToResponseBoolGoalDTO(
+                recordPersistenceController.create(
+                        boolRecord.toDocument(),
+                        statsService.getGoalStatsReachedBoolValueUpdate(dto, goalDoc),
+                        mid),
+                goalDoc);
     }
 
     public ResponseNumGoalDTO createNumRecord(CreateNumRecordDTO dto, String uid, String mid) {
@@ -45,14 +52,20 @@ public class RecordService {
             throw new BadRequestException("Tipo de Registro incorrecto para la meta");
         NumRecord numRecord = dto.toEntity();
         validateRecord(goalDoc, numRecord);
-        return goalService.mapToResponseNumGoalDTO(recordPersistenceController.create(numRecord.toDocument(), mid));
+        return goalService.mapToResponseNumGoalDTO(
+                recordPersistenceController.create(
+                        numRecord.toDocument(),
+                        statsService.getGoalStatsReachedNumValueUpdate(dto, goalDoc),
+                        mid),
+                goalDoc);
     }
 
     public Object deleteRecord(String uid, String mid, LocalDate date) {
-        goalService.validateAndGetGoal(uid, mid);
+        Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         return goalService.mapToResponseGoalDTO(
-                recordPersistenceController.delete(mid,
-                        LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString()));
+                recordPersistenceController.delete(
+                        mid, LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString()),
+                goalDoc);
     }
 
     private void validateRecord(Document goalDoc, Record record) {

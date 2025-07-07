@@ -1,6 +1,6 @@
 package org.GoLIfeAPI.persistence;
 
-import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.result.DeleteResult;
 import org.GoLIfeAPI.exception.ConflictException;
@@ -23,16 +23,17 @@ public class UserPersistenceController extends BasePersistenceController {
     }
 
     public Document create(Document user, String uid) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
             String objectId = mongoService.insertDoc(session, user, USER_COLLECTION_NAME);
+            System.out.println("id:" + objectId);
             if (objectId != null && !objectId.isBlank()) {
                 session.commitTransaction();
                 session.close();
                 return mongoService.findDocById(objectId, USER_COLLECTION_NAME);
             } else throw new Exception();
-        } catch (DuplicateKeyException e) {
+        } catch (MongoWriteException e) {
             session.abortTransaction();
             session.close();
             throw new ConflictException("El usuario ya existe");
@@ -46,17 +47,17 @@ public class UserPersistenceController extends BasePersistenceController {
 
     public Document read(String uid) {
         try {
-            return mongoService.findDocByKey("uid", uid, USER_COLLECTION_NAME);
+            return mongoService.findDocByKey(USER_ID_NAME, uid, USER_COLLECTION_NAME);
         } catch (Exception e) {
             throw new RuntimeException("Error interno al leer el usuario", e);
         }
     }
 
     public Document update(Document user, String uid) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            Document userDoc = mongoService.updateDocByKey(session, "uid", uid, USER_COLLECTION_NAME, user);
+            Document userDoc = mongoService.updateDocByKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME, user);
             if (userDoc == null) throw new NotFoundException("");
             session.commitTransaction();
             session.close();
@@ -73,18 +74,17 @@ public class UserPersistenceController extends BasePersistenceController {
     }
 
     public void delete(String uid) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            DeleteResult deleteUser = mongoService.deleteDocByKey(session, "uid", uid, USER_COLLECTION_NAME);
+            DeleteResult deleteUser = mongoService.deleteDocByKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME);
             if (!deleteUser.wasAcknowledged()) throw new Exception();
             if (deleteUser.getDeletedCount() == 0) throw new NotFoundException("");
-            DeleteResult deleteGoals = mongoService.deleteManyDocsByKey(session, "uid", uid, GOAL_COLLECTION_NAME);
-            if (deleteGoals.wasAcknowledged()) {
-                if (firebaseService.deleteFirebaseUser(uid)) {
-                    session.commitTransaction();
-                    session.close();
-                } else throw new Exception();
+            DeleteResult deleteGoals = mongoService.deleteManyDocsByKey(session, USER_ID_NAME, uid, GOAL_COLLECTION_NAME);
+            if (!deleteGoals.wasAcknowledged()) throw new Exception();
+            if (firebaseService.deleteFirebaseUser(uid)) {
+                session.commitTransaction();
+                session.close();
             } else throw new Exception();
         } catch (NotFoundException e) {
             session.abortTransaction();

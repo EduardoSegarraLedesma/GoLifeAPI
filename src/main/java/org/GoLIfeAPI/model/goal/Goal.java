@@ -1,5 +1,6 @@
 package org.GoLIfeAPI.model.goal;
 
+import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.model.record.Record;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -12,43 +13,41 @@ import java.util.stream.Collectors;
 
 public abstract class Goal {
 
-    public enum Tipo {
-        Num, Bool
-    }
-
     DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-
-    public enum Duracion {
-        Dias, Semanas, Meses, Años, Indefinido
-    }
 
     protected ObjectId _id;
     protected String uid;
     protected String nombre;
-    protected Tipo tipo;
+    protected Enums.Tipo tipo;
     protected String descripcion;
     protected LocalDate fecha;
     protected Boolean finalizado;
     protected int duracionValor;
-    protected Duracion duracionUnidad;
+    protected Enums.Duracion duracionUnidad;
     protected List<Record> registros;
+    protected GoalStats estadisticas;
 
-    public Goal() {
-        this.tipo = Tipo.Bool;
+    public Goal(LocalDate fechaFin) {
+        this.tipo = Enums.Tipo.Bool;
         finalizado = false;
+        estadisticas = new GoalStats(fechaFin);
     }
 
-    public Goal(String uid, String nombre, Tipo tipo,
+    public Goal(String uid, String nombre, Enums.Tipo tipo,
                 String descripcion, LocalDate fecha, Boolean finalizado,
-                int duracionValor, Duracion duracionUnidad) {
+                int duracionValor, Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin) {
         this.uid = uid;
         this.nombre = nombre;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.fecha = fecha;
         this.finalizado = finalizado;
-        this.duracionValor = duracionValor;
         this.duracionUnidad = duracionUnidad;
+        if (this.duracionUnidad.toString().equalsIgnoreCase("Indefinido"))
+            this.duracionValor = -1;
+        else
+            this.duracionValor = duracionValor;
+        estadisticas = new GoalStats(valorAlcanzado, fechaFin);
     }
 
     public Document toDocument() {
@@ -61,7 +60,8 @@ public abstract class Goal {
                 .append("finalizado", finalizado)
                 .append("duracionValor", duracionValor)
                 .append("duracionUnidad", duracionUnidad)
-                .append("registros", getListaRegistros());
+                .append("registros", getListaRegistros())
+                .append("estadisticas", estadisticas.toDocument());
     }
 
     public Document toParcialDocument() {
@@ -102,19 +102,19 @@ public abstract class Goal {
         this.uid = uid;
     }
 
-    public Tipo getTipo() {
+    public Enums.Tipo getTipo() {
         return tipo;
     }
 
-    public void setTipo(Tipo tipo) {
+    public void setTipo(Enums.Tipo tipo) {
         this.tipo = tipo;
     }
 
-    public Duracion getDuracionUnidad() {
+    public Enums.Duracion getDuracionUnidad() {
         return duracionUnidad;
     }
 
-    public void setDuracionUnidad(Duracion duracionUnidad) {
+    public void setDuracionUnidad(Enums.Duracion duracionUnidad) {
         this.duracionUnidad = duracionUnidad;
     }
 
@@ -179,4 +179,13 @@ public abstract class Goal {
         }
         return false;
     }
+
+    public GoalStats getEstadisticas() {
+        return estadisticas;
+    }
+
+    public void setEstadisticas(GoalStats estadisticas) {
+        this.estadisticas = estadisticas;
+    }
+
 }

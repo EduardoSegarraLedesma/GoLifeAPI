@@ -15,13 +15,17 @@ public class RecordPersistenceController extends BasePersistenceController {
         super(mongoService);
     }
 
-    public Document create(Document record, String mid) {
-        ClientSession session = mongoService.getSession();
+    public Document create(Document record, Document goalStatsUpdate, String mid) {
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
             Document goalDoc = mongoService.insertEmbeddedDocInListByParentId(session, mid, GOAL_COLLECTION_NAME,
                     RECORD_LIST_NAME, record);
             if (goalDoc == null) throw new NotFoundException("");
+            if (goalStatsUpdate != null && !goalStatsUpdate.isEmpty()) {
+                goalDoc = mongoService.updateSetEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME, STATS_NAME, goalStatsUpdate);
+                if (goalDoc == null) throw new NotFoundException("");
+            }
             session.commitTransaction();
             session.close();
             return goalDoc;
@@ -37,7 +41,7 @@ public class RecordPersistenceController extends BasePersistenceController {
     }
 
     public Document delete(String mid, String date) {
-        ClientSession session = mongoService.getSession();
+        ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
             Document goalDoc = mongoService.removeEmbeddedDocInListByParentIdSonKey(session,

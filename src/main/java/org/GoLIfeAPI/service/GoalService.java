@@ -10,12 +10,14 @@ import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.exception.ForbiddenResourceException;
 import org.GoLIfeAPI.exception.NotFoundException;
+import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.model.goal.Goal;
 import org.GoLIfeAPI.persistence.GoalPersistenceController;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +35,11 @@ public class GoalService {
     }
 
     public ResponseBoolGoalUserStatsDTO createBoolGoal(CreateBoolGoalDTO dto, String uid) {
-        Goal goal = dto.toEntity(uid);
+        LocalDate finalDate = statsService.calculateFinalGoalDate(
+                dto.getFecha(),
+                dto.getDuracionValor(),
+                dto.getDuracionUnidad());
+        Goal goal = dto.toEntity(uid, finalDate);
         Document deltaUserStatsDoc = statsService.getUpdatedUserStatsDoc(+1, 0);
         Document composedDoc = goalPersistenceController.create(
                 goal.toDocument(),
@@ -41,12 +47,18 @@ public class GoalService {
                 deltaUserStatsDoc,
                 uid);
         return new ResponseBoolGoalUserStatsDTO(
-                mapToResponseBoolGoalDTO(composedDoc.get("meta", Document.class)),
+                mapToResponseBoolGoalDTO(
+                        composedDoc.get("meta", Document.class),
+                        composedDoc.get("meta", Document.class)),
                 statsService.mapEmbeddedToResponseUserStatsDTO(composedDoc));
     }
 
     public ResponseNumGoalUserStatsDTO createNumGoal(CreateNumGoalDTO dto, String uid) {
-        Goal goal = dto.toEntity(uid);
+        LocalDate finalDate = statsService.calculateFinalGoalDate(
+                dto.getFecha(),
+                dto.getDuracionValor(),
+                dto.getDuracionUnidad());
+        Goal goal = dto.toEntity(uid, finalDate);
         Document deltaUserStatsDoc = statsService.getUpdatedUserStatsDoc(+1, 0);
         Document composedDoc = goalPersistenceController.create(
                 goal.toDocument(),
@@ -54,38 +66,47 @@ public class GoalService {
                 deltaUserStatsDoc,
                 uid);
         return new ResponseNumGoalUserStatsDTO(
-                mapToResponseNumGoalDTO(composedDoc.get("meta", Document.class)),
+                mapToResponseNumGoalDTO(
+                        composedDoc.get("meta", Document.class),
+                        composedDoc.get("meta", Document.class)),
                 statsService.mapEmbeddedToResponseUserStatsDTO(composedDoc));
     }
 
     public Object getGoal(String uid, String mid) {
         Document goalDoc = validateAndGetGoal(uid, mid);
-        return mapToResponseGoalDTO(goalDoc);
+        return mapToResponseGoalDTO(goalDoc, goalDoc);
     }
 
     public Object finalizeGoal(String uid, String mid) {
         Document goalDoc = validateAndGetGoal(uid, mid);
         if (goalDoc.getBoolean("finalizado")) throw new ConflictException("La meta ya esta finalizada");
         Document update = new Document("finalizado", true);
-        Document deltaUserStatsDoc = statsService.getUpdatedUserStatsDoc(0, +1);
-        Document composedDoc = goalPersistenceController.update(update, update, deltaUserStatsDoc, uid, mid);
-        return mapToComposedResponseGoalDTO(composedDoc);
+        Document deltaUserStats = statsService.getUpdatedUserStatsDoc(0, +1);
+        Document composedDoc = goalPersistenceController.update(update, null, update, deltaUserStats, uid, mid);
+        return mapToComposedResponseGoalDTO(composedDoc, goalDoc);
     }
 
     public ResponseBoolGoalDTO updateBoolGoal(PatchBoolGoalDTO dto, String uid, String mid) {
         Document goalDoc = validateAndGetGoal(uid, mid);
-        if (goalDoc.getString("tipo").equalsIgnoreCase("Bool"))
-            return mapToResponseBoolGoalDTO(goalPersistenceController.update(dto.toDocument(),
-                    dto.toParcialDocument(), null, uid, mid));
-        else throw new BadRequestException("Tipo incorrecto para la meta");
+        if (goalDoc.getString("tipo").equalsIgnoreCase("Bool")) {
+            Document deltaGoalStats = statsService.getGoalStatsFinalDateUpdate(dto, goalDoc);
+            return mapToResponseBoolGoalDTO(
+                    goalPersistenceController.update(
+                            dto.toDocument(), deltaGoalStats,
+                            dto.toParcialDocument(), null, uid, mid),
+                    goalDoc);
+        } else throw new BadRequestException("Tipo incorrecto para la meta");
     }
 
     public ResponseNumGoalDTO updateNumGoal(PatchNumGoalDTO dto, String uid, String mid) {
         Document goalDoc = validateAndGetGoal(uid, mid);
-        if (goalDoc.getString("tipo").equalsIgnoreCase("Num"))
-            return mapToResponseNumGoalDTO(goalPersistenceController.update(dto.toDocument(),
-                    dto.toParcialDocument(), null, uid, mid));
-        else throw new BadRequestException("Tipo incorrecto para la meta");
+        if (goalDoc.getString("tipo").equalsIgnoreCase("Num")) {
+            Document deltaGoalStats = statsService.getGoalStatsFinalDateUpdate(dto, goalDoc);
+            return mapToResponseNumGoalDTO(
+                    goalPersistenceController.update(dto.toDocument(), deltaGoalStats,
+                            dto.toParcialDocument(), null, uid, mid),
+                    goalDoc);
+        } else throw new BadRequestException("Tipo incorrecto para la meta");
     }
 
     public ResponseUserStatsDTO deleteGoal(String uid, String mid) {
@@ -107,79 +128,78 @@ public class GoalService {
         return goalDoc;
     }
 
-    public Object mapToComposedResponseGoalDTO(Document composedDoc) {
-        Document goalDoc = composedDoc.get("meta", Document.class);
-        String type = goalDoc.getString("tipo");
+    public Object mapToComposedResponseGoalDTO(Document composedDoc, Document oldDoc) {
+        Document newDoc = composedDoc.get("meta", Document.class);
+        String type = newDoc.getString("tipo");
         if (type.equals("Bool"))
             return new ResponseBoolGoalUserStatsDTO(
-                    mapToResponseBoolGoalDTO(goalDoc),
+                    mapToResponseBoolGoalDTO(newDoc, oldDoc),
                     statsService.mapEmbeddedToResponseUserStatsDTO(composedDoc));
         else if (type.equals("Num"))
             return new ResponseNumGoalUserStatsDTO(
-                    mapToResponseNumGoalDTO(goalDoc),
+                    mapToResponseNumGoalDTO(newDoc, oldDoc),
                     statsService.mapEmbeddedToResponseUserStatsDTO(composedDoc));
         else
             throw new RuntimeException("Error interno", new Throwable());
     }
 
-    public Object mapToResponseGoalDTO(Document doc) {
-        String type = doc.getString("tipo");
+    public Object mapToResponseGoalDTO(Document newDoc, Document oldDoc) {
+        String type = newDoc.getString("tipo");
         if (type.equals("Bool"))
-            return mapToResponseBoolGoalDTO(doc);
+            return mapToResponseBoolGoalDTO(newDoc, oldDoc);
         else if (type.equals("Num"))
-            return mapToResponseNumGoalDTO(doc);
+            return mapToResponseNumGoalDTO(newDoc, oldDoc);
         else
             throw new RuntimeException("Error interno", new Throwable());
     }
 
-    public ResponseBoolGoalDTO mapToResponseBoolGoalDTO(Document doc) {
-        List<Document> boolRecords = doc.getList("registros", Document.class);
+    public ResponseBoolGoalDTO mapToResponseBoolGoalDTO(Document newDoc, Document oldDoc) {
+        List<Document> boolRecords = newDoc.getList("registros", Document.class);
         List<ResponseBoolRecordDTO> registros = Collections.emptyList();
         if (boolRecords != null) {
             registros = boolRecords.stream().map(d -> {
-                String fecha = d.getString("fecha");
-                Boolean valorBool = d.getBoolean("valorBool");
-                return new ResponseBoolRecordDTO(valorBool, fecha);
+                return new ResponseBoolRecordDTO(
+                        d.getBoolean("valorBool"),
+                        d.getString("fecha"));
             }).collect(Collectors.toList());
         }
         return new ResponseBoolGoalDTO(
-                doc.getObjectId("_id").toString(),
-                doc.getString("nombre"),
-                Goal.Tipo.valueOf(doc.getString("tipo")),
-                doc.getString("descripcion"),
-                doc.getString("fecha"),
-                doc.getBoolean("finalizado"),
-                doc.getInteger("duracionValor"),
-                Goal.Duracion.valueOf(doc.getString("duracionUnidad")),
+                newDoc.getObjectId("_id").toString(),
+                newDoc.getString("nombre"),
+                Enums.Tipo.valueOf(newDoc.getString("tipo")),
+                newDoc.getString("descripcion"),
+                newDoc.getString("fecha"),
+                newDoc.getBoolean("finalizado"),
+                newDoc.getInteger("duracionValor"),
+                Enums.Duracion.valueOf(newDoc.getString("duracionUnidad")),
+                statsService.mapEmbeddedToResponseGoalStatsDTO(newDoc, oldDoc),
                 registros
         );
     }
 
-    public ResponseNumGoalDTO mapToResponseNumGoalDTO(Document doc) {
-        List<Document> numRecords = doc.getList("registros", Document.class);
+    public ResponseNumGoalDTO mapToResponseNumGoalDTO(Document newDoc, Document oldDoc) {
+        List<Document> numRecords = newDoc.getList("registros", Document.class);
         List<ResponseNumRecordDTO> registros = Collections.emptyList();
         if (numRecords != null) {
             registros = numRecords.stream().map(d -> {
-                String fecha = d.getString("fecha");
-                double valorNumDouble = doc.getDouble("valorNum");
-                Float valorNum = (float) valorNumDouble;
-                return new ResponseNumRecordDTO(valorNum, fecha);
+                return new ResponseNumRecordDTO(
+                        d.getDouble("valorNum"),
+                        d.getString("fecha"));
             }).collect(Collectors.toList());
         }
-        double valorObjetivoDouble = doc.getDouble("valorObjetivo");
-        Float valorObjetivo = (float) valorObjetivoDouble;
         return new ResponseNumGoalDTO(
-                doc.getObjectId("_id").toString(),
-                doc.getString("nombre"),
-                Goal.Tipo.valueOf(doc.getString("tipo")),
-                doc.getString("descripcion"),
-                doc.getString("fecha"),
-                doc.getBoolean("finalizado"),
-                doc.getInteger("duracionValor"),
-                Goal.Duracion.valueOf(doc.getString("duracionUnidad")),
+                newDoc.getObjectId("_id").toString(),
+                newDoc.getString("nombre"),
+                Enums.Tipo.valueOf(newDoc.getString("tipo")),
+                newDoc.getString("descripcion"),
+                newDoc.getString("fecha"),
+                newDoc.getBoolean("finalizado"),
+                newDoc.getInteger("duracionValor"),
+                Enums.Duracion.valueOf(newDoc.getString("duracionUnidad")),
+                statsService.mapEmbeddedToResponseGoalStatsDTO(newDoc, oldDoc),
                 registros,
-                valorObjetivo,
-                doc.getString("unidad")
+                newDoc.getDouble("valorObjetivo"),
+                newDoc.getString("unidad")
         );
     }
 }

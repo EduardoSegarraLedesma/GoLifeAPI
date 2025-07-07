@@ -10,7 +10,7 @@ import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
-import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.service.RecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +44,7 @@ public class RecordRestController {
     @PostMapping()
     public ResponseEntity<?> postRegistro(@AuthenticationPrincipal String uid,
                                           @PathVariable("mid") String mid,
-                                          @RequestParam("tipo") Goal.Tipo tipo,
+                                          @RequestParam("tipo") Enums.Tipo tipo,
                                           @RequestBody JsonNode jsonBody) {
         try {
             if (tipo.toString().equalsIgnoreCase("Bool")) {

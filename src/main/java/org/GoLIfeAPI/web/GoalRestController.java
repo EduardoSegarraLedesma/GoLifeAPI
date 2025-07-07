@@ -10,7 +10,7 @@ import org.GoLIfeAPI.dto.composed.ResponseBoolGoalUserStatsDTO;
 import org.GoLIfeAPI.dto.composed.ResponseNumGoalUserStatsDTO;
 import org.GoLIfeAPI.dto.goal.*;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
-import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.service.GoalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -70,7 +70,7 @@ public class GoalRestController {
     @PatchMapping("/{mid}")
     public ResponseEntity<?> patchMeta(@AuthenticationPrincipal String uid,
                                        @PathVariable String mid,
-                                       @RequestParam("tipo") Goal.Tipo tipo,
+                                       @RequestParam("tipo") Enums.Tipo tipo,
                                        @RequestBody JsonNode jsonBody) {
         try {
             if (tipo.toString().equalsIgnoreCase("Bool")) {

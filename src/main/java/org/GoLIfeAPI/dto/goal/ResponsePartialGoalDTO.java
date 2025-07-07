@@ -1,20 +1,20 @@
 package org.GoLIfeAPI.dto.goal;
 
-import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.Enums;
 import org.bson.types.ObjectId;
 
 public class ResponsePartialGoalDTO {
 
     protected String _id;
     protected String nombre;
-    protected Goal.Tipo tipo;
+    protected Enums.Tipo tipo;
     protected String fecha;
     protected Boolean finalizado;
     protected int duracionValor;
-    protected Goal.Duracion duracionUnidad;
+    protected Enums.Duracion duracionUnidad;
 
-    public ResponsePartialGoalDTO(ObjectId _id, String nombre, Goal.Tipo tipo,
-                                  String fecha, Boolean finalizado, int duracionValor, Goal.Duracion duracionUnidad) {
+    public ResponsePartialGoalDTO(ObjectId _id, String nombre, Enums.Tipo tipo,
+                                  String fecha, Boolean finalizado, int duracionValor, Enums.Duracion duracionUnidad) {
         this._id = _id.toString();
         this.nombre = nombre;
         this.tipo = tipo;
@@ -28,11 +28,11 @@ public class ResponsePartialGoalDTO {
         return _id;
     }
 
-    public Goal.Tipo getTipo() {
+    public Enums.Tipo getTipo() {
         return tipo;
     }
 
-    public Goal.Duracion getDuracionUnidad() {
+    public Enums.Duracion getDuracionUnidad() {
         return duracionUnidad;
     }
 

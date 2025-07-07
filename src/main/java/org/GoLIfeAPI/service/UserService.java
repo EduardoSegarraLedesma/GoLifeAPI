@@ -5,7 +5,7 @@ import org.GoLIfeAPI.dto.user.CreateUserDTO;
 import org.GoLIfeAPI.dto.user.PatchUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.exception.NotFoundException;
-import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.persistence.UserPersistenceController;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -54,11 +54,11 @@ public class UserService {
             partialGoalDTOs = partialGoals.stream().map(d -> {
                 ObjectId id = d.getObjectId("_id");
                 String nombre = d.getString("nombre");
-                Goal.Tipo tipo = Goal.Tipo.valueOf(d.getString("tipo"));
+                Enums.Tipo tipo = Enums.Tipo.valueOf(d.getString("tipo"));
                 String fecha = d.getString("fecha");
                 Boolean finalizado = d.getBoolean("finalizado");
                 int duracionValor = d.getInteger("duracionValor");
-                Goal.Duracion durUnidad = Goal.Duracion.valueOf(d.getString("duracionUnidad"));
+                Enums.Duracion durUnidad = Enums.Duracion.valueOf(d.getString("duracionUnidad"));
                 return new ResponsePartialGoalDTO(
                         id,
                         nombre,
