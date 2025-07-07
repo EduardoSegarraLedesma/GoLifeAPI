@@ -83,6 +83,7 @@ public class MongoService {
     // Insert new Document in Embedded Document List ->
     public Document insertEmbeddedDocInListByParentId(ClientSession session, String id,
                                                       String collection, String listKey, Document doc) {
+       //Ordenar con each sort los registros introducidos
         return insertEmbeddedDocInListByParentKey(session, "_id", new ObjectId(id), collection, listKey, doc);
     }
 

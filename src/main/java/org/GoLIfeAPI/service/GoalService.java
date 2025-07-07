@@ -103,7 +103,8 @@ public class GoalService {
         if (goalDoc.getString("tipo").equalsIgnoreCase("Num")) {
             Document deltaGoalStats = statsService.getGoalStatsFinalDateUpdate(dto, goalDoc);
             return mapToResponseNumGoalDTO(
-                    goalPersistenceController.update(dto.toDocument(), deltaGoalStats,
+                    goalPersistenceController.update(
+                            dto.toDocument(), deltaGoalStats,
                             dto.toParcialDocument(), null, uid, mid),
                     goalDoc);
         } else throw new BadRequestException("Tipo incorrecto para la meta");
