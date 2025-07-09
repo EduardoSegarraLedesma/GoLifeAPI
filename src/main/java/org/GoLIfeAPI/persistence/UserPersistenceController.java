@@ -47,7 +47,7 @@ public class UserPersistenceController extends BasePersistenceController {
 
     public Document read(String uid) {
         try {
-            Document userDoc = mongoService.findDocById(uid, USER_COLLECTION_NAME);
+            Document userDoc = mongoService.findDocByKey(USER_ID_NAME, uid, USER_COLLECTION_NAME);
             if (userDoc == null) throw new NotFoundException("");
             return userDoc;
         } catch (NotFoundException e) {
