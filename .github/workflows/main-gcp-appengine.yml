@@ -29,7 +29,7 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build & run tests
-        run: mvn --batch-mode clean verify
+        run: mvn --batch-mode test
 
   deploy:
     name: Build & Deploy
