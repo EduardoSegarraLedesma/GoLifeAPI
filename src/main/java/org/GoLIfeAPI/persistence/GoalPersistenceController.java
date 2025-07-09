@@ -121,7 +121,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         } catch (Exception e) {
             session.abortTransaction();
             session.close();
-            throw new RuntimeException("Error interno al borrar la meta", e);
+            throw new RuntimeException("Error interno al eliminar la meta", e);
         }
     }
 }

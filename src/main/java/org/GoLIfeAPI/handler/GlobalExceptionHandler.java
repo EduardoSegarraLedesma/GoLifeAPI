@@ -71,7 +71,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
     }
 
-
     // 404: Resource not found
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFound(NotFoundException ex) {
@@ -79,7 +78,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ? ex.getMessage() : "Recurso no encontrado";
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
-
 
     // 409: Conflict
     @ExceptionHandler({DuplicateKeyException.class, ConflictException.class})

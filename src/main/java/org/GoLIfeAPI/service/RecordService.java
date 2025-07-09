@@ -35,7 +35,7 @@ public class RecordService {
     public ResponseBoolGoalDTO createBoolRecord(CreateBoolRecordDTO dto, String uid, String mid) {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         if (!goalDoc.getString("tipo").equalsIgnoreCase("Bool"))
-            throw new BadRequestException("Tipo de Registro incorrecto para la meta");
+            throw new BadRequestException("Tipo de registro incorrecto para la meta");
         BoolRecord boolRecord = dto.toEntity();
         validateRecord(goalDoc, boolRecord);
         return goalService.mapToResponseBoolGoalDTO(
