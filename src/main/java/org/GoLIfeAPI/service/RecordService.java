@@ -6,6 +6,7 @@ import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
+import org.GoLIfeAPI.exception.NotFoundException;
 import org.GoLIfeAPI.mapper.GoalMapper;
 import org.GoLIfeAPI.mapper.RecordMapper;
 import org.GoLIfeAPI.model.record.BoolRecord;
@@ -50,7 +51,7 @@ public class RecordService {
         validateRecord(goalDoc, boolRecord);
         return goalMapper.mapGoalDocToResponseBoolGoalDTO(
                 recordPersistenceController.create(
-                        boolRecord.toDocument(),
+                        recordMapper.mapBoolRecordToBoolRecordDoc(boolRecord),
                         statsService.getGoalStatsReachedBoolValueUpdate(dto, goalDoc),
                         mid),
                 goalDoc);
@@ -64,18 +65,20 @@ public class RecordService {
         validateRecord(goalDoc, numRecord);
         return goalMapper.mapGoalDocToResponseNumGoalDTO(
                 recordPersistenceController.create(
-                        numRecord.toDocument(),
+                        recordMapper.mapNumRecordToNumRecordDoc(numRecord),
                         statsService.getGoalStatsReachedNumValueUpdate(dto, goalDoc),
                         mid),
                 goalDoc);
     }
 
-    public Object deleteRecord(String uid, String mid, LocalDate date) {
+    public void deleteRecord(String uid, String mid, LocalDate date) {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
-        return goalMapper.mapGoalDocToResponseGoalDTO(
-                recordPersistenceController.delete(
-                        mid, LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString()),
-                goalDoc);
+        List<Document> records = (List<Document>) goalDoc.get("registros");
+        String stringDate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        boolean exists = records.stream().anyMatch(reg -> stringDate.equals(reg.getString("fecha")));
+        if (!exists) throw new NotFoundException("No existe un registro en esa fecha");
+        recordPersistenceController.delete(mid,
+                LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString());
     }
 
     private void validateRecord(Document goalDoc, Record record) {

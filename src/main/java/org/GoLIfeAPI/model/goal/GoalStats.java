@@ -1,11 +1,8 @@
 package org.GoLIfeAPI.model.goal;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public class GoalStats {
-
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private Boolean valorAlcanzado;
     private LocalDate fechaFin;

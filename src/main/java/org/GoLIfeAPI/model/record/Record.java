@@ -3,10 +3,9 @@ package org.GoLIfeAPI.model.record;
 import org.bson.Document;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public abstract class Record {
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
     protected LocalDate fecha;
 
     public Record() {

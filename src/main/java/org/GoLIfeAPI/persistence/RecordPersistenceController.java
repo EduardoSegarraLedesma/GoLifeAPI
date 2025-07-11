@@ -3,6 +3,7 @@ package org.GoLIfeAPI.persistence;
 import com.mongodb.client.ClientSession;
 import org.GoLIfeAPI.exception.NotFoundException;
 import org.GoLIfeAPI.infrastructure.MongoService;
+import org.GoLIfeAPI.persistence.dao.GoalDAO;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -10,20 +11,23 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RecordPersistenceController extends BasePersistenceController {
 
+    private final GoalDAO goalDAO;
+
     @Autowired
-    public RecordPersistenceController(MongoService mongoService) {
+    public RecordPersistenceController(MongoService mongoService,
+                                       GoalDAO goalDAO) {
         super(mongoService);
+        this.goalDAO = goalDAO;
     }
 
     public Document create(Document record, Document goalStatsUpdate, String mid) {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            Document goalDoc = mongoService.insertEmbeddedDocInListByParentId(session, mid, GOAL_COLLECTION_NAME,
-                    RECORD_LIST_NAME, record);
+            Document goalDoc = goalDAO.insertRecordInListByGoalId(session, mid, record);
             if (goalDoc == null) throw new NotFoundException("");
             if (goalStatsUpdate != null && !goalStatsUpdate.isEmpty()) {
-                goalDoc = mongoService.updateSetEmbeddedDocByParentId(session, mid, GOAL_COLLECTION_NAME, STATS_NAME, goalStatsUpdate);
+                goalDoc = goalDAO.updateGoalSatsByGoalId(session, mid, goalStatsUpdate);
                 if (goalDoc == null) throw new NotFoundException("");
             }
             session.commitTransaction();
@@ -40,16 +44,14 @@ public class RecordPersistenceController extends BasePersistenceController {
         }
     }
 
-    public Document delete(String mid, String date) {
+    public void delete(String mid, String date) {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            Document goalDoc = mongoService.removeEmbeddedDocInListByParentIdSonKey(session,
-                    mid, GOAL_COLLECTION_NAME, RECORD_LIST_NAME, "fecha", date);
+            Document goalDoc = goalDAO.removeRecordFromListByGoalIdAndDate(session, mid, date);
             if (goalDoc == null) throw new NotFoundException("");
             session.commitTransaction();
             session.close();
-            return goalDoc;
         } catch (NotFoundException e) {
             session.abortTransaction();
             session.close();

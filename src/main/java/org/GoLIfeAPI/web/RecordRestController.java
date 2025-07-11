@@ -37,7 +37,6 @@ public class RecordRestController {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false);
-        //  .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
         this.validator = validator;
     }
 
@@ -71,7 +70,8 @@ public class RecordRestController {
     public ResponseEntity<?> deleteRegistro(@AuthenticationPrincipal String uid,
                                             @PathVariable("mid") String mid,
                                             @PathVariable("fecha") LocalDate fecha) {
-        return ResponseEntity.ok(recordService.deleteRecord(uid, mid, fecha));
+        recordService.deleteRecord(uid, mid, fecha);
+        return ResponseEntity.ok("Registro eliminado exitosamente");
     }
 
     // Auxiliary Methods

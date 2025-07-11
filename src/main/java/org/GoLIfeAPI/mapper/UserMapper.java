@@ -10,6 +10,8 @@ import org.GoLIfeAPI.model.user.UserStats;
 import org.bson.Document;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +48,6 @@ public class UserMapper {
         Document doc = new Document("uid", user.getUid())
                 .append("nombre", user.getNombre())
                 .append("apellidos", user.getApellidos());
-
         if (user.getMetas() != null) {
             List<Document> metasDocs = user.getMetas()
                     .stream()
@@ -56,7 +57,6 @@ public class UserMapper {
         } else {
             doc.append("metas", List.of());
         }
-
         doc.append("estadisticas", mapUserStatsToUserStatsDoc(user.getEstadisticas()));
         return doc;
     }
@@ -73,14 +73,12 @@ public class UserMapper {
     public ResponseUserDTO mapUserDocToResponseUserDTO(Document newDoc) {
         List<Document> partialGoals = newDoc.getList("metas", Document.class);
         List<ResponsePartialGoalDTO> partialGoalDTOs = Collections.emptyList();
-
         if (partialGoals != null) {
             partialGoalDTOs = partialGoals
                     .stream()
                     .map(Goal -> goalMapper.mapGoalDocToPartialGoalDTO(Goal))
                     .collect(Collectors.toList());
         }
-
         return new ResponseUserDTO(
                 newDoc.getString("nombre"),
                 newDoc.getString("apellidos"),
@@ -90,8 +88,22 @@ public class UserMapper {
 
     public ResponseUserStatsDTO mapUserDocToResponseUserStatsDTO(Document doc) {
         Document statsDoc = doc.get("estadisticas", Document.class);
+        int totalMetas = statsDoc.getInteger("totalMetas");
+        int totalMetasFinalizadas = statsDoc.getInteger("totalMetasFinalizadas");
         return new ResponseUserStatsDTO(
-                statsDoc.getInteger("totalMetas"),
-                statsDoc.getInteger("totalMetasFinalizadas"));
+                totalMetas,
+                totalMetasFinalizadas,
+                calculatePorcentajeFinalizadas(totalMetas, totalMetasFinalizadas));
+    }
+
+    private BigDecimal calculatePorcentajeFinalizadas(int totalMetas, int totalMetasFinalizadas) {
+        if (totalMetas > 0 && totalMetasFinalizadas > 0) {
+            return BigDecimal.valueOf(totalMetasFinalizadas)
+                    .divide(BigDecimal.valueOf(totalMetas), 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(2, RoundingMode.HALF_UP);
+        } else {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
     }
 }

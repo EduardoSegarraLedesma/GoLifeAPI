@@ -7,6 +7,8 @@ import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.exception.NotFoundException;
 import org.GoLIfeAPI.infrastructure.FirebaseService;
 import org.GoLIfeAPI.infrastructure.MongoService;
+import org.GoLIfeAPI.persistence.dao.GoalDAO;
+import org.GoLIfeAPI.persistence.dao.UserDAO;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -15,23 +17,29 @@ import org.springframework.stereotype.Repository;
 public class UserPersistenceController extends BasePersistenceController {
 
     private final FirebaseService firebaseService;
+    private final UserDAO userDAO;
+    private final GoalDAO goalDAO;
 
     @Autowired
-    public UserPersistenceController(MongoService mongoService, FirebaseService firebaseService) {
+    public UserPersistenceController(MongoService mongoService,
+                                     FirebaseService firebaseService,
+                                     UserDAO userDAO, GoalDAO goalDAO) {
         super(mongoService);
         this.firebaseService = firebaseService;
+        this.userDAO = userDAO;
+        this.goalDAO = goalDAO;
     }
 
     public Document create(Document user, String uid) {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            String objectId = mongoService.insertDoc(session, user, USER_COLLECTION_NAME);
+            String objectId = userDAO.insertDoc(session, user);
             System.out.println("id:" + objectId);
             if (objectId != null && !objectId.isBlank()) {
                 session.commitTransaction();
                 session.close();
-                return mongoService.findDocById(objectId, USER_COLLECTION_NAME);
+                return userDAO.findDocById(objectId);
             } else throw new Exception();
         } catch (MongoWriteException e) {
             session.abortTransaction();
@@ -47,7 +55,7 @@ public class UserPersistenceController extends BasePersistenceController {
 
     public Document read(String uid) {
         try {
-            Document userDoc = mongoService.findDocByKey(USER_ID_NAME, uid, USER_COLLECTION_NAME);
+            Document userDoc = userDAO.findUserByUid(uid);
             if (userDoc == null) throw new NotFoundException("");
             return userDoc;
         } catch (NotFoundException e) {
@@ -57,11 +65,11 @@ public class UserPersistenceController extends BasePersistenceController {
         }
     }
 
-    public Document update(Document user, String uid) {
+    public Document update(Document update, String uid) {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            Document userDoc = mongoService.updateDocByKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME, user);
+            Document userDoc = userDAO.updateUserByUid(session, uid, update);
             if (userDoc == null) throw new NotFoundException("");
             session.commitTransaction();
             session.close();
@@ -81,10 +89,10 @@ public class UserPersistenceController extends BasePersistenceController {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
-            DeleteResult deleteUser = mongoService.deleteDocByKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME);
+            DeleteResult deleteUser = userDAO.deleteUserByUid(session, uid);
             if (!deleteUser.wasAcknowledged()) throw new Exception();
             if (deleteUser.getDeletedCount() == 0) throw new NotFoundException("");
-            DeleteResult deleteGoals = mongoService.deleteManyDocsByKey(session, USER_ID_NAME, uid, GOAL_COLLECTION_NAME);
+            DeleteResult deleteGoals = goalDAO.deleteManyGoalsByUid(session, uid);
             if (!deleteGoals.wasAcknowledged()) throw new Exception();
             if (firebaseService.deleteFirebaseUser(uid)) {
                 session.commitTransaction();

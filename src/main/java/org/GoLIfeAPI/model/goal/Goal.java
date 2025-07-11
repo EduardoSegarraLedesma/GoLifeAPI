@@ -4,11 +4,8 @@ import org.GoLIfeAPI.model.Enums;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public abstract class Goal {
-
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
     protected ObjectId _id;
     protected String uid;
