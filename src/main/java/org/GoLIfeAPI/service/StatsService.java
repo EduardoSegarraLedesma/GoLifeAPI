@@ -1,7 +1,6 @@
 package org.GoLIfeAPI.service;
 
 import org.GoLIfeAPI.dto.goal.PatchGoalDTO;
-import org.GoLIfeAPI.dto.goal.ResponseGoalStatsDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
@@ -22,19 +21,6 @@ public class StatsService {
                 .append("totalMetasFinalizadas", deltaTotalFinalizedGoals);
     }
 
-    public ResponseUserStatsDTO mapToResponseUserStatsDTO(Document doc) {
-        return new ResponseUserStatsDTO(
-                doc.getInteger("totalMetas"),
-                doc.getInteger("totalMetasFinalizadas"));
-    }
-
-    public ResponseUserStatsDTO mapEmbeddedToResponseUserStatsDTO(Document doc) {
-        Document statsDoc = doc.get("estadisticas", Document.class);
-        return new ResponseUserStatsDTO(
-                statsDoc.getInteger("totalMetas"),
-                statsDoc.getInteger("totalMetasFinalizadas"));
-    }
-
     //Goal Stats
     public LocalDate calculateFinalGoalDate(LocalDate startDate, int duration, Enums.Duracion durationUnit) {
         return switch (durationUnit) {
@@ -42,34 +28,29 @@ public class StatsService {
             case Semanas -> startDate.plusWeeks(duration);
             case Meses -> startDate.plusMonths(duration);
             case Años -> startDate.plusYears(duration);
-            default -> null;
+            case Indefinido -> null;
         };
     }
 
     public Document getGoalStatsFinalDateUpdate(PatchGoalDTO goalDto, Document goalDoc) {
-        Integer newDuration = goalDto.getDuracionValor();
+        Integer newDurationValue = goalDto.getDuracionValor();
         Enums.Duracion newDurationUnit = goalDto.getDuracionUnidad();
         Document goalStatsUpdates = new Document();
         LocalDate startDate = LocalDate.parse(goalDoc.getString("fecha"), DateTimeFormatter.ISO_LOCAL_DATE);
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate newFinalDate;
-        if ((newDuration != null && newDuration > 0) && newDurationUnit == null) {
-            newFinalDate = calculateFinalGoalDate(
-                    startDate,
-                    newDuration,
+        if ((newDurationValue != null && newDurationValue > 0) && newDurationUnit == null) {
+            newFinalDate = calculateFinalGoalDate(startDate, newDurationValue,
                     Enums.Duracion.valueOf(goalDoc.getString("duracionUnidad")));
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
-        } else if ((newDuration == null || newDuration < 0) && newDurationUnit != null) {
+        } else if ((newDurationValue == null || newDurationValue < 0) && newDurationUnit != null) {
             newFinalDate = calculateFinalGoalDate(
                     startDate,
-                    goalDoc.getInteger("duracionValor"),
+                    goalDoc.getInteger("duracionValor") > 0 ? goalDoc.getInteger("duracionValor") : 1,
                     newDurationUnit);
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
-        } else if ((newDuration != null && newDuration > 0) && newDurationUnit != null) {
-            newFinalDate = calculateFinalGoalDate(
-                    startDate,
-                    goalDoc.getInteger("duracionValor"),
-                    newDurationUnit);
+        } else if ((newDurationValue != null && newDurationValue > 0) && newDurationUnit != null) {
+            newFinalDate = calculateFinalGoalDate(startDate, newDurationValue, newDurationUnit);
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
         }
         return goalStatsUpdates;
@@ -90,15 +71,6 @@ public class StatsService {
         if (!ReachedValue && compareDoublesWithTwoDecimals(recordDto.getValorNum(), goalValue))
             goalStatsUpdates.append("valorAlcanzado", true);
         return goalStatsUpdates;
-    }
-
-    public ResponseGoalStatsDTO mapEmbeddedToResponseGoalStatsDTO(Document newDoc, Document oldDoc) {
-        Document newStatsDoc = newDoc.get("estadisticas", Document.class);
-        Document oldStatsDoc = oldDoc.get("estadisticas", Document.class);
-        return new ResponseGoalStatsDTO(
-                newStatsDoc.getBoolean("valorAlcanzado"),
-                (newStatsDoc.getBoolean("valorAlcanzado") && !oldStatsDoc.getBoolean("valorAlcanzado")),
-                newStatsDoc.getString("fechaFin"));
     }
 
     private Boolean compareDoublesWithTwoDecimals(Double value1, Double value2) {

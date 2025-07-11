@@ -27,10 +27,6 @@ public class CreateNumRecordDTO extends CreateRecordDTO {
         this.valorNum = valorNum;
     }
 
-    public NumRecord toEntity() {
-        return new NumRecord(valorNum, fecha);
-    }
-
     public Double getValorNum() {
         return valorNum;
     }

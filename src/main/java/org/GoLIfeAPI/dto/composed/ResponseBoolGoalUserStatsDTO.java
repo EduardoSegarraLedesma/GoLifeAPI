@@ -13,7 +13,6 @@ public class ResponseBoolGoalUserStatsDTO {
         this.estadisticasUsuario = estadisticasUsuario;
     }
 
-
     public ResponseBoolGoalDTO getMeta() {
         return meta;
     }

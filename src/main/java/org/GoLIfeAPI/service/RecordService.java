@@ -6,6 +6,8 @@ import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
+import org.GoLIfeAPI.mapper.GoalMapper;
+import org.GoLIfeAPI.mapper.RecordMapper;
 import org.GoLIfeAPI.model.record.BoolRecord;
 import org.GoLIfeAPI.model.record.NumRecord;
 import org.GoLIfeAPI.model.record.Record;
@@ -21,12 +23,20 @@ import java.util.List;
 @Service
 public class RecordService {
 
+    private final GoalMapper goalMapper;
+    private final RecordMapper recordMapper;
     private final RecordPersistenceController recordPersistenceController;
     private final GoalService goalService;
     private final StatsService statsService;
 
     @Autowired
-    public RecordService(RecordPersistenceController recordPersistenceController, GoalService goalService, StatsService statsService) {
+    public RecordService(GoalMapper goalMapper,
+                         RecordMapper recordMapper,
+                         RecordPersistenceController recordPersistenceController,
+                         GoalService goalService,
+                         StatsService statsService) {
+        this.goalMapper = goalMapper;
+        this.recordMapper = recordMapper;
         this.recordPersistenceController = recordPersistenceController;
         this.goalService = goalService;
         this.statsService = statsService;
@@ -36,9 +46,9 @@ public class RecordService {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         if (!goalDoc.getString("tipo").equalsIgnoreCase("Bool"))
             throw new BadRequestException("Tipo de registro incorrecto para la meta");
-        BoolRecord boolRecord = dto.toEntity();
+        BoolRecord boolRecord = recordMapper.mapCreateBoolRecordDtoToBoolRecord(dto);
         validateRecord(goalDoc, boolRecord);
-        return goalService.mapToResponseBoolGoalDTO(
+        return goalMapper.mapGoalDocToResponseBoolGoalDTO(
                 recordPersistenceController.create(
                         boolRecord.toDocument(),
                         statsService.getGoalStatsReachedBoolValueUpdate(dto, goalDoc),
@@ -50,9 +60,9 @@ public class RecordService {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
         if (!goalDoc.getString("tipo").equalsIgnoreCase("Num"))
             throw new BadRequestException("Tipo de Registro incorrecto para la meta");
-        NumRecord numRecord = dto.toEntity();
+        NumRecord numRecord = recordMapper.mapCreateNumRecordDtoToBoolRecord(dto);
         validateRecord(goalDoc, numRecord);
-        return goalService.mapToResponseNumGoalDTO(
+        return goalMapper.mapGoalDocToResponseNumGoalDTO(
                 recordPersistenceController.create(
                         numRecord.toDocument(),
                         statsService.getGoalStatsReachedNumValueUpdate(dto, goalDoc),
@@ -62,7 +72,7 @@ public class RecordService {
 
     public Object deleteRecord(String uid, String mid, LocalDate date) {
         Document goalDoc = goalService.validateAndGetGoal(uid, mid);
-        return goalService.mapToResponseGoalDTO(
+        return goalMapper.mapGoalDocToResponseGoalDTO(
                 recordPersistenceController.delete(
                         mid, LocalDate.parse(date.toString(), DateTimeFormatter.ISO_LOCAL_DATE).toString()),
                 goalDoc);

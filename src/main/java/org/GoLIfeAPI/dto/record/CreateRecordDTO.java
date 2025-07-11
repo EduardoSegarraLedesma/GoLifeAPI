@@ -1,7 +1,6 @@
 package org.GoLIfeAPI.dto.record;
 
 import jakarta.validation.constraints.NotNull;
-import org.bson.Document;
 
 import java.time.LocalDate;
 

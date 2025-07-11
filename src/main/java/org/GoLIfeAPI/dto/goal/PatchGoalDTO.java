@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import org.GoLIfeAPI.model.Enums;
-import org.bson.Document;
 
 public abstract class PatchGoalDTO {
 
@@ -22,38 +21,6 @@ public abstract class PatchGoalDTO {
         descripcion = null;
         duracionValor = null;
         duracionUnidad = null;
-    }
-
-    public Document toDocument() {
-        Document doc = new Document();
-        if (nombre != null && !nombre.isBlank()) doc.append("nombre", nombre);
-        if (descripcion != null && !descripcion.isBlank()) doc.append("descripcion", descripcion);
-        appendCorrectDuracionValor(doc);
-        if (duracionUnidad != null) doc.append("duracionUnidad", duracionUnidad);
-        return doc;
-    }
-
-
-    public Document toParcialDocument() {
-        Document doc = new Document();
-        if (nombre != null && !nombre.isBlank()) doc.append("nombre", nombre);
-        appendCorrectDuracionValor(doc);
-        if (duracionUnidad != null) doc.append("duracionUnidad", duracionUnidad);
-        return doc;
-    }
-
-    private void appendCorrectDuracionValor(Document doc) {
-        if (duracionUnidad == null) {
-            if (duracionValor != null && duracionValor > 0)
-                doc.append("duracionValor", duracionValor);
-        } else if (duracionUnidad.toString().equalsIgnoreCase("Indefinido"))
-            doc.append("duracionValor", -1);
-        else {
-            if (duracionValor != null && duracionValor > 0)
-                doc.append("duracionValor", duracionValor);
-            else
-                doc.append("duracionValor", 1);
-        }
     }
 
     public String getNombre() {

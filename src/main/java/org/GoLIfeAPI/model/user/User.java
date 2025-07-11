@@ -1,11 +1,9 @@
 package org.GoLIfeAPI.model.user;
 
 import org.GoLIfeAPI.model.goal.Goal;
-import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class User {
 
@@ -31,23 +29,6 @@ public class User {
         this.apellidos = apellidos;
         this.nombre = nombre;
         this.estadisticas = new UserStats(totalMetas, totalMetasFinalizadas);
-    }
-
-    public Document toDocument() {
-        Document doc = new Document();
-        doc.append("uid", uid);
-        doc.append("nombre", nombre);
-        doc.append("apellidos", apellidos);
-        if (metas != null) {
-            List<Document> metasDocs = metas.stream()
-                    .map(Goal::toParcialDocument)
-                    .collect(Collectors.toList());
-            doc.append("metas", metasDocs);
-        } else {
-            doc.append("metas", List.of());
-        }
-        doc.append("estadisticas", estadisticas.toDocument());
-        return doc;
     }
 
     public String getUid() {

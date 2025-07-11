@@ -1,11 +1,15 @@
 package org.GoLIfeAPI.model.goal;
 
 import org.GoLIfeAPI.model.Enums;
-import org.bson.Document;
+import org.GoLIfeAPI.model.record.BoolRecord;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoolGoal extends Goal {
+
+    protected List<BoolRecord> registros;
 
     public BoolGoal(LocalDate fechaFin) {
         super(fechaFin);
@@ -18,8 +22,25 @@ public class BoolGoal extends Goal {
                 finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
     }
 
-    @Override
-    public Document toDocument() {
-        return super.toDocument();
+    public List<BoolRecord> getRegistros() {
+        return registros;
+    }
+
+    public void setRegistros(List<BoolRecord> registros) {
+        this.registros = registros;
+    }
+
+    public void addRegistro(BoolRecord registro) {
+        if (registros == null) {
+            registros = new ArrayList<>();
+        }
+        registros.add(registro);
+    }
+
+    public boolean removeRegistro(BoolRecord registro) {
+        if (registros != null) {
+            return registros.remove(registro);
+        }
+        return false;
     }
 }

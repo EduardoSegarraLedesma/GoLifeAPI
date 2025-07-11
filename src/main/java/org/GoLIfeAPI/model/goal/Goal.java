@@ -1,15 +1,10 @@
 package org.GoLIfeAPI.model.goal;
 
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.model.record.Record;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class Goal {
 
@@ -24,7 +19,6 @@ public abstract class Goal {
     protected Boolean finalizado;
     protected int duracionValor;
     protected Enums.Duracion duracionUnidad;
-    protected List<Record> registros;
     protected GoalStats estadisticas;
 
     public Goal(LocalDate fechaFin) {
@@ -48,42 +42,6 @@ public abstract class Goal {
         else
             this.duracionValor = duracionValor;
         estadisticas = new GoalStats(valorAlcanzado, fechaFin);
-    }
-
-    public Document toDocument() {
-        return new Document()
-                .append("uid", uid)
-                .append("nombre", nombre)
-                .append("tipo", tipo)
-                .append("descripcion", descripcion)
-                .append("fecha", fecha.format(formatter))
-                .append("finalizado", finalizado)
-                .append("duracionValor", duracionValor)
-                .append("duracionUnidad", duracionUnidad)
-                .append("registros", getListaRegistros())
-                .append("estadisticas", estadisticas.toDocument());
-    }
-
-    public Document toParcialDocument() {
-        return new Document()
-                .append("_id", _id)
-                .append("nombre", nombre)
-                .append("tipo", tipo)
-                .append("fecha", fecha.format(formatter))
-                .append("finalizado", finalizado)
-                .append("duracionValor", duracionValor)
-                .append("duracionUnidad", duracionUnidad);
-    }
-
-    private List<Document> getListaRegistros() {
-        if (registros != null) {
-            List<Document> registrosDocs = registros.stream()
-                    .map(Record::toDocument)
-                    .collect(Collectors.toList());
-            return registrosDocs;
-        } else {
-            return List.of();
-        }
     }
 
     public ObjectId get_id() {
@@ -158,28 +116,6 @@ public abstract class Goal {
         this.descripcion = descripcion;
     }
 
-    public List<Record> getRegistros() {
-        return registros;
-    }
-
-    public void setRegistros(List<Record> registros) {
-        this.registros = registros;
-    }
-
-    public void addRegistro(Record registro) {
-        if (registros == null) {
-            registros = new ArrayList<>();
-        }
-        registros.add(registro);
-    }
-
-    public boolean removeRegistro(Record registro) {
-        if (registros != null) {
-            return registros.remove(registro);
-        }
-        return false;
-    }
-
     public GoalStats getEstadisticas() {
         return estadisticas;
     }
@@ -187,5 +123,4 @@ public abstract class Goal {
     public void setEstadisticas(GoalStats estadisticas) {
         this.estadisticas = estadisticas;
     }
-
 }

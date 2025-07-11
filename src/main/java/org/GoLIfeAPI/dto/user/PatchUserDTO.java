@@ -1,7 +1,6 @@
 package org.GoLIfeAPI.dto.user;
 
 import jakarta.validation.constraints.Size;
-import org.bson.Document;
 
 public class PatchUserDTO {
 
@@ -12,13 +11,6 @@ public class PatchUserDTO {
 
     public PatchUserDTO() {
         apellidos = "";
-    }
-
-    public Document toDocument() {
-        Document doc = new Document();
-        if (nombre != null && !nombre.isBlank()) doc.append("nombre", nombre);
-        if (apellidos != null && !apellidos.isBlank()) doc.append("apellidos", apellidos);
-        return doc;
     }
 
     public String getApellidos() {

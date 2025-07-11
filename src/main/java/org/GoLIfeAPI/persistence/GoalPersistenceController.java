@@ -52,8 +52,44 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
-    public Document update(Document goal, Document goalStatsUpdate,
-                           Document partialGoalUpdate, Document userStatsUpdate, String uid, String mid) {
+    public Document updateWithUserStats(Document goal, Document partialGoalUpdate,
+                                        Document userStatsUpdate, String uid, String mid) {
+        ClientSession session = mongoService.getStartedSession();
+        try {
+            session.startTransaction();
+            // Goal
+            Document goalDoc = mongoService.updateDocById(session, mid, GOAL_COLLECTION_NAME, goal);
+            if (goalDoc == null) throw new NotFoundException("");
+            // Partial Goal in User
+            Document userDoc;
+            if (partialGoalUpdate != null && !partialGoalUpdate.isEmpty()) {
+                userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
+                        USER_COLLECTION_NAME, GOAL_LIST_NAME, mid, partialGoalUpdate);
+                if (userDoc == null) throw new NotFoundException("");
+            }
+            // User Stats in User
+            userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
+                    STATS_NAME, userStatsUpdate);
+            if (userDoc == null) throw new Exception();
+            Document composedDoc = new Document();
+            composedDoc.append(STATS_NAME, userDoc.get(STATS_NAME, Document.class));
+            composedDoc.append("meta", goalDoc);
+            session.commitTransaction();
+            session.close();
+            return composedDoc;
+        } catch (NotFoundException e) {
+            session.abortTransaction();
+            session.close();
+            throw new NotFoundException("Meta no encontrada");
+        } catch (Exception e) {
+            session.abortTransaction();
+            session.close();
+            throw new RuntimeException("Error interno al editar la meta", e);
+        }
+    }
+
+    public Document updateWithGoalStats(Document goal, Document partialGoalUpdate,
+                                        Document goalStatsUpdate, String uid, String mid) {
         ClientSession session = mongoService.getStartedSession();
         try {
             session.startTransaction();
@@ -66,23 +102,10 @@ public class GoalPersistenceController extends BasePersistenceController {
                 if (goalDoc == null) throw new NotFoundException("");
             }
             // Partial Goal in User
-            Document userDoc;
             if (partialGoalUpdate != null && !partialGoalUpdate.isEmpty()) {
-                userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
+                Document userDoc = mongoService.updateEmbeddedDocInListByParentKeySonId(session, USER_ID_NAME, uid,
                         USER_COLLECTION_NAME, GOAL_LIST_NAME, mid, partialGoalUpdate);
                 if (userDoc == null) throw new NotFoundException("");
-            }
-            // User Stats in User
-            if (userStatsUpdate != null && !userStatsUpdate.isEmpty()) {
-                userDoc = mongoService.updateIncEmbeddedDocByParentKey(session, USER_ID_NAME, uid, USER_COLLECTION_NAME,
-                        STATS_NAME, userStatsUpdate);
-                if (userDoc == null) throw new Exception();
-                Document composedDoc = new Document();
-                composedDoc.append(STATS_NAME, userDoc.get(STATS_NAME, Document.class));
-                composedDoc.append("meta", goalDoc);
-                session.commitTransaction();
-                session.close();
-                return composedDoc;
             }
             session.commitTransaction();
             session.close();
@@ -113,7 +136,7 @@ public class GoalPersistenceController extends BasePersistenceController {
             if (userDoc == null) throw new Exception();
             session.commitTransaction();
             session.close();
-            return userDoc.get(STATS_NAME, Document.class);
+            return new Document(STATS_NAME, userDoc.get(STATS_NAME, Document.class));
         } catch (NotFoundException e) {
             session.abortTransaction();
             session.close();

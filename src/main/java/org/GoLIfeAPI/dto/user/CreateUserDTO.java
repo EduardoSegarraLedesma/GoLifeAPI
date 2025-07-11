@@ -16,10 +16,6 @@ public class CreateUserDTO {
         apellidos = "";
     }
 
-    public User toEntity(String uid) {
-        return new User(uid, getApellidos(), getNombre());
-    }
-
     public String getApellidos() {
         return apellidos;
     }

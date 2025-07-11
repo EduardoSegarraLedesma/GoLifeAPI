@@ -3,7 +3,6 @@ package org.GoLIfeAPI.dto.record;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import org.GoLIfeAPI.model.record.BoolRecord;
 
 import java.time.LocalDate;
 
@@ -20,10 +19,6 @@ public class CreateBoolRecordDTO extends CreateRecordDTO {
                                LocalDate fecha) {
         super(fecha);
         this.valorBool = valorBool;
-    }
-
-    public BoolRecord toEntity() {
-        return new BoolRecord(valorBool, fecha);
     }
 
     public boolean isValorBool() {

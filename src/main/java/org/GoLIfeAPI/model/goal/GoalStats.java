@@ -1,7 +1,5 @@
 package org.GoLIfeAPI.model.goal;
 
-import org.bson.Document;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -20,12 +18,6 @@ public class GoalStats {
     public GoalStats(Boolean valorAlcanzado, LocalDate fechaFin) {
         this.valorAlcanzado = valorAlcanzado;
         this.fechaFin = fechaFin;
-    }
-
-    public Document toDocument() {
-        return new Document()
-                .append("valorAlcanzado", valorAlcanzado)
-                .append("fechaFin", fechaFin != null ? fechaFin.format(formatter) : "");
     }
 
     public LocalDate getFechaFin() {
