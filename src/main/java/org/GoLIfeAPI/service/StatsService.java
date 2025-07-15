@@ -3,7 +3,6 @@ package org.GoLIfeAPI.service;
 import org.GoLIfeAPI.dto.goal.PatchGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
-import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.model.Enums;
 import org.bson.Document;
 import org.springframework.stereotype.Service;

@@ -6,9 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
-import org.GoLIfeAPI.dto.composed.ResponseBoolGoalUserStatsDTO;
-import org.GoLIfeAPI.dto.composed.ResponseNumGoalUserStatsDTO;
-import org.GoLIfeAPI.dto.goal.*;
+import org.GoLIfeAPI.dto.goal.CreateBoolGoalDTO;
+import org.GoLIfeAPI.dto.goal.CreateNumGoalDTO;
+import org.GoLIfeAPI.dto.goal.PatchBoolGoalDTO;
+import org.GoLIfeAPI.dto.goal.PatchNumGoalDTO;
+import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.service.GoalService;
@@ -41,16 +43,16 @@ public class GoalRestController {
     }
 
     @PostMapping("/bool")
-    public ResponseEntity<ResponseBoolGoalUserStatsDTO> postMetaBool(@AuthenticationPrincipal String uid,
-                                                                     @Valid @RequestBody CreateBoolGoalDTO createBoolGoalDTO) {
+    public ResponseEntity<ResponseUserDTO> postMetaBool(@AuthenticationPrincipal String uid,
+                                                        @Valid @RequestBody CreateBoolGoalDTO createBoolGoalDTO) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(goalService.createBoolGoal(createBoolGoalDTO, uid));
     }
 
     @PostMapping("/num")
-    public ResponseEntity<ResponseNumGoalUserStatsDTO> postMetaNum(@AuthenticationPrincipal String uid,
-                                                                   @Valid @RequestBody CreateNumGoalDTO createNumGoalDTO) {
+    public ResponseEntity<ResponseUserDTO> postMetaNum(@AuthenticationPrincipal String uid,
+                                                       @Valid @RequestBody CreateNumGoalDTO createNumGoalDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(goalService.createNumGoal(createNumGoalDTO, uid));
     }
@@ -62,29 +64,25 @@ public class GoalRestController {
     }
 
     @PostMapping("/{mid}/finalizar")
-    public ResponseEntity<?> postMetaFinalizar(@AuthenticationPrincipal String uid,
-                                               @PathVariable("mid") String mid) {
+    public ResponseEntity<ResponseUserDTO> postMetaFinalizar(@AuthenticationPrincipal String uid,
+                                                             @PathVariable("mid") String mid) {
         return ResponseEntity.ok(goalService.finalizeGoal(uid, mid));
     }
 
     @PatchMapping("/{mid}")
-    public ResponseEntity<?> patchMeta(@AuthenticationPrincipal String uid,
-                                       @PathVariable String mid,
-                                       @RequestParam("tipo") Enums.Tipo tipo,
-                                       @RequestBody JsonNode jsonBody) {
+    public ResponseEntity<ResponseUserDTO> patchMeta(@AuthenticationPrincipal String uid,
+                                                     @PathVariable String mid,
+                                                     @RequestParam("tipo") Enums.Tipo tipo,
+                                                     @RequestBody JsonNode jsonBody) {
         try {
             if (tipo.toString().equalsIgnoreCase("Bool")) {
-                PatchBoolGoalDTO boolDto = objectMapper.treeToValue(
-                        jsonBody, PatchBoolGoalDTO.class);
+                PatchBoolGoalDTO boolDto = objectMapper.treeToValue(jsonBody, PatchBoolGoalDTO.class);
                 validateDTO(boolDto);
-                ResponseBoolGoalDTO updated = goalService.updateBoolGoal(boolDto, uid, mid);
-                return ResponseEntity.ok(updated);
+                return ResponseEntity.ok(goalService.updateBoolGoal(boolDto, uid, mid));
             } else if (tipo.toString().equalsIgnoreCase("Num")) {
-                PatchNumGoalDTO numDto = objectMapper.treeToValue(
-                        jsonBody, PatchNumGoalDTO.class);
+                PatchNumGoalDTO numDto = objectMapper.treeToValue(jsonBody, PatchNumGoalDTO.class);
                 validateDTO(numDto);
-                ResponseNumGoalDTO updated = goalService.updateNumGoal(numDto, uid, mid);
-                return ResponseEntity.ok(updated);
+                return ResponseEntity.ok(goalService.updateNumGoal(numDto, uid, mid));
             } else
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de meta no soportado");
         } catch (JsonProcessingException e) {

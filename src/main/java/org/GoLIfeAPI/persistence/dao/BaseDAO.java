@@ -52,7 +52,15 @@ public abstract class BaseDAO {
 
     // Find ->
     public Document findDocById(String id) {
-        return findDocByKey("_id", new ObjectId(id));
+        return findDocByKey(GOAL_ID_NAME, new ObjectId(id));
+    }
+
+    public Document findDocById(ClientSession session,
+                                String id) {
+        return mongoClient.getDatabase(DATABASE_NAME)
+                .getCollection(COLLECTION_NAME)
+                .find(session,
+                        new Document(GOAL_ID_NAME, new ObjectId(id))).first();
     }
 
     protected Document findDocByKey(String key, Object value) {

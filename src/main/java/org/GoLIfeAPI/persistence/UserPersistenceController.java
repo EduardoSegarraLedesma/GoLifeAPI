@@ -1,14 +1,13 @@
 package org.GoLIfeAPI.persistence;
 
 import com.mongodb.MongoWriteException;
-import com.mongodb.client.ClientSession;
 import com.mongodb.client.result.DeleteResult;
 import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.exception.NotFoundException;
 import org.GoLIfeAPI.infrastructure.FirebaseService;
-import org.GoLIfeAPI.infrastructure.MongoService;
 import org.GoLIfeAPI.persistence.dao.GoalDAO;
 import org.GoLIfeAPI.persistence.dao.UserDAO;
+import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,33 +20,27 @@ public class UserPersistenceController extends BasePersistenceController {
     private final GoalDAO goalDAO;
 
     @Autowired
-    public UserPersistenceController(MongoService mongoService,
+    public UserPersistenceController(TransactionRunner transactionRunner,
                                      FirebaseService firebaseService,
                                      UserDAO userDAO, GoalDAO goalDAO) {
-        super(mongoService);
+        super(transactionRunner);
         this.firebaseService = firebaseService;
         this.userDAO = userDAO;
         this.goalDAO = goalDAO;
     }
 
     public Document create(Document user, String uid) {
-        ClientSession session = mongoService.getStartedSession();
         try {
-            session.startTransaction();
-            String objectId = userDAO.insertDoc(session, user);
-            System.out.println("id:" + objectId);
-            if (objectId != null && !objectId.isBlank()) {
-                session.commitTransaction();
-                session.close();
-                return userDAO.findDocById(objectId);
-            } else throw new Exception();
+            return transactionRunner.run(session -> {
+                String id = userDAO.insertDoc(session, user);
+                if (id == null || id.isBlank()) throw new RuntimeException();
+                Document createdUser = userDAO.findDocById(session, id);
+                if (createdUser == null) throw new RuntimeException();
+                return createdUser;
+            });
         } catch (MongoWriteException e) {
-            session.abortTransaction();
-            session.close();
             throw new ConflictException("El usuario ya existe");
-        } catch (Exception e) {
-            session.abortTransaction();
-            session.close();
+        } catch (RuntimeException e) {
             firebaseService.deleteFirebaseUser(uid);
             throw new RuntimeException("Error interno al crear el usuario", e);
         }
@@ -56,55 +49,41 @@ public class UserPersistenceController extends BasePersistenceController {
     public Document read(String uid) {
         try {
             Document userDoc = userDAO.findUserByUid(uid);
-            if (userDoc == null) throw new NotFoundException("");
+            if (userDoc == null) throw new NotFoundException("No se ha encontrado al usuario");
             return userDoc;
-        } catch (NotFoundException e) {
-            throw new NotFoundException("No se ha encontrado al usuario");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error interno al leer el usuario", e);
         }
     }
 
     public Document update(Document update, String uid) {
-        ClientSession session = mongoService.getStartedSession();
         try {
-            session.startTransaction();
-            Document userDoc = userDAO.updateUserByUid(session, uid, update);
-            if (userDoc == null) throw new NotFoundException("");
-            session.commitTransaction();
-            session.close();
-            return userDoc;
+            return transactionRunner.run(session -> {
+                Document userDoc = userDAO.updateUserByUid(session, uid, update);
+                if (userDoc == null) throw new NotFoundException("Usuario no encontrado");
+                return userDoc;
+            });
         } catch (NotFoundException e) {
-            session.abortTransaction();
-            session.close();
-            throw new NotFoundException("Usuario no encontrado");
-        } catch (Exception e) {
-            session.abortTransaction();
-            session.close();
+            throw e;
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error interno al editar el usuario", e);
         }
     }
 
     public void delete(String uid) {
-        ClientSession session = mongoService.getStartedSession();
         try {
-            session.startTransaction();
-            DeleteResult deleteUser = userDAO.deleteUserByUid(session, uid);
-            if (!deleteUser.wasAcknowledged()) throw new Exception();
-            if (deleteUser.getDeletedCount() == 0) throw new NotFoundException("");
-            DeleteResult deleteGoals = goalDAO.deleteManyGoalsByUid(session, uid);
-            if (!deleteGoals.wasAcknowledged()) throw new Exception();
-            if (firebaseService.deleteFirebaseUser(uid)) {
-                session.commitTransaction();
-                session.close();
-            } else throw new Exception();
+            transactionRunner.run(session -> {
+                DeleteResult deleteUser = userDAO.deleteUserByUid(session, uid);
+                if (!deleteUser.wasAcknowledged()) throw new RuntimeException();
+                if (deleteUser.getDeletedCount() == 0) throw new NotFoundException("Usuario no encontrado");
+                DeleteResult deleteGoals = goalDAO.deleteManyGoalsByUid(session, uid);
+                if (!deleteGoals.wasAcknowledged()) throw new RuntimeException();
+                if (!firebaseService.deleteFirebaseUser(uid)) throw new RuntimeException();
+                return null;
+            });
         } catch (NotFoundException e) {
-            session.abortTransaction();
-            session.close();
-            throw new NotFoundException("Usuario no encontrado");
-        } catch (Exception e) {
-            session.abortTransaction();
-            session.close();
+            throw e;
+        } catch (RuntimeException e) {
             throw new RuntimeException("Error interno al borrar el usuario", e);
         }
     }

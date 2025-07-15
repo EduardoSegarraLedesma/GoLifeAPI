@@ -1,12 +1,13 @@
 package org.GoLIfeAPI.persistence;
 
-import org.GoLIfeAPI.infrastructure.MongoService;
+import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
 
 public abstract class BasePersistenceController {
 
-    protected final MongoService mongoService;
+    protected final TransactionRunner transactionRunner;
 
-    public BasePersistenceController(MongoService mongoService) {
-        this.mongoService = mongoService;
+    public BasePersistenceController(TransactionRunner transactionRunner) {
+        this.transactionRunner = transactionRunner;
     }
+
 }
