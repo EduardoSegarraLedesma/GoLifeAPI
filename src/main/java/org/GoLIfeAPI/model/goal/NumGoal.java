@@ -2,6 +2,7 @@ package org.GoLIfeAPI.model.goal;
 
 import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.model.record.NumRecord;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +25,17 @@ public class NumGoal extends Goal {
                    Double valorObjetivo, String unidad) {
         super(uid, nombre, Enums.Tipo.Num, descripcion, fecha,
                 finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
+        this.valorObjetivo = valorObjetivo;
+        this.unidad = unidad;
+    }
+
+    public NumGoal(String uid, ObjectId _id, String nombre, String descripcion,
+                   LocalDate fecha, Boolean finalizado, int duracionValor,
+                   Enums.Duracion duracionUnidad, GoalStats estadisticas,
+                   List<NumRecord> registros, Double valorObjetivo, String unidad) {
+        super(uid, _id, nombre, Enums.Tipo.Num, descripcion, fecha,
+                finalizado, duracionValor, duracionUnidad, estadisticas);
+        this.registros = registros;
         this.valorObjetivo = valorObjetivo;
         this.unidad = unidad;
     }

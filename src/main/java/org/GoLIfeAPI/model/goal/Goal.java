@@ -41,6 +41,24 @@ public abstract class Goal {
         estadisticas = new GoalStats(valorAlcanzado, fechaFin);
     }
 
+    public Goal(String uid, ObjectId _id, String nombre, Enums.Tipo tipo,
+                String descripcion, LocalDate fecha, Boolean finalizado,
+                int duracionValor, Enums.Duracion duracionUnidad, GoalStats estadisticas) {
+        this.uid = uid;
+        this._id = _id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.finalizado = finalizado;
+        this.duracionUnidad = duracionUnidad;
+        if (this.duracionUnidad.toString().equalsIgnoreCase("Indefinido"))
+            this.duracionValor = -1;
+        else
+            this.duracionValor = duracionValor;
+        this.estadisticas = estadisticas;
+    }
+
     public ObjectId get_id() {
         return _id;
     }

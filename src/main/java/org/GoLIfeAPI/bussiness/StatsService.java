@@ -1,9 +1,12 @@
-package org.GoLIfeAPI.service;
+package org.GoLIfeAPI.bussiness;
 
 import org.GoLIfeAPI.dto.goal.PatchGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.model.Enums;
+import org.GoLIfeAPI.model.goal.BoolGoal;
+import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.goal.NumGoal;
 import org.bson.Document;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 public class StatsService {
 
     // User Stats
-    public Document getUpdatedUserStatsDoc(int deltaTotalGoals, int deltaTotalFinalizedGoals) {
+    public Document getUserStatsUpdateDoc(int deltaTotalGoals, int deltaTotalFinalizedGoals) {
         return new Document()
                 .append("totalMetas", deltaTotalGoals)
                 .append("totalMetasFinalizadas", deltaTotalFinalizedGoals);
@@ -31,21 +34,19 @@ public class StatsService {
         };
     }
 
-    public Document getGoalStatsFinalDateUpdate(PatchGoalDTO goalDto, Document goalDoc) {
+    public Document getGoalStatsFinalDateUpdateDoc(PatchGoalDTO goalDto, Goal goal) {
         Integer newDurationValue = goalDto.getDuracionValor();
         Enums.Duracion newDurationUnit = goalDto.getDuracionUnidad();
         Document goalStatsUpdates = new Document();
-        LocalDate startDate = LocalDate.parse(goalDoc.getString("fecha"), DateTimeFormatter.ISO_LOCAL_DATE);
+        LocalDate startDate = LocalDate.parse(goal.getFecha().format(DateTimeFormatter.ISO_LOCAL_DATE));
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate newFinalDate;
         if ((newDurationValue != null && newDurationValue > 0) && newDurationUnit == null) {
-            newFinalDate = calculateFinalGoalDate(startDate, newDurationValue,
-                    Enums.Duracion.valueOf(goalDoc.getString("duracionUnidad")));
+            newFinalDate = calculateFinalGoalDate(startDate, newDurationValue, goal.getDuracionUnidad());
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
         } else if ((newDurationValue == null || newDurationValue < 0) && newDurationUnit != null) {
-            newFinalDate = calculateFinalGoalDate(
-                    startDate,
-                    goalDoc.getInteger("duracionValor") > 0 ? goalDoc.getInteger("duracionValor") : 1,
+            newFinalDate = calculateFinalGoalDate(startDate,
+                    goal.getDuracionValor() > 0 ? goal.getDuracionValor() : 1,
                     newDurationUnit);
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
         } else if ((newDurationValue != null && newDurationValue > 0) && newDurationUnit != null) {
@@ -55,18 +56,18 @@ public class StatsService {
         return goalStatsUpdates;
     }
 
-    public Document getGoalStatsReachedBoolValueUpdate(CreateBoolRecordDTO recordDto, Document goalDoc) {
+    public Document getGoalStatsReachedBoolValueUpdateDoc(CreateBoolRecordDTO recordDto, BoolGoal boolGoal) {
         Document goalStatsUpdates = new Document();
-        Boolean ReachedValue = goalDoc.get("estadisticas", Document.class).getBoolean("valorAlcanzado");
+        Boolean ReachedValue = boolGoal.getEstadisticas().getValorAlcanzado();
         if (!ReachedValue && recordDto.isValorBool())
             goalStatsUpdates.append("valorAlcanzado", true);
         return goalStatsUpdates;
     }
 
-    public Document getGoalStatsReachedNumValueUpdate(CreateNumRecordDTO recordDto, Document goalDoc) {
+    public Document getGoalStatsReachedNumValueUpdateDoc(CreateNumRecordDTO recordDto, NumGoal numGoal) {
         Document goalStatsUpdates = new Document();
-        Boolean ReachedValue = goalDoc.get("estadisticas", Document.class).getBoolean("valorAlcanzado");
-        double goalValue = goalDoc.getDouble("valorObjetivo");
+        Boolean ReachedValue = numGoal.getEstadisticas().getValorAlcanzado();
+        double goalValue = numGoal.getValorObjetivo();
         if (!ReachedValue && compareDoublesWithTwoDecimals(recordDto.getValorNum(), goalValue))
             goalStatsUpdates.append("valorAlcanzado", true);
         return goalStatsUpdates;

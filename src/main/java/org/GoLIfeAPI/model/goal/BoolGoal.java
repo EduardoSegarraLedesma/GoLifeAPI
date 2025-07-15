@@ -2,6 +2,7 @@ package org.GoLIfeAPI.model.goal;
 
 import org.GoLIfeAPI.model.Enums;
 import org.GoLIfeAPI.model.record.BoolRecord;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,6 +21,15 @@ public class BoolGoal extends Goal {
                     Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin) {
         super(uid, nombre, Enums.Tipo.Bool, descripcion, fecha,
                 finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
+    }
+
+    public BoolGoal(String uid, ObjectId _id, String nombre, String descripcion,
+                    LocalDate fecha, Boolean finalizado, int duracionValor,
+                    Enums.Duracion duracionUnidad, GoalStats estadisticas,
+                    List<BoolRecord> registros) {
+        super(uid, _id, nombre, Enums.Tipo.Bool, descripcion, fecha,
+                finalizado, duracionValor, duracionUnidad, estadisticas);
+        this.registros = registros;
     }
 
     public List<BoolRecord> getRegistros() {

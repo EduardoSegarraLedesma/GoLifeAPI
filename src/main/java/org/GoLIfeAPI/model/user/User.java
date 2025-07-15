@@ -1,6 +1,6 @@
 package org.GoLIfeAPI.model.user;
 
-import org.GoLIfeAPI.model.goal.Goal;
+import org.GoLIfeAPI.model.goal.PartialGoal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class User {
     private String uid;
     private String nombre;
     private String apellidos;
-    private List<Goal> metas;
+    private List<PartialGoal> metas;
     private UserStats estadisticas;
 
     public User() {
@@ -24,11 +24,12 @@ public class User {
         this.estadisticas = new UserStats();
     }
 
-    public User(String uid, String apellidos, String nombre, int totalMetas, int totalMetasFinalizadas) {
+    public User(String uid, String apellidos, String nombre, List<PartialGoal> metas, UserStats estadisticas) {
         this.uid = uid;
         this.apellidos = apellidos;
         this.nombre = nombre;
-        this.estadisticas = new UserStats(totalMetas, totalMetasFinalizadas);
+        this.metas = metas;
+        this.estadisticas = estadisticas;
     }
 
     public String getUid() {
@@ -55,22 +56,22 @@ public class User {
         this.nombre = nombre;
     }
 
-    public List<Goal> getMetas() {
+    public List<PartialGoal> getMetas() {
         return metas;
     }
 
-    public void setMetas(List<Goal> metas) {
+    public void setMetas(List<PartialGoal> metas) {
         this.metas = metas;
     }
 
-    public void addMeta(Goal meta) {
+    public void addMeta(PartialGoal meta) {
         if (metas == null) {
             metas = new ArrayList<>();
         }
         metas.add(meta);
     }
 
-    public boolean removeMeta(Goal meta) {
+    public boolean removeMeta(PartialGoal meta) {
         if (metas != null) {
             return metas.remove(meta);
         }

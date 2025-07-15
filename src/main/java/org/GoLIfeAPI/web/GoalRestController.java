@@ -13,7 +13,7 @@ import org.GoLIfeAPI.dto.goal.PatchNumGoalDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.service.GoalService;
+import org.GoLIfeAPI.bussiness.GoalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

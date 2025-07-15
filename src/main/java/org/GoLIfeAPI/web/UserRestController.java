@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.GoLIfeAPI.dto.user.CreateUserDTO;
 import org.GoLIfeAPI.dto.user.PatchUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
-import org.GoLIfeAPI.service.UserService;
+import org.GoLIfeAPI.bussiness.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
