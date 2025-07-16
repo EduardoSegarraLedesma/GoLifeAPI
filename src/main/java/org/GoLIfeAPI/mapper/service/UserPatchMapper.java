@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.mapper.bussiness;
+package org.GoLIfeAPI.mapper.service;
 
 import org.GoLIfeAPI.dto.user.PatchUserDTO;
 import org.bson.Document;

@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.mapper.bussiness;
+package org.GoLIfeAPI.mapper.service;
 
 import org.GoLIfeAPI.dto.goal.ResponsePartialGoalDTO;
 import org.GoLIfeAPI.dto.user.CreateUserDTO;

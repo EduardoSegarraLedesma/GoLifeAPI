@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.bussiness.interfaces;
+package org.GoLIfeAPI.service.interfaces;
 
 import org.GoLIfeAPI.dto.user.CreateUserDTO;
 import org.GoLIfeAPI.dto.user.PatchUserDTO;

@@ -26,9 +26,10 @@ public class GoalDAO extends BaseDAO {
     // Insert ->
     public Document insertRecordInListByGoalId(ClientSession session,
                                                String id, Document doc) {
-        //Ordenar con each sort los registros introducidos
+        Document order = new Document("$each", List.of(doc))
+                .append("$sort", new Document("fecha", -1));
         return insertEmbeddedDocInListByParentKey(session,
-                GOAL_ID_NAME, new ObjectId(id), RECORD_LIST_NAME, doc);
+                GOAL_ID_NAME, new ObjectId(id), RECORD_LIST_NAME, order);
     }
 
     // Update

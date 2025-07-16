@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
-import org.GoLIfeAPI.bussiness.interfaces.IGoalService;
+import org.GoLIfeAPI.service.interfaces.IGoalService;
 import org.GoLIfeAPI.dto.goal.CreateBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.CreateNumGoalDTO;
 import org.GoLIfeAPI.dto.goal.PatchBoolGoalDTO;
