@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.persistence.dao;
+package org.GoLIfeAPI.persistence.implementation.dao;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.model.Updates;

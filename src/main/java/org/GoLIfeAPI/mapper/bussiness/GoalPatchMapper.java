@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GoalPatchMapper {
 
+    public Document mapFinalizePatchToDoc() {
+        return new Document("finalizado", true);
+    }
+
     public Document mapPatchBoolGoalDtoToDoc(PatchBoolGoalDTO dto) {
         Document doc = new Document();
         mapPatchGoalDtoToDoc(dto, doc);

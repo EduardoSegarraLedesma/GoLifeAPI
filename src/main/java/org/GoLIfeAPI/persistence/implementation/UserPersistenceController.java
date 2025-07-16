@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.persistence;
+package org.GoLIfeAPI.persistence.implementation;
 
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.result.DeleteResult;
@@ -7,15 +7,16 @@ import org.GoLIfeAPI.exception.NotFoundException;
 import org.GoLIfeAPI.infrastructure.FirebaseService;
 import org.GoLIfeAPI.mapper.persistence.UserDocMapper;
 import org.GoLIfeAPI.model.user.User;
-import org.GoLIfeAPI.persistence.dao.GoalDAO;
-import org.GoLIfeAPI.persistence.dao.UserDAO;
-import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.implementation.dao.GoalDAO;
+import org.GoLIfeAPI.persistence.implementation.dao.UserDAO;
+import org.GoLIfeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.interfaces.IUserPersistenceController;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class UserPersistenceController extends BasePersistenceController {
+public class UserPersistenceController extends BasePersistenceController implements IUserPersistenceController {
 
     private final UserDocMapper userDocMapper;
     private final FirebaseService firebaseService;
@@ -34,6 +35,7 @@ public class UserPersistenceController extends BasePersistenceController {
         this.goalDAO = goalDAO;
     }
 
+    @Override
     public User create(User user, String uid) {
         try {
             return transactionRunner.run(session -> {
@@ -52,6 +54,7 @@ public class UserPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public User read(String uid) {
         try {
             Document userDoc = userDAO.findUserByUid(uid);
@@ -62,6 +65,7 @@ public class UserPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public User update(Document update, String uid) {
         try {
             return transactionRunner.run(session -> {
@@ -76,6 +80,7 @@ public class UserPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public void delete(String uid) {
         try {
             transactionRunner.run(session -> {

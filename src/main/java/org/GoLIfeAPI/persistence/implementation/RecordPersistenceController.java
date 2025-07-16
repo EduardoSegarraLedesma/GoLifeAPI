@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.persistence;
+package org.GoLIfeAPI.persistence.implementation;
 
 import com.mongodb.client.ClientSession;
 import org.GoLIfeAPI.exception.NotFoundException;
@@ -8,14 +8,15 @@ import org.GoLIfeAPI.model.goal.BoolGoal;
 import org.GoLIfeAPI.model.goal.NumGoal;
 import org.GoLIfeAPI.model.record.BoolRecord;
 import org.GoLIfeAPI.model.record.NumRecord;
-import org.GoLIfeAPI.persistence.dao.GoalDAO;
-import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.implementation.dao.GoalDAO;
+import org.GoLIfeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.interfaces.IRecordPersistenceController;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class RecordPersistenceController extends BasePersistenceController {
+public class RecordPersistenceController extends BasePersistenceController implements IRecordPersistenceController {
 
     private final GoalDocMapper goalDocMapper;
     private final RecordDocMapper recordDocMapper;
@@ -32,6 +33,7 @@ public class RecordPersistenceController extends BasePersistenceController {
         this.goalDAO = goalDAO;
     }
 
+    @Override
     public BoolGoal createBoolrecord(BoolRecord record, Document goalStatsUpdate, String mid) {
         try {
             return transactionRunner.run(session -> {
@@ -46,7 +48,7 @@ public class RecordPersistenceController extends BasePersistenceController {
         }
     }
 
-
+    @Override
     public NumGoal createNumRecord(NumRecord record, Document goalStatsUpdate, String mid) {
         try {
             return transactionRunner.run(session -> {
@@ -72,6 +74,7 @@ public class RecordPersistenceController extends BasePersistenceController {
         return goalDoc;
     }
 
+    @Override
     public void delete(String mid, String date) {
         try {
             transactionRunner.run(session -> {

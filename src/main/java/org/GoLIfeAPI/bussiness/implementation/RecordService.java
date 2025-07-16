@@ -1,5 +1,6 @@
-package org.GoLIfeAPI.bussiness;
+package org.GoLIfeAPI.bussiness.implementation;
 
+import org.GoLIfeAPI.bussiness.interfaces.IRecordService;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
@@ -15,7 +16,7 @@ import org.GoLIfeAPI.model.goal.NumGoal;
 import org.GoLIfeAPI.model.record.BoolRecord;
 import org.GoLIfeAPI.model.record.NumRecord;
 import org.GoLIfeAPI.model.record.Record;
-import org.GoLIfeAPI.persistence.RecordPersistenceController;
+import org.GoLIfeAPI.persistence.interfaces.IRecordPersistenceController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,18 +25,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-public class RecordService {
+public class RecordService implements IRecordService {
 
     private final GoalDtoMapper goalDtoMapper;
     private final RecordDtoMapper recordDtoMapper;
-    private final RecordPersistenceController recordPersistenceController;
+    private final IRecordPersistenceController recordPersistenceController;
     private final GoalService goalService;
     private final StatsService statsService;
 
     @Autowired
     public RecordService(GoalDtoMapper goalDtoMapper,
                          RecordDtoMapper recordDtoMapper,
-                         RecordPersistenceController recordPersistenceController,
+                         IRecordPersistenceController recordPersistenceController,
                          GoalService goalService,
                          StatsService statsService) {
         this.goalDtoMapper = goalDtoMapper;
@@ -45,6 +46,7 @@ public class RecordService {
         this.statsService = statsService;
     }
 
+    @Override
     public ResponseBoolGoalDTO createBoolRecord(CreateBoolRecordDTO dto, String uid, String mid) {
         Goal goal = goalService.validateAndGetGoal(uid, mid);
         if (goal instanceof NumGoal) {
@@ -63,6 +65,7 @@ public class RecordService {
             throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
     }
 
+    @Override
     public ResponseNumGoalDTO createNumRecord(CreateNumRecordDTO dto, String uid, String mid) {
         Goal goal = goalService.validateAndGetGoal(uid, mid);
         if (goal instanceof NumGoal num) {
@@ -81,6 +84,7 @@ public class RecordService {
             throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
     }
 
+    @Override
     public void deleteRecord(String uid, String mid, LocalDate date) {
         Goal goal = goalService.validateAndGetGoal(uid, mid);
         List<? extends Record> records;

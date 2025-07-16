@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import org.GoLIfeAPI.bussiness.interfaces.IGoalService;
 import org.GoLIfeAPI.dto.goal.CreateBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.CreateNumGoalDTO;
 import org.GoLIfeAPI.dto.goal.PatchBoolGoalDTO;
@@ -13,7 +14,6 @@ import org.GoLIfeAPI.dto.goal.PatchNumGoalDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.bussiness.GoalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +27,12 @@ import java.util.Set;
 @RequestMapping("/api/metas")
 public class GoalRestController {
 
-    private final GoalService goalService;
+    private final IGoalService goalService;
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    public GoalRestController(GoalService goalService, ObjectMapper objectMapper,
+    public GoalRestController(IGoalService goalService,
+                              ObjectMapper objectMapper,
                               Validator validator) {
         this.goalService = goalService;
         this.objectMapper = objectMapper;

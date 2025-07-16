@@ -1,6 +1,6 @@
-package org.GoLIfeAPI.persistence;
+package org.GoLIfeAPI.persistence.implementation;
 
-import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.implementation.transaction.TransactionRunner;
 
 public abstract class BasePersistenceController {
 

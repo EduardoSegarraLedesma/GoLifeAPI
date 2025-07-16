@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.persistence;
+package org.GoLIfeAPI.persistence.implementation;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.result.DeleteResult;
@@ -10,16 +10,17 @@ import org.GoLIfeAPI.model.goal.Goal;
 import org.GoLIfeAPI.model.goal.NumGoal;
 import org.GoLIfeAPI.model.user.User;
 import org.GoLIfeAPI.model.user.UserStats;
-import org.GoLIfeAPI.persistence.dao.GoalDAO;
-import org.GoLIfeAPI.persistence.dao.UserDAO;
-import org.GoLIfeAPI.persistence.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.implementation.dao.GoalDAO;
+import org.GoLIfeAPI.persistence.implementation.dao.UserDAO;
+import org.GoLIfeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLIfeAPI.persistence.interfaces.IGoalPersistenceController;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class GoalPersistenceController extends BasePersistenceController {
+public class GoalPersistenceController extends BasePersistenceController implements IGoalPersistenceController {
 
     private final UserDocMapper userDocMapper;
     private final GoalDocMapper goalDocMapper;
@@ -38,6 +39,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         this.goalDAO = goalDAO;
     }
 
+    @Override
     public User createBoolGoal(BoolGoal goal, Document userStatsUpdate, String uid) {
         try {
             return transactionRunner.run(session -> {
@@ -51,6 +53,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public User createNumGoal(NumGoal goal, Document userStatsUpdate, String uid) {
         try {
             return transactionRunner.run(session -> {
@@ -64,7 +67,6 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
-
     private Document create(ClientSession session,
                             Document goalDoc, Document partialGoalDoc, Document userStatsUpdate, String uid) {
         String id = goalDAO.insertDoc(session, goalDoc);
@@ -77,6 +79,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         return userDoc;
     }
 
+    @Override
     public Goal readGoal(String id) {
         try {
             Document goalDoc = goalDAO.findDocById(id);
@@ -87,24 +90,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
-    public BoolGoal readBoolGoal(String id) {
-        return goalDocMapper.mapDocToBoolGoal(read(id));
-    }
-
-    public NumGoal readNumGoal(String id) {
-        return goalDocMapper.mapDocToNumGoal(read(id));
-    }
-
-    private Document read(String id) {
-        try {
-            Document goalDoc = goalDAO.findDocById(id);
-            if (goalDoc == null) throw new NotFoundException("No se ha encontrado la Meta");
-            return goalDoc;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error interno al leer la meta", e);
-        }
-    }
-
+    @Override
     public User updateWithUserStats(Document goalUpdate, Document partialGoalUpdate,
                                     Document userStatsUpdate, String uid, String mid) {
         try {
@@ -127,6 +113,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public User updateWithGoalStats(Document goalUpdate, Document partialGoalUpdate,
                                     Document goalStatsUpdate, String uid, String mid) {
         try {
@@ -149,6 +136,7 @@ public class GoalPersistenceController extends BasePersistenceController {
         }
     }
 
+    @Override
     public UserStats delete(Document userStatsUpdate, String uid, String mid) {
         try {
             return transactionRunner.run(session -> {

@@ -1,5 +1,5 @@
 
-package org.GoLIfeAPI.persistence.transaction;
+package org.GoLIfeAPI.persistence.implementation.transaction;
 
 import com.mongodb.client.ClientSession;
 

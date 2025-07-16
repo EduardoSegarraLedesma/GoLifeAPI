@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.GoLIfeAPI.bussiness.interfaces.IRecordService;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.bussiness.RecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,11 +25,12 @@ import java.util.Set;
 @RequestMapping("/api/metas/{mid}/registros")
 public class RecordRestController {
 
-    private final RecordService recordService;
+    private final IRecordService recordService;
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    public RecordRestController(RecordService recordService, ObjectMapper objectMapper,
+    public RecordRestController(IRecordService recordService,
+                                ObjectMapper objectMapper,
                                 Validator validator) {
         this.recordService = recordService;
         this.objectMapper = objectMapper;
