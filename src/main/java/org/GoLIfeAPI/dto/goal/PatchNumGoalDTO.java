@@ -1,7 +1,8 @@
 package org.GoLIfeAPI.dto.goal;
 
-import jakarta.validation.constraints.*;
-import org.bson.Document;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public class PatchNumGoalDTO extends PatchGoalDTO {
 
@@ -15,14 +16,6 @@ public class PatchNumGoalDTO extends PatchGoalDTO {
         super();
         valorObjetivo = null;
         unidad = null;
-    }
-
-    @Override
-    public Document toDocument() {
-        Document doc = super.toDocument();
-        if (valorObjetivo != null) doc.append("valorObjetivo", valorObjetivo);
-        if (unidad != null && !unidad.isBlank()) doc.append("unidad", unidad);
-        return doc;
     }
 
     public Double getValorObjetivo() {

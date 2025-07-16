@@ -246,7 +246,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseBoolGoalUserStats'
+                $ref: '#/components/schemas/ResponseUser'
         "400":
           description: Datos de la meta no válidos (primer error de validación)
           content:
@@ -306,7 +306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseNumGoalUserStats'
+                $ref: '#/components/schemas/ResponseUser'
         "400":
           description: Datos de la meta no válidos (primer error de validación)
           content:
@@ -441,9 +441,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ResponseBoolGoal'
-                  - $ref: '#/components/schemas/ResponseNumGoal'
+                $ref: '#/components/schemas/ResponseUser'
         "400":
           description: Error en la petición (primer error de validación)
           content:
@@ -581,9 +579,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ResponseBoolGoalUserStats'
-                  - $ref: '#/components/schemas/ResponseNumGoalUserStats'
+                $ref: '#/components/schemas/ResponseUser'
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1328,46 +1324,6 @@ components:
           maximum: 9999999999999.99
           multipleOf: 0.01
           example: 2.0
-
-    # — Respuestas Compuestas —
-    ResponseBoolGoalUserStats:
-      type: object
-      description: DTO compuesto que engloba una meta booleana con las estadísticas del usuario
-      required:
-        - meta
-        - estadisticasUsuario
-      properties:
-        meta:
-          $ref: '#/components/schemas/ResponseBoolGoal'
-        estadisticasUsuario:
-          $ref: '#/components/schemas/ResponseUserStats'
-
-    ResponseNumGoalUserStats:
-      type: object
-      description: DTO compuesto que engloba una meta numérica con las estadísticas del usuario
-      required:
-        - meta
-        - estadisticasUsuario
-      properties:
-        meta:
-          $ref: '#/components/schemas/ResponseNumGoal'
-        estadisticasUsuario:
-          $ref: '#/components/schemas/ResponseUserStats'
-
-    # — Otros —
-    MessageResponse:
-      type: object
-      properties:
-        message:
-          type: string
-
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
 
   responses:
 

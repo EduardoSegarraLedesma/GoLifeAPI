@@ -1,12 +1,9 @@
 package org.GoLIfeAPI.model.record;
 
-import org.bson.Document;
-
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public abstract class Record {
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
     protected LocalDate fecha;
 
     public Record() {
@@ -14,10 +11,6 @@ public abstract class Record {
 
     public Record(LocalDate fecha) {
         this.fecha = fecha;
-    }
-
-    public Document toDocument() {
-        return new Document();
     }
 
     public LocalDate getFecha() {

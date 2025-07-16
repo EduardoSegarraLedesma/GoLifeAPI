@@ -1,12 +1,16 @@
 package org.GoLIfeAPI.model.goal;
 
 import org.GoLIfeAPI.model.Enums;
-import org.bson.Document;
+import org.GoLIfeAPI.model.record.NumRecord;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NumGoal extends Goal {
 
+    protected List<NumRecord> registros;
     private Double valorObjetivo;
     private String unidad;
 
@@ -25,12 +29,37 @@ public class NumGoal extends Goal {
         this.unidad = unidad;
     }
 
-    @Override
-    public Document toDocument() {
-        Document doc = super.toDocument();
-        doc.append("valorObjetivo", valorObjetivo);
-        doc.append("unidad", unidad);
-        return doc;
+    public NumGoal(String uid, ObjectId _id, String nombre, String descripcion,
+                   LocalDate fecha, Boolean finalizado, int duracionValor,
+                   Enums.Duracion duracionUnidad, GoalStats estadisticas,
+                   List<NumRecord> registros, Double valorObjetivo, String unidad) {
+        super(uid, _id, nombre, Enums.Tipo.Num, descripcion, fecha,
+                finalizado, duracionValor, duracionUnidad, estadisticas);
+        this.registros = registros;
+        this.valorObjetivo = valorObjetivo;
+        this.unidad = unidad;
+    }
+
+    public List<NumRecord> getRegistros() {
+        return registros;
+    }
+
+    public void setRegistros(List<NumRecord> registros) {
+        this.registros = registros;
+    }
+
+    public void addRegistro(NumRecord registro) {
+        if (registros == null) {
+            registros = new ArrayList<>();
+        }
+        registros.add(registro);
+    }
+
+    public boolean removeRegistro(NumRecord registro) {
+        if (registros != null) {
+            return registros.remove(registro);
+        }
+        return false;
     }
 
     public Double getValorObjetivo() {

@@ -2,7 +2,7 @@ package org.GoLifeAPI.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.GoLIfeAPI.handler.GlobalExceptionHandler;
-import org.GoLIfeAPI.service.UserService;
+import org.GoLIfeAPI.bussiness.implementation.UserService;
 import org.GoLIfeAPI.web.UserRestController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;

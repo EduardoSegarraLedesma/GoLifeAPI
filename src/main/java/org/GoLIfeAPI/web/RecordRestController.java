@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.GoLIfeAPI.bussiness.interfaces.IRecordService;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.service.RecordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,11 +25,12 @@ import java.util.Set;
 @RequestMapping("/api/metas/{mid}/registros")
 public class RecordRestController {
 
-    private final RecordService recordService;
+    private final IRecordService recordService;
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    public RecordRestController(RecordService recordService, ObjectMapper objectMapper,
+    public RecordRestController(IRecordService recordService,
+                                ObjectMapper objectMapper,
                                 Validator validator) {
         this.recordService = recordService;
         this.objectMapper = objectMapper;
@@ -37,7 +38,6 @@ public class RecordRestController {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false);
-        //  .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
         this.validator = validator;
     }
 
@@ -71,7 +71,8 @@ public class RecordRestController {
     public ResponseEntity<?> deleteRegistro(@AuthenticationPrincipal String uid,
                                             @PathVariable("mid") String mid,
                                             @PathVariable("fecha") LocalDate fecha) {
-        return ResponseEntity.ok(recordService.deleteRecord(uid, mid, fecha));
+        recordService.deleteRecord(uid, mid, fecha);
+        return ResponseEntity.ok("Registro eliminado exitosamente");
     }
 
     // Auxiliary Methods

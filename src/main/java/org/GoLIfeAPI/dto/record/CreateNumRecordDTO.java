@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import org.GoLIfeAPI.model.record.NumRecord;
 
 import java.time.LocalDate;
 
@@ -25,10 +24,6 @@ public class CreateNumRecordDTO extends CreateRecordDTO {
                               LocalDate fecha) {
         super(fecha);
         this.valorNum = valorNum;
-    }
-
-    public NumRecord toEntity() {
-        return new NumRecord(valorNum, fecha);
     }
 
     public Double getValorNum() {

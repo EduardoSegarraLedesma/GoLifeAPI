@@ -2,7 +2,6 @@ package org.GoLIfeAPI.dto.goal;
 
 import jakarta.validation.constraints.*;
 import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.model.goal.NumGoal;
 
 import java.time.LocalDate;
 
@@ -27,16 +26,12 @@ public class CreateNumGoalDTO extends CreateGoalDTO {
         this.unidad = unidad;
     }
 
-    public NumGoal toEntity(String uid, LocalDate fechaFin) {
-        return new NumGoal(uid, getNombre(), getDescripcion(), getFecha(), false,
-                getDuracionValor(), getDuracionUnidad(), false, fechaFin, getValorObjetivo(), getUnidad());
-    }
 
-    public @NotNull(message = "El valor objetivo es obligatorio") @Positive(message = "El valor objetivo debe ser un número positivo") @Digits(integer = 13, fraction = 2, message = "Formato inválido: máximo 13 cifras enteras y 2 decimales") Double getValorObjetivo() {
+    public Double getValorObjetivo() {
         return valorObjetivo;
     }
 
-    public void setValorObjetivo(@NotNull(message = "El valor objetivo es obligatorio") @Positive(message = "El valor objetivo debe ser un número positivo") @Digits(integer = 13, fraction = 2, message = "Formato inválido: máximo 13 cifras enteras y 2 decimales") Double valorObjetivo) {
+    public void setValorObjetivo(Double valorObjetivo) {
         this.valorObjetivo = valorObjetivo;
     }
 
