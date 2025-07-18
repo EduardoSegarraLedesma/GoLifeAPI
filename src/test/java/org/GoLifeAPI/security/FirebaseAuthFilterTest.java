@@ -47,7 +47,7 @@ class FirebaseAuthFilterTest {
     }
 
     @BeforeAll
-    void beforeAll() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         given(firebaseService.verifyBearerToken("Bearer good.token")).willReturn("test-uid");
         mockMvc = MockMvcBuilders
@@ -58,7 +58,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void validToken_200() throws Exception {
+    void whenValidToken_200() throws Exception {
         mockMvc.perform(get("/secure")
                         .header("Authorization", "Bearer good.token"))
                 .andExpect(status().isOk())
@@ -66,7 +66,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void invalidToken_401() throws Exception {
+    void whenInvalidToken_401() throws Exception {
         given(firebaseService.verifyBearerToken("Bearer bad.token")).willReturn(null);
 
         mockMvc.perform(get("/secure")
@@ -76,7 +76,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void missingHeader_401() throws Exception {
+    void whenMissingHeader_401() throws Exception {
         mockMvc.perform(get("/secure"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Falta el encabezado Authorization"));
@@ -84,7 +84,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void emptyHeader_401() throws Exception {
+    void whenEmptyHeader_401() throws Exception {
         mockMvc.perform(get("/secure")
                         .header("Authorization", ""))
                 .andExpect(status().isUnauthorized())
@@ -93,7 +93,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void nonBearerScheme_401() throws Exception {
+    void whenNonBearerScheme_401() throws Exception {
         mockMvc.perform(get("/secure")
                         .header("Authorization", "Basic abc"))
                 .andExpect(status().isUnauthorized())
@@ -102,7 +102,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void lowerCaseBearer_401() throws Exception {
+    void whenLowerCaseBearer_401() throws Exception {
         mockMvc.perform(get("/secure")
                         .header("Authorization", "bearer good.token"))
                 .andExpect(status().isUnauthorized())
@@ -111,7 +111,7 @@ class FirebaseAuthFilterTest {
     }
 
     @Test
-    void noSpaceAfterBearer_401() throws Exception {
+    void whenNoSpaceAfterBearer_401() throws Exception {
         mockMvc.perform(get("/secure")
                         .header("Authorization", "Bearergood.token"))
                 .andExpect(status().isUnauthorized())
