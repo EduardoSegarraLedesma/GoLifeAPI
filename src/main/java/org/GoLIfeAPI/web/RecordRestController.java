@@ -51,12 +51,12 @@ public class RecordRestController {
                 CreateBoolRecordDTO boolRecord = objectMapper.treeToValue(jsonBody, CreateBoolRecordDTO.class);
                 validateDTO(boolRecord);
                 ResponseBoolGoalDTO updated = recordService.createBoolRecord(boolRecord, uid, mid);
-                return ResponseEntity.ok(updated);
+                return ResponseEntity.status(HttpStatus.CREATED).body(updated);
             } else if (tipo.toString().equalsIgnoreCase("Num")) {
                 CreateNumRecordDTO numRecord = objectMapper.treeToValue(jsonBody, CreateNumRecordDTO.class);
                 validateDTO(numRecord);
                 ResponseNumGoalDTO updated = recordService.createNumRecord(numRecord, uid, mid);
-                return ResponseEntity.ok(updated);
+                return ResponseEntity.status(HttpStatus.CREATED).body(updated);
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de meta no soportado");
             }

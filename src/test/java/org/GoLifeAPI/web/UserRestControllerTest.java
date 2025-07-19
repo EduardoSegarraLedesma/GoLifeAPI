@@ -439,7 +439,6 @@ public class UserRestControllerTest {
                     .andExpect(jsonPath("$.nombre").value(maxName))
                     .andExpect(jsonPath("$.apellidos").value(""));
         }
-
     }
 
     @Nested
