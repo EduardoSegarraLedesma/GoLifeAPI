@@ -1,9 +1,14 @@
 package org.GoLifeAPI.web;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
+import org.GoLIfeAPI.security.RateLimitingFilter;
 import org.GoLIfeAPI.service.interfaces.IRecordService;
 import org.GoLIfeAPI.web.RecordRestController;
 import org.junit.jupiter.api.*;
@@ -13,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 
@@ -69,6 +76,20 @@ public class RecordRestControllerTest {
 
     @TestConfiguration
     static class TestSecurityConfig {
+        @Bean
+        @Primary
+        public RateLimitingFilter noOpRateLimitingFilter() {
+            return new RateLimitingFilter() {
+                @Override
+                protected void doFilterInternal(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                FilterChain filterChain)
+                        throws ServletException, IOException {
+                    filterChain.doFilter(request, response);
+                }
+            };
+        }
+
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http

@@ -12,6 +12,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.Instant;
@@ -30,61 +32,6 @@ import java.util.Map;
 @ResponseBody
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // 400: Missing request parameter
-    @Override
-    protected ResponseEntity<Object> handleMissingServletRequestParameter(
-            MissingServletRequestParameterException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
-        String message = ex.getParameterName() != null && !ex.getParameterName().isBlank()
-                ? "Falta el parámetro requerido: " + ex.getParameterName()
-                : "Falta un parámetro requerido";
-        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
-    }
-
-    // 400: Type Mismatch in Parameter
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(
-            MethodArgumentTypeMismatchException ex,
-            WebRequest request) {
-        String paramName = ex.getName();
-        String message = String.format("Valor inválido para el parámetro '%s'",
-                paramName);
-        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
-    }
-
-    // 400: Invalid parameter or path variable
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> handleBadRequest(
-            BadRequestException ex,
-            WebRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
-    }
-
-    // 400: Malformed or unreadable JSON
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
-        String message = ex.getMessage() != null && !ex.getMessage().isBlank()
-                ? ex.getMessage()
-                : "Cuerpo de la petición malformado o inválido";
-        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
-    }
-
-    // 400: Jackson parse errors
-    @ExceptionHandler({ JsonParseException.class, JsonMappingException.class })
-    public ResponseEntity<Object> handleJacksonExceptions(
-            JsonProcessingException ex,
-            WebRequest request) {
-        String details = ex.getOriginalMessage();
-        String message = "Error al parsear JSON: " + details;
-        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
-    }
-
     // Handles ResponseStatusException thrown from controllers
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatus(ResponseStatusException ex, WebRequest request) {
@@ -93,13 +40,74 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(ex.getStatusCode(), error, message, request);
     }
 
+    // 400: Missing request parameter
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+                                                                          HttpHeaders headers,
+                                                                          HttpStatusCode status,
+                                                                          WebRequest request) {
+        String message = ex.getParameterName() != null && !ex.getParameterName().isBlank()
+                ? "Falta el parámetro requerido: " + ex.getParameterName()
+                : "Falta un parámetro requerido";
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
+    }
+
+    // 400: Type Mismatch in Parameter
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+                                                                      WebRequest request) {
+        String paramName = ex.getName();
+        String message = String.format("Valor inválido para el parámetro '%s'",
+                paramName);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
+    }
+
+    // 400: Missing Path Variable
+    @Override
+    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex,
+                                                               HttpHeaders headers,
+                                                               HttpStatusCode status,
+                                                               WebRequest request) {
+        String varName = ex.getVariableName();
+        String message = varName != null && !varName.isBlank()
+                ? "Falta el path variable requerido: " + varName
+                : "Falta un path variable requerido";
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
+    }
+
+
+    // 400: Invalid parameter or path variable
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handleBadRequest(BadRequestException ex, WebRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
+    }
+
+    // 400: Malformed or unreadable JSON
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
+        String message = ex.getMessage() != null && !ex.getMessage().isBlank()
+                ? ex.getMessage()
+                : "Cuerpo de la petición malformado o inválido";
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
+    }
+
+    // 400: Jackson parse errors
+    @ExceptionHandler({JsonParseException.class, JsonMappingException.class})
+    public ResponseEntity<Object> handleJacksonExceptions(JsonProcessingException ex, WebRequest request) {
+        String details = ex.getOriginalMessage();
+        String message = "Error al parsear JSON: " + details;
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
+    }
+
     // 400: Validation errors on @Valid
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -115,6 +123,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", message, request);
     }
 
+    // 404: Endpoint not found / non existent
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex,
+                                                                   HttpHeaders headers,
+                                                                   HttpStatusCode status,
+                                                                   WebRequest request) {
+        String message = String.format("No existe el endpoint %s %s", ex.getHttpMethod(), ex.getRequestURL());
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", message, request);
+    }
+
     // 404: Resource not found
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFound(NotFoundException ex, WebRequest request) {
@@ -124,7 +142,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     // 409: Conflict
-    @ExceptionHandler({ DuplicateKeyException.class, ConflictException.class })
+    @ExceptionHandler({DuplicateKeyException.class, ConflictException.class})
     public ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
         String message = ex.getMessage() != null && !ex.getMessage().isBlank()
                 ? ex.getMessage() : "Conflicto en la petición";

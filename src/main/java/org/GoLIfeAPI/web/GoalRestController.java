@@ -17,6 +17,7 @@ import org.GoLIfeAPI.model.Enums;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -87,7 +88,7 @@ public class GoalRestController {
             } else
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de meta no soportado");
         } catch (JsonProcessingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cuerpo de la petición malformado", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cuerpo de la petición malformado o invalido", e);
         }
     }
 

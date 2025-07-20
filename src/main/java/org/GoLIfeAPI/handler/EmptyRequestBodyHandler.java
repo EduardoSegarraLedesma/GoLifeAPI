@@ -39,7 +39,6 @@ public class EmptyRequestBodyHandler extends RequestBodyAdviceAdapter {
                                            Type targetType,
                                            Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
         byte[] bodyBytes = StreamUtils.copyToByteArray(inputMessage.getBody());
-
         if (bodyBytes.length > 0) {
             try {
                 JsonNode node = objectMapper.readTree(bodyBytes);
