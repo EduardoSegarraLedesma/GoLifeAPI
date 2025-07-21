@@ -62,7 +62,7 @@ public class RecordService implements IRecordService {
                     bool);
         } else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class RecordService implements IRecordService {
             throw new BadRequestException("Tipo de registro incorrecto para la meta");
         } else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
@@ -94,7 +94,7 @@ public class RecordService implements IRecordService {
             records = bool.getRegistros();
         else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
         date = LocalDate.parse(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
         LocalDate finalDate = date;
         boolean exists = records.stream()
