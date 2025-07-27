@@ -82,7 +82,7 @@ public class GoalService implements IGoalService {
             return goalDtoMapper.mapBoolGoalToResponseBoolGoalDTO(bool, bool);
         else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de Meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
