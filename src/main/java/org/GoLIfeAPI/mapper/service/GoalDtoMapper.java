@@ -91,7 +91,7 @@ public class GoalDtoMapper {
         return new ResponseGoalStatsDTO(
                 newGoalStats.getValorAlcanzado(),
                 (newGoalStats.getValorAlcanzado() && !oldGoalStats.getValorAlcanzado()),
-                newGoalStats.getFechaFin().format(formatter));
+                newGoalStats.getFechaFin() != null ? newGoalStats.getFechaFin().format(formatter) : "");
     }
 
     public ResponsePartialGoalDTO mapPartialGoalToResponsePartialGoalDTO(PartialGoal partialGoal) {

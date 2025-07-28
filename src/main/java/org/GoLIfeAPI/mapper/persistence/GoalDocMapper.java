@@ -177,6 +177,6 @@ public class GoalDocMapper {
     private GoalStats mapDocToGoalStats(Document goalStatsDoc) {
         return new GoalStats(
                 goalStatsDoc.getBoolean("valorAlcanzado"),
-                LocalDate.parse(goalStatsDoc.getString("fechaFin")));
+                !goalStatsDoc.getString("fechaFin").isEmpty()? LocalDate.parse(goalStatsDoc.getString("fechaFin")) : null );
     }
 }
