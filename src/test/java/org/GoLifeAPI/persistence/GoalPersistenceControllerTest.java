@@ -101,8 +101,8 @@ public class GoalPersistenceControllerTest {
         updatedUser = goalPersistenceController.createNumGoal(numGoal, statsUpdate, uid);
         numMid = updatedUser.getMetas().get(1).get_id().toString();
 
-        MongoContainer.setUid(boolMid);
-        MongoContainer.setUid(numMid);
+        MongoContainer.setBoolMid(boolMid);
+        MongoContainer.setNumMid(numMid);
     }
 
     @BeforeEach

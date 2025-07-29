@@ -57,7 +57,6 @@ public class UserServiceTest {
         responseUserDTO = null;
     }
 
-
     @Nested
     @DisplayName("createUser")
     class CreateUser {
