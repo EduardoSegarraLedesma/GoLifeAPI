@@ -24,7 +24,7 @@ public class User {
         this.estadisticas = new UserStats();
     }
 
-    public User(String uid, String apellidos, String nombre, List<PartialGoal> metas, UserStats estadisticas) {
+    public User(String uid,  String nombre,String apellidos, List<PartialGoal> metas, UserStats estadisticas) {
         this.uid = uid;
         this.apellidos = apellidos;
         this.nombre = nombre;

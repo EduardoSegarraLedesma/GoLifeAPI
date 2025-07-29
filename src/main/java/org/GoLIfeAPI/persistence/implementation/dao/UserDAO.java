@@ -34,7 +34,6 @@ public class UserDAO extends BaseDAO {
     // Find ->
     public Document findUserByUid(Object uid) {
         return findDocByKey(USER_ID_NAME, uid);
-
     }
 
     // Update

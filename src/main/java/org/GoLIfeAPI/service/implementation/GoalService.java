@@ -1,6 +1,6 @@
-package org.GoLIfeAPI.bussiness.implementation;
+package org.GoLIfeAPI.service.implementation;
 
-import org.GoLIfeAPI.bussiness.interfaces.IGoalService;
+import org.GoLIfeAPI.service.interfaces.IGoalService;
 import org.GoLIfeAPI.dto.goal.CreateBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.CreateNumGoalDTO;
 import org.GoLIfeAPI.dto.goal.PatchBoolGoalDTO;
@@ -10,9 +10,9 @@ import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.exception.ForbiddenResourceException;
-import org.GoLIfeAPI.mapper.bussiness.GoalDtoMapper;
-import org.GoLIfeAPI.mapper.bussiness.GoalPatchMapper;
-import org.GoLIfeAPI.mapper.bussiness.UserDtoMapper;
+import org.GoLIfeAPI.mapper.service.GoalDtoMapper;
+import org.GoLIfeAPI.mapper.service.GoalPatchMapper;
+import org.GoLIfeAPI.mapper.service.UserDtoMapper;
 import org.GoLIfeAPI.model.goal.BoolGoal;
 import org.GoLIfeAPI.model.goal.Goal;
 import org.GoLIfeAPI.model.goal.NumGoal;
@@ -82,7 +82,7 @@ public class GoalService implements IGoalService {
             return goalDtoMapper.mapBoolGoalToResponseBoolGoalDTO(bool, bool);
         else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de Meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
@@ -143,7 +143,7 @@ public class GoalService implements IGoalService {
     }
 
     public Goal validateAndGetGoal(String uid, String mid) {
-        Goal goal = goalPersistenceController.readGoal(mid);
+        Goal goal = goalPersistenceController.read(mid);
         if (!uid.equals(goal.getUid()))
             throw new ForbiddenResourceException("No autorizado para acceder a esta meta");
         return goal;

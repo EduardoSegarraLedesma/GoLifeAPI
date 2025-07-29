@@ -11,7 +11,8 @@ public class ResponseUserDTO {
     private List<ResponsePartialGoalDTO> metas;
     private ResponseUserStatsDTO estadisticas;
 
-    public ResponseUserDTO(String apellidos, String nombre,
+    public ResponseUserDTO(String nombre,
+                           String apellidos,
                            List<ResponsePartialGoalDTO> metas, ResponseUserStatsDTO estadisticas) {
         this.apellidos = apellidos;
         this.nombre = nombre;

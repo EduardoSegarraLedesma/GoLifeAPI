@@ -60,6 +60,8 @@ public class UserPersistenceController extends BasePersistenceController impleme
             Document userDoc = userDAO.findUserByUid(uid);
             if (userDoc == null) throw new NotFoundException("No se ha encontrado al usuario");
             return userDocMapper.mapDocToUser(userDoc);
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Error interno al leer el usuario", e);
         }

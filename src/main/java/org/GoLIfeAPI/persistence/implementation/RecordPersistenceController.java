@@ -18,9 +18,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RecordPersistenceController extends BasePersistenceController implements IRecordPersistenceController {
 
-    private final GoalDocMapper goalDocMapper;
-    private final RecordDocMapper recordDocMapper;
-    private final GoalDAO goalDAO;
+    private  GoalDocMapper goalDocMapper;
+    private  RecordDocMapper recordDocMapper;
+    private  GoalDAO goalDAO;
 
     @Autowired
     public RecordPersistenceController(TransactionRunner transactionRunner,

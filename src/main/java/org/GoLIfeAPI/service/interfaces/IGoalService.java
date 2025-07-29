@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.bussiness.interfaces;
+package org.GoLIfeAPI.service.interfaces;
 
 import org.GoLIfeAPI.dto.goal.CreateBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.CreateNumGoalDTO;
@@ -8,7 +8,6 @@ import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
 
 public interface IGoalService {
-
 
     ResponseUserDTO createBoolGoal(CreateBoolGoalDTO dto, String uid);
 

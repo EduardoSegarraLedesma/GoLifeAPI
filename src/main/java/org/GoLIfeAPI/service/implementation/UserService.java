@@ -1,12 +1,12 @@
-package org.GoLIfeAPI.bussiness.implementation;
+package org.GoLIfeAPI.service.implementation;
 
-import org.GoLIfeAPI.bussiness.interfaces.IUserService;
+import org.GoLIfeAPI.service.interfaces.IUserService;
 import org.GoLIfeAPI.dto.user.CreateUserDTO;
 import org.GoLIfeAPI.dto.user.PatchUserDTO;
 import org.GoLIfeAPI.dto.user.ResponseUserDTO;
 import org.GoLIfeAPI.exception.NotFoundException;
-import org.GoLIfeAPI.mapper.bussiness.UserDtoMapper;
-import org.GoLIfeAPI.mapper.bussiness.UserPatchMapper;
+import org.GoLIfeAPI.mapper.service.UserDtoMapper;
+import org.GoLIfeAPI.mapper.service.UserPatchMapper;
 import org.GoLIfeAPI.model.user.User;
 import org.GoLIfeAPI.persistence.interfaces.IUserPersistenceController;
 import org.springframework.beans.factory.annotation.Autowired;

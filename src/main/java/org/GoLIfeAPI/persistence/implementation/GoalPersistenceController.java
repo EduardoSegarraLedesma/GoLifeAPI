@@ -80,11 +80,13 @@ public class GoalPersistenceController extends BasePersistenceController impleme
     }
 
     @Override
-    public Goal readGoal(String id) {
+    public Goal read(String id) {
         try {
             Document goalDoc = goalDAO.findDocById(id);
             if (goalDoc == null) throw new NotFoundException("Meta no encontrada");
             return goalDocMapper.mapDocToGoal(goalDoc);
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new RuntimeException("Error interno al leer la meta", e);
         }
@@ -118,7 +120,6 @@ public class GoalPersistenceController extends BasePersistenceController impleme
                                     Document goalStatsUpdate, String uid, String mid) {
         try {
             return transactionRunner.run(session -> {
-                session.startTransaction();
                 Document goalDoc = goalDAO.updateGoalByGoalId(session, mid, goalUpdate);
                 if (goalDoc == null) throw new NotFoundException("Meta no encontrada");
                 if (goalStatsUpdate != null && !goalStatsUpdate.isEmpty()) {

@@ -1,6 +1,6 @@
-package org.GoLIfeAPI.bussiness.implementation;
+package org.GoLIfeAPI.service.implementation;
 
-import org.GoLIfeAPI.bussiness.interfaces.IRecordService;
+import org.GoLIfeAPI.service.interfaces.IRecordService;
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
@@ -8,8 +8,8 @@ import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLIfeAPI.exception.BadRequestException;
 import org.GoLIfeAPI.exception.ConflictException;
 import org.GoLIfeAPI.exception.NotFoundException;
-import org.GoLIfeAPI.mapper.bussiness.GoalDtoMapper;
-import org.GoLIfeAPI.mapper.bussiness.RecordDtoMapper;
+import org.GoLIfeAPI.mapper.service.GoalDtoMapper;
+import org.GoLIfeAPI.mapper.service.RecordDtoMapper;
 import org.GoLIfeAPI.model.goal.BoolGoal;
 import org.GoLIfeAPI.model.goal.Goal;
 import org.GoLIfeAPI.model.goal.NumGoal;
@@ -62,7 +62,7 @@ public class RecordService implements IRecordService {
                     bool);
         } else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class RecordService implements IRecordService {
             throw new BadRequestException("Tipo de registro incorrecto para la meta");
         } else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
     }
 
     @Override
@@ -94,7 +94,7 @@ public class RecordService implements IRecordService {
             records = bool.getRegistros();
         else
             // Estado imposible: tipo de Goal desconocido
-            throw new IllegalStateException("Tipo de Goal inesperado: " + goal.getClass().getName());
+            throw new IllegalStateException("Tipo de meta inesperada: " + goal.getClass().getName());
         date = LocalDate.parse(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
         LocalDate finalDate = date;
         boolean exists = records.stream()

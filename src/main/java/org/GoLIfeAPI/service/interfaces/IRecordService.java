@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.bussiness.interfaces;
+package org.GoLIfeAPI.service.interfaces;
 
 import org.GoLIfeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLIfeAPI.dto.goal.ResponseNumGoalDTO;

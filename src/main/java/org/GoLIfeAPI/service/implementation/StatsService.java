@@ -1,4 +1,4 @@
-package org.GoLIfeAPI.bussiness.implementation;
+package org.GoLIfeAPI.service.implementation;
 
 import org.GoLIfeAPI.dto.goal.PatchGoalDTO;
 import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
