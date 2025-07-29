@@ -143,7 +143,7 @@ public class GoalService implements IGoalService {
     }
 
     public Goal validateAndGetGoal(String uid, String mid) {
-        Goal goal = goalPersistenceController.readGoal(mid);
+        Goal goal = goalPersistenceController.read(mid);
         if (!uid.equals(goal.getUid()))
             throw new ForbiddenResourceException("No autorizado para acceder a esta meta");
         return goal;

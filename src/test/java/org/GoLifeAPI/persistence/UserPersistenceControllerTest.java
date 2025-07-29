@@ -26,15 +26,11 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@Testcontainers
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -52,14 +48,10 @@ public class UserPersistenceControllerTest {
 
     private String uid;
 
-    @Container
-    static MongoDBContainer mongo = new MongoDBContainer("mongo:8.0.11");
-
     @BeforeAll
-    public void setup() throws Exception {
+    public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        mongo.start();
-        String mongoUri = mongo.getReplicaSetUrl();
+        String mongoUri = MongoContainer.getMongoURI();
         withEnvironmentVariable("DB_NAME", "test-db")
                 .and("DB_CONNECTION_STRING", mongoUri)
                 .execute(() -> {
@@ -77,23 +69,27 @@ public class UserPersistenceControllerTest {
         firebaseService = mock(FirebaseService.class);
         when(firebaseService.deleteFirebaseUser(any())).thenReturn(true);
         ReflectionTestUtils.setField(userPersistenceController, "firebaseService", firebaseService);
+        uid = "test-uid";
     }
 
     @AfterAll
-    static void tearDown() {
-        mongo.stop();
+    public void nextTestSetUp() {
+        User input = new User(uid, "apellidos", "nombre");
+        userPersistenceController.create(input, uid);
+        MongoContainer.setUid(uid);
     }
 
     @BeforeEach
-    public void setUp() {
-        uid = "test-uid";
+    public void beforeEach() {
         doCallRealMethod().when(transactionRunner).run(any());
         doCallRealMethod().when(userDAO).insertDoc(any(ClientSession.class), any(Document.class));
         doCallRealMethod().when(userDAO).findDocById(any(ClientSession.class), any(String.class));
         doCallRealMethod().when(userDAO).findUserByUid(any(String.class));
         doCallRealMethod().when(userDAO).updateUserByUid(any(ClientSession.class), any(String.class), any(Document.class));
         doCallRealMethod().when(userDAO).deleteUserByUid(any(ClientSession.class), any(String.class));
+
         doCallRealMethod().when(goalDAO).deleteManyGoalsByUid(any(ClientSession.class), any(String.class));
+
         clearInvocations(firebaseService);
         clearInvocations(userDAO);
         clearInvocations(goalDAO);
@@ -102,7 +98,7 @@ public class UserPersistenceControllerTest {
     @Order(1)
     @Nested
     @DisplayName("create")
-    class Create {
+    public class Create {
 
         @Test
         public void create_whenValid_returnsUser() {
@@ -186,7 +182,7 @@ public class UserPersistenceControllerTest {
     @Order(2)
     @Nested
     @DisplayName("read")
-    class Read {
+    public class Read {
         @Test
         public void read_whenUserExists_returnsUser() {
             User result = userPersistenceController.read(uid);
@@ -222,7 +218,7 @@ public class UserPersistenceControllerTest {
     @Order(3)
     @Nested
     @DisplayName("update")
-    class Update {
+    public class Update {
         @Test
         public void update_whenUserExists_returnsUser() {
             Document update = new Document("nombre", "nuevo")
@@ -266,7 +262,7 @@ public class UserPersistenceControllerTest {
     @Order(4)
     @Nested
     @DisplayName("delete")
-    class Delete {
+    public class Delete {
         @Test
         public void delete_whenAllOperationsSucceed_noException() {
             when(firebaseService.deleteFirebaseUser(any())).thenReturn(true);

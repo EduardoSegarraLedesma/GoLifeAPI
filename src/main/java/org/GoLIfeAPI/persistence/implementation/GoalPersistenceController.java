@@ -80,7 +80,7 @@ public class GoalPersistenceController extends BasePersistenceController impleme
     }
 
     @Override
-    public Goal readGoal(String id) {
+    public Goal read(String id) {
         try {
             Document goalDoc = goalDAO.findDocById(id);
             if (goalDoc == null) throw new NotFoundException("Meta no encontrada");

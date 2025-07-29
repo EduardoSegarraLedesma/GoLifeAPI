@@ -175,7 +175,7 @@ public class UserRestControllerTest {
                     .content(mapper.writeValueAsString(createUserDTO)));
 
             response.andExpect(MockMvcResultMatchers.status().isBadRequest());
-            response.andExpect(jsonPath("$.message").value("El nombre es obligatorio"));
+            response.andExpect(jsonPath("$.message").value("El nombre debe tener entre 2 y 50 caracteres"));
         }
 
         @Test

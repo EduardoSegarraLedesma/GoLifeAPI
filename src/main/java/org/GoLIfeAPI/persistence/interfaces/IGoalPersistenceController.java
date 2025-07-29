@@ -13,7 +13,7 @@ public interface IGoalPersistenceController {
 
     User createNumGoal(NumGoal goal, Document userStatsUpdate, String uid);
 
-    Goal readGoal(String id);
+    Goal read(String id);
 
     User updateWithUserStats(Document goalUpdate, Document partialGoalUpdate,
                              Document userStatsUpdate, String uid, String mid);
