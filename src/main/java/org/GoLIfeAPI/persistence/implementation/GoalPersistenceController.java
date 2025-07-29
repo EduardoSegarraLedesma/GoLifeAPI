@@ -85,8 +85,9 @@ public class GoalPersistenceController extends BasePersistenceController impleme
             Document goalDoc = goalDAO.findDocById(id);
             if (goalDoc == null) throw new NotFoundException("Meta no encontrada");
             return goalDocMapper.mapDocToGoal(goalDoc);
+        } catch (NotFoundException e) {
+            throw e;
         } catch (RuntimeException e) {
-            System.out.println(e );
             throw new RuntimeException("Error interno al leer la meta", e);
         }
     }
