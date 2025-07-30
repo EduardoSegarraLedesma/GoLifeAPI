@@ -139,7 +139,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.GoLIfeAPI.Main</mainClass>
+                    <mainClass>org.GoLifeAPI.Main</mainClass>
                 </configuration>
             </plugin>
             <!-- Resource Encoding -->

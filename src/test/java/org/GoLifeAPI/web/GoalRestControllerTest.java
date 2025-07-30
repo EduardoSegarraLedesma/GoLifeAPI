@@ -7,13 +7,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.GoLIfeAPI.dto.goal.*;
-import org.GoLIfeAPI.dto.user.ResponseUserDTO;
-import org.GoLIfeAPI.dto.user.ResponseUserStatsDTO;
-import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.security.RateLimitingFilter;
-import org.GoLIfeAPI.service.interfaces.IGoalService;
-import org.GoLIfeAPI.web.GoalRestController;
+import org.GoLifeAPI.dto.goal.*;
+import org.GoLifeAPI.dto.user.ResponseUserDTO;
+import org.GoLifeAPI.dto.user.ResponseUserStatsDTO;
+import org.GoLifeAPI.model.Enums;
+import org.GoLifeAPI.security.RateLimitingFilter;
+import org.GoLifeAPI.service.interfaces.IGoalService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,7 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = GoalRestController.class)
+@WebMvcTest(controllers =GoalRestController.class)
 @AutoConfigureMockMvc
 @Import(GoalRestControllerTest.TestSecurityConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

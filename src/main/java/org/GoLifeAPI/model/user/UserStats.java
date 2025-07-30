@@ -1,0 +1,38 @@
+package org.GoLifeAPI.model.user;
+
+public class UserStats {
+
+    private int totalMetas;
+    private int totalMetasFinalizadas;
+
+    public UserStats() {
+        this.totalMetas = 0;
+        this.totalMetasFinalizadas = 0;
+    }
+
+    public UserStats(int totalMetas, int totalMetasFinalizadas) {
+        this.totalMetas = Math.max(totalMetas, 0);
+        this.totalMetasFinalizadas = Math.max(totalMetasFinalizadas, 0);
+    }
+
+    public int getTotalMetas() {
+        return totalMetas;
+    }
+
+    public void setTotalMetas(int totalMetas) {
+        if (totalMetas > 0) {
+            this.totalMetas = totalMetas;
+        }
+    }
+
+    public int getTotalMetasFinalizadas() {
+        return totalMetasFinalizadas;
+    }
+
+    public void setTotalMetasFinalizadas(int totalMetasFinalizadas) {
+        if (totalMetasFinalizadas > 0) {
+            this.totalMetasFinalizadas = totalMetasFinalizadas;
+        }
+    }
+
+}

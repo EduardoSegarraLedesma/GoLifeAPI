@@ -1,13 +1,13 @@
 package org.GoLifeAPI.service;
 
-import org.GoLIfeAPI.dto.goal.PatchBoolGoalDTO;
-import org.GoLIfeAPI.dto.record.CreateBoolRecordDTO;
-import org.GoLIfeAPI.dto.record.CreateNumRecordDTO;
-import org.GoLIfeAPI.model.Enums;
-import org.GoLIfeAPI.model.goal.BoolGoal;
-import org.GoLIfeAPI.model.goal.GoalStats;
-import org.GoLIfeAPI.model.goal.NumGoal;
-import org.GoLIfeAPI.service.implementation.StatsService;
+import org.GoLifeAPI.dto.goal.PatchBoolGoalDTO;
+import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
+import org.GoLifeAPI.dto.record.CreateNumRecordDTO;
+import org.GoLifeAPI.model.Enums;
+import org.GoLifeAPI.model.goal.BoolGoal;
+import org.GoLifeAPI.model.goal.GoalStats;
+import org.GoLifeAPI.model.goal.NumGoal;
+import org.GoLifeAPI.service.implementation.StatsService;
 import org.assertj.core.api.Assertions;
 import org.bson.Document;
 import org.bson.types.ObjectId;
