@@ -1,7 +1,6 @@
 package org.GoLifeAPI.security;
 
 import jakarta.servlet.FilterChain;
-import org.GoLIfeAPI.security.RateLimitingFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

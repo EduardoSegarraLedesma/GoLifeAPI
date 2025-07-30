@@ -1,16 +1,16 @@
 package org.GoLifeAPI.service;
 
-import org.GoLIfeAPI.dto.user.CreateUserDTO;
-import org.GoLIfeAPI.dto.user.PatchUserDTO;
-import org.GoLIfeAPI.dto.user.ResponseUserDTO;
-import org.GoLIfeAPI.exception.NotFoundException;
-import org.GoLIfeAPI.mapper.service.GoalDtoMapper;
-import org.GoLIfeAPI.mapper.service.RecordDtoMapper;
-import org.GoLIfeAPI.mapper.service.UserDtoMapper;
-import org.GoLIfeAPI.mapper.service.UserPatchMapper;
-import org.GoLIfeAPI.model.user.User;
-import org.GoLIfeAPI.persistence.interfaces.IUserPersistenceController;
-import org.GoLIfeAPI.service.implementation.UserService;
+import org.GoLifeAPI.dto.user.CreateUserDTO;
+import org.GoLifeAPI.dto.user.PatchUserDTO;
+import org.GoLifeAPI.dto.user.ResponseUserDTO;
+import org.GoLifeAPI.exception.NotFoundException;
+import org.GoLifeAPI.mapper.service.GoalDtoMapper;
+import org.GoLifeAPI.mapper.service.RecordDtoMapper;
+import org.GoLifeAPI.mapper.service.UserDtoMapper;
+import org.GoLifeAPI.mapper.service.UserPatchMapper;
+import org.GoLifeAPI.model.user.User;
+import org.GoLifeAPI.persistence.interfaces.IUserPersistenceController;
+import org.GoLifeAPI.service.implementation.UserService;
 import org.assertj.core.api.Assertions;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
