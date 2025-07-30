@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.GoLifeAPI.config.ValidatorConfig;
 import org.GoLifeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLifeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
@@ -42,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = RecordRestController.class)
 @AutoConfigureMockMvc
-@Import(RecordRestControllerTest.TestSecurityConfig.class)
+@Import({RecordRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RecordRestControllerTest {
 
@@ -60,18 +61,6 @@ public class RecordRestControllerTest {
     private String numRecordJson;
     private ResponseBoolGoalDTO responseBoolGoalDTO;
     private ResponseNumGoalDTO responseNumGoalDTO;
-
-    @BeforeEach
-    public void setUp() {
-        uid = "test-uid";
-        mid = "test-mid";
-        defaultPrincipal = new UsernamePasswordAuthenticationToken(
-                uid, null, Collections.emptyList()
-        );
-        clearInvocations(recordService);
-        boolRecordJson = null;
-        numRecordJson = null;
-    }
 
     @TestConfiguration
     static class TestSecurityConfig {
@@ -98,6 +87,18 @@ public class RecordRestControllerTest {
                     );
             return http.build();
         }
+    }
+
+    @BeforeEach
+    public void setUp() {
+        uid = "test-uid";
+        mid = "test-mid";
+        defaultPrincipal = new UsernamePasswordAuthenticationToken(
+                uid, null, Collections.emptyList()
+        );
+        clearInvocations(recordService);
+        boolRecordJson = null;
+        numRecordJson = null;
     }
 
     @Nested

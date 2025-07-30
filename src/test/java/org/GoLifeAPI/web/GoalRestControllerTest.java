@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.GoLifeAPI.config.ValidatorConfig;
 import org.GoLifeAPI.dto.goal.*;
 import org.GoLifeAPI.dto.user.ResponseUserDTO;
 import org.GoLifeAPI.dto.user.ResponseUserStatsDTO;
@@ -39,9 +40,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers =GoalRestController.class)
+@WebMvcTest(controllers = GoalRestController.class)
 @AutoConfigureMockMvc
-@Import(GoalRestControllerTest.TestSecurityConfig.class)
+@Import({GoalRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GoalRestControllerTest {
 

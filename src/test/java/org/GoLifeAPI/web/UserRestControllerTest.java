@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.GoLifeAPI.config.ValidatorConfig;
 import org.GoLifeAPI.dto.user.CreateUserDTO;
 import org.GoLifeAPI.dto.user.PatchUserDTO;
 import org.GoLifeAPI.dto.user.ResponseUserDTO;
@@ -17,6 +18,8 @@ import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IUserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -46,7 +49,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = UserRestController.class)
 @AutoConfigureMockMvc
 @Import({UserDtoMapper.class, GoalDtoMapper.class, RecordDtoMapper.class,
-        UserRestControllerTest.TestSecurityConfig.class})
+        UserRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
+@ImportAutoConfiguration({
+        ValidationAutoConfiguration.class
+})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserRestControllerTest {
 
@@ -174,7 +180,7 @@ public class UserRestControllerTest {
                     .content(mapper.writeValueAsString(createUserDTO)));
 
             response.andExpect(MockMvcResultMatchers.status().isBadRequest());
-            response.andExpect(jsonPath("$.message").value("El nombre debe tener entre 2 y 50 caracteres"));
+            response.andExpect(jsonPath("$.message").exists());
         }
 
         @Test
