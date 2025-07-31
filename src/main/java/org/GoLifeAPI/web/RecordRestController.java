@@ -47,21 +47,20 @@ public class RecordRestController {
                                           @RequestParam("tipo") Enums.Tipo tipo,
                                           @RequestBody JsonNode jsonBody) {
         try {
-            if (tipo.toString().equalsIgnoreCase("Bool")) {
-                CreateBoolRecordDTO boolRecord = objectMapper.treeToValue(jsonBody, CreateBoolRecordDTO.class);
-                validateDTO(boolRecord);
-                ResponseBoolGoalDTO updated = recordService.createBoolRecord(boolRecord, uid, mid);
-                return ResponseEntity.status(HttpStatus.CREATED).body(updated);
-            } else if (tipo.toString().equalsIgnoreCase("Num")) {
-                CreateNumRecordDTO numRecord = objectMapper.treeToValue(jsonBody, CreateNumRecordDTO.class);
-                validateDTO(numRecord);
-                ResponseNumGoalDTO updated = recordService.createNumRecord(numRecord, uid, mid);
-                return ResponseEntity.status(HttpStatus.CREATED).body(updated);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de meta no soportado");
-            }
-        } catch (JsonParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cuerpo de la petición malformado", e);
+            return switch (tipo) {
+                case Bool -> {
+                    CreateBoolRecordDTO boolRecord = objectMapper.treeToValue(jsonBody, CreateBoolRecordDTO.class);
+                    validateDTO(boolRecord);
+                    ResponseBoolGoalDTO updated = recordService.createBoolRecord(boolRecord, uid, mid);
+                    yield ResponseEntity.status(HttpStatus.CREATED).body(updated);
+                }
+                case Num -> {
+                    CreateNumRecordDTO numRecord = objectMapper.treeToValue(jsonBody, CreateNumRecordDTO.class);
+                    validateDTO(numRecord);
+                    ResponseNumGoalDTO updated = recordService.createNumRecord(numRecord, uid, mid);
+                    yield ResponseEntity.status(HttpStatus.CREATED).body(updated);
+                }
+            };
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cuerpo de la petición malformado", e);
         }

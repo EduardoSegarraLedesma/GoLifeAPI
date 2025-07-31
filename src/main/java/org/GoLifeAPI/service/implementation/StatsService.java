@@ -49,7 +49,7 @@ public class StatsService {
                     goal.getDuracionValor() > 0 ? goal.getDuracionValor() : 1,
                     newDurationUnit);
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
-        } else if ((newDurationValue != null && newDurationValue > 0) && newDurationUnit != null) {
+        } else if (newDurationValue != null && newDurationValue > 0) {
             newFinalDate = calculateFinalGoalDate(startDate, newDurationValue, newDurationUnit);
             goalStatsUpdates.append("fechaFin", newFinalDate != null ? newFinalDate.format(formatter) : "");
         }

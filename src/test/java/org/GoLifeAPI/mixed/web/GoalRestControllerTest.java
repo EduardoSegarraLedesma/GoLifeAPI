@@ -1,4 +1,4 @@
-package org.GoLifeAPI.web;
+package org.GoLifeAPI.mixed.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,6 +14,7 @@ import org.GoLifeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLifeAPI.model.Enums;
 import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IGoalService;
+import org.GoLifeAPI.web.GoalRestController;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

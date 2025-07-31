@@ -1,6 +1,7 @@
-package org.GoLifeAPI.service;
+package org.GoLifeAPI.mixed.service;
 
 import org.GoLifeAPI.dto.goal.PatchBoolGoalDTO;
+import org.GoLifeAPI.dto.goal.PatchGoalDTO;
 import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLifeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLifeAPI.model.Enums;
@@ -119,6 +120,19 @@ public class StatsServiceTest {
         }
 
         @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenNewValueNoNewUnitIndefinido_usesOriginalUnitReturnsBlank() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(5);
+            dto.setDuracionUnidad(null);
+            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 3, Enums.Duracion.Indefinido,
+                    new GoalStats(false, start), new ArrayList<>());
+            Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
+            Assertions.assertThat(doc.getString("fechaFin")).isEqualTo("");
+        }
+
+        @Test
         public void getGoalStatsFinalDateUpdateDoc_whenNoNewValueNewUnit_usesOriginalValueOrOne() {
             LocalDate start = LocalDate.of(2025, 7, 1);
             PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
@@ -129,6 +143,80 @@ public class StatsServiceTest {
                     new GoalStats(false, start), new ArrayList<>());
             Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
             String expected = start.plusMonths(4).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            Assertions.assertThat(doc.getString("fechaFin")).isEqualTo(expected);
+        }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenNoNewValueNewUnitIndefinido_usesOriginalValueOrOneReturnsBlank() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(null);
+            dto.setDuracionUnidad(Enums.Duracion.Indefinido);
+            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 4, Enums.Duracion.Dias,
+                    new GoalStats(false, start), new ArrayList<>());
+            Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
+            Assertions.assertThat(doc.getString("fechaFin")).isEqualTo("");
+        }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenNewValueAndUnitNull_returnsEmptyFechaFin() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(null);
+            dto.setDuracionUnidad(null);
+            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 5, Enums.Duracion.Dias,
+                    new GoalStats(false, start), new ArrayList<>());
+
+            Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
+            Assertions.assertThat(doc.getString("fechaFin")).isEqualTo(null);
+        }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenNewValueNegativeAndUnitProvided_usesOriginal() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(-3);
+            dto.setDuracionUnidad(Enums.Duracion.Semanas);
+
+            BoolGoal goal1 = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 5, Enums.Duracion.Dias,
+                    new GoalStats(false, start), new ArrayList<>());
+            Document doc1 = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal1);
+            String expected1 = start.plusWeeks(5).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            Assertions.assertThat(doc1.getString("fechaFin")).isEqualTo(expected1);
+        }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenNewValueNegativeAndUnitProvided_oneWithNewUnit() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(-3);
+            dto.setDuracionUnidad(Enums.Duracion.Semanas);
+
+            BoolGoal goal2 = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 0, Enums.Duracion.Dias,
+                    new GoalStats(false, start), new ArrayList<>());
+            Document doc2 = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal2);
+            String expected2 = start.plusWeeks(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            Assertions.assertThat(doc2.getString("fechaFin")).isEqualTo(expected2);
+        }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenValuePositiveAndUnitProvided_usesThatUnit() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(7);
+            dto.setDuracionUnidad(Enums.Duracion.Meses);
+
+            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false,
+                    10, Enums.Duracion.Semanas,
+                    new GoalStats(false, start), new ArrayList<>());
+
+            Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
+            String expected = start.plusMonths(7).format(DateTimeFormatter.ISO_LOCAL_DATE);
             Assertions.assertThat(doc.getString("fechaFin")).isEqualTo(expected);
         }
 
@@ -147,17 +235,32 @@ public class StatsServiceTest {
         }
 
         @Test
-        public void getGoalStatsFinalDateUpdateDoc_whenNeitherDurations_noFechaFin() {
+        public void getGoalStatsFinalDateUpdateDoc_whenBothNewValueAndNewUnitIndefinido_usesBothReturnsBlank() {
             LocalDate start = LocalDate.of(2025, 7, 1);
             PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
-            dto.setDuracionValor(null);
-            dto.setDuracionUnidad(null);
+            dto.setDuracionValor(2);
+            dto.setDuracionUnidad(Enums.Duracion.Indefinido);
             BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
-                    start, false, 4, Enums.Duracion.Semanas,
+                    start, false, 4, Enums.Duracion.Meses,
                     new GoalStats(false, start), new ArrayList<>());
             Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
-            Assertions.assertThat(doc.containsKey("fechaFin")).isFalse();
+            Assertions.assertThat(doc.getString("fechaFin")).isEqualTo("");
         }
+
+        @Test
+        public void getGoalStatsFinalDateUpdateDoc_whenZeroValueAndNoUnit_thenDocIsEmpty() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
+            dto.setDuracionValor(0);
+            dto.setDuracionUnidad(null);
+            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+                    start, false, 5, Enums.Duracion.Semanas,
+                    new GoalStats(false, start), new ArrayList<>());
+
+            Document doc = statsService.getGoalStatsFinalDateUpdateDoc(dto, goal);
+            Assertions.assertThat(doc.isEmpty()).isTrue();
+        }
+
     }
 
     @Nested

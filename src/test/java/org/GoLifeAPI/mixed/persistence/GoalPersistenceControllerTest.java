@@ -1,4 +1,4 @@
-package org.GoLifeAPI.persistence;
+package org.GoLifeAPI.mixed.persistence;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.result.DeleteResult;
@@ -18,6 +18,7 @@ import org.GoLifeAPI.persistence.implementation.GoalPersistenceController;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.dao.UserDAO;
 import org.GoLifeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLifeAPI.util.MongoContainer;
 import org.assertj.core.api.Assertions;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -429,8 +430,10 @@ public class GoalPersistenceControllerTest {
     @Order(4)
     @Nested
     @DisplayName("updateWithGoalStats")
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class UpdateWithGoalStats {
 
+        @Order(1)
         @Test
         public void updateWithGoalStats_whenValidBool_updatesFechaFin() {
             Document update = new Document("fecha", "2025-12-31")
@@ -445,6 +448,40 @@ public class GoalPersistenceControllerTest {
             PartialGoal updatedGoal = updated.getMetas().get(0);
             Assertions.assertThat(updatedGoal.getNombre()).isEqualTo("nuevoNombre");
             Assertions.assertThat(updatedGoal.getFecha()).isEqualTo(LocalDate.parse("2025-12-31"));
+        }
+
+        @Order(2)
+        @Test
+        void updateWithGoalStats_whenGoalStatsUpdateNull_skipsStatsUpdate() {
+            Document update = new Document("fecha", "2025-12-30")
+                    .append("nombre", "nuevoNombre2");
+
+            User updated = goalPersistenceController.updateWithGoalStats(
+                    update, update, null, uid, boolMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            PartialGoal updatedGoal = updated.getMetas().get(0);
+            Assertions.assertThat(updatedGoal.getNombre()).isEqualTo("nuevoNombre2");
+            Assertions.assertThat(updatedGoal.getFecha()).isEqualTo(LocalDate.parse("2025-12-30"));
+            verify(goalDAO, never()).updateGoalSatsByGoalId(any(), anyString(), any());
+        }
+
+        @Order(3)
+        @Test
+        void updateWithGoalStats_whenGoalStatsUpdateEmpty_skipsStatsUpdate() {
+            Document update = new Document("fecha", "2025-12-29")
+                    .append("nombre", "nuevoNombre3");
+
+            User updated = goalPersistenceController.updateWithGoalStats(
+                    update, update, new Document(), uid, boolMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            PartialGoal updatedGoal = updated.getMetas().get(0);
+            Assertions.assertThat(updatedGoal.getNombre()).isEqualTo("nuevoNombre3");
+            Assertions.assertThat(updatedGoal.getFecha()).isEqualTo(LocalDate.parse("2025-12-29"));
+            verify(goalDAO, never()).updateGoalSatsByGoalId(any(), anyString(), any());
         }
 
         @Test
@@ -543,6 +580,23 @@ public class GoalPersistenceControllerTest {
                     .isInstanceOf(NotFoundException.class)
                     .hasMessage("Usuario de la Meta no encontrado");
         }
+
+        @Test
+        void updateWithGoalStats_whenRuntimeException_thenThrowsWrappedRuntimeException() {
+            Document update = new Document("nombre", "X");
+            Document statsUpdate = new Document("fechaFin", "2025-12-31");
+            doThrow(new IllegalStateException("boom"))
+                    .when(goalDAO).updateGoalByGoalId(any(ClientSession.class), eq(boolMid), any(Document.class));
+
+            Assertions.assertThatThrownBy(() ->
+                            goalPersistenceController.updateWithGoalStats(update, update, statsUpdate, uid, boolMid)
+                    )
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("Error interno al editar la meta")
+                    .hasCauseInstanceOf(IllegalStateException.class)
+                    .hasRootCauseMessage("boom");
+        }
+
     }
 
     @Order(5)
@@ -566,6 +620,38 @@ public class GoalPersistenceControllerTest {
         }
 
         @Order(2)
+        @Test
+        void updateWithUserStats_whenPartialGoalNull_skipsPartialGoalUpdate() {
+            Document update = new Document("finalizado", false);
+            Document statsUpdate = new Document("totalMetas", 0).append("totalMetasFinalizadas", 0);
+
+            User updated = goalPersistenceController.updateWithUserStats(
+                    update, null, statsUpdate, uid, boolMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            Assertions.assertThat(updated.getMetas().get(0).getFinalizado()).isTrue();
+            Assertions.assertThat(updated.getEstadisticas().getTotalMetasFinalizadas()).isEqualTo(1);
+            verify(userDAO, never()).updatePartialGoalInListByUidAndGoalId(any(), anyString(), anyString(), any());
+        }
+
+        @Order(3)
+        @Test
+        void updateWithUserStats_whenPartialGoalEmpty_skipsPartialGoalUpdate() {
+            Document update = new Document("finalizado", true);
+            Document statsUpdate = new Document("totalMetas", 0).append("totalMetasFinalizadas", 0);
+
+            User updated = goalPersistenceController.updateWithUserStats(
+                    update, new Document(), statsUpdate, uid, boolMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            Assertions.assertThat(updated.getMetas().get(0).getFinalizado()).isTrue();
+            Assertions.assertThat(updated.getEstadisticas().getTotalMetasFinalizadas()).isEqualTo(1);
+            verify(userDAO, never()).updatePartialGoalInListByUidAndGoalId(any(), anyString(), anyString(), any());
+        }
+
+        @Order(4)
         @Test
         public void updateWithUserStats_whenValidNum_setsFinalizadoTrue() {
             Document update = new Document("finalizado", true);
@@ -626,6 +712,23 @@ public class GoalPersistenceControllerTest {
                     ).isInstanceOf(NotFoundException.class)
                     .hasMessage("Usuario de la Meta no encontrado");
         }
+
+        @Test
+        void updateWithUserStats_whenRuntimeException_thenThrowsWrappedRuntimeException() {
+            Document update = new Document("finalizado", true);
+            Document statsUpdate = new Document("totalMetas", 0);
+            doThrow(new IllegalStateException("boom"))
+                    .when(goalDAO).updateGoalByGoalId(any(ClientSession.class), eq(boolMid), any(Document.class));
+
+            Assertions.assertThatThrownBy(() ->
+                            goalPersistenceController.updateWithUserStats(update, update, statsUpdate, uid, boolMid)
+                    )
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("Error interno al editar la meta")
+                    .hasCauseInstanceOf(IllegalStateException.class)
+                    .hasRootCauseMessage("boom");
+        }
+
     }
 
     @Order(6)

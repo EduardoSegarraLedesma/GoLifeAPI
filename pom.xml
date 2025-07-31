@@ -17,6 +17,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <argLine></argLine>
+        <skipUnitTests></skipUnitTests>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -151,6 +153,29 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- TEST: -->
             <!-- JUnit Test Suite + System-Lambda Test Env Modification-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -158,13 +183,34 @@
                 <version>3.0.0-M9</version>
                 <configuration>
                     <argLine>
+                        @{argLine}
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.util=ALL-UNNAMED
+                    </argLine>
+                    <skipTests>${skipUnitTests}</skipTests>
+                    <excludes>
+                        <exclude>**/e2e/**/*.java</exclude>
+                        <exclude>**/mixed/**/UserPersistenceControllerTest.java</exclude>
+                        <exclude>**/mixed/**/GoalPersistenceControllerTest.java</exclude>
+                        <exclude>**/mixed/**/RecordPersistenceControllerTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <!-- VERIFY: -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M9</version>
+                <configuration>
+                    <argLine>@{argLine}
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                     </argLine>
                     <excludes>
-                        <exclude>**/UserPersistenceControllerTest.java</exclude>
-                        <exclude>**/GoalPersistenceControllerTest.java</exclude>
-                        <exclude>**/RecordPersistenceControllerTest.java</exclude>
+                        <exclude>**/mixed/**/*.java</exclude>
+                        <include>**/e2e/UserTestIT.java</include>
+                        <include>**/e2e/GoalTestIT.java</include>
+                        <include>**/e2e/RecordTestIT.java</include>
                     </excludes>
                 </configuration>
             </plugin>

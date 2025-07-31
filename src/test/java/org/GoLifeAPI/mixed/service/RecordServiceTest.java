@@ -1,4 +1,4 @@
-package org.GoLifeAPI.service;
+package org.GoLifeAPI.mixed.service;
 
 import org.GoLifeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLifeAPI.dto.goal.ResponseNumGoalDTO;
@@ -322,6 +322,41 @@ public class RecordServiceTest {
 
             verify(recordPersistenceController, never()).delete(anyString(), anyString());
         }
+
+        @Test
+        public void deleteRecord_whenNumRecordExists_delegatesToPersistence() {
+            LocalDate date = LocalDate.of(2025, 7, 1);
+            NumRecord record = new NumRecord(42.0, date);
+            NumGoal numGoal = new NumGoal(uid, new ObjectId(), "n", "d",
+                    date, false, 1, Enums.Duracion.Dias,
+                    new GoalStats(false, date),
+                    new ArrayList<>(List.of(record)),
+                    100.0, "km");
+            when(goalService.validateAndGetGoal(uid, mid)).thenReturn(numGoal);
+
+            recordService.deleteRecord(uid, mid, date);
+
+            verify(recordPersistenceController).delete(eq(mid), eq(date.toString()));
+        }
+
+        @Test
+        public void deleteRecord_whenNumRecordNotExists_throwsNotFoundException() {
+            LocalDate date = LocalDate.of(2025, 7, 1);
+            NumGoal numGoal = new NumGoal(uid, new ObjectId(), "n", "d",
+                    date, false, 1, Enums.Duracion.Dias,
+                    new GoalStats(false, date),
+                    new ArrayList<>(),
+                    100.0, "km");
+            when(goalService.validateAndGetGoal(uid, mid)).thenReturn(numGoal);
+
+            Assertions.assertThatThrownBy(() ->
+                            recordService.deleteRecord(uid, mid, date)
+                    ).isInstanceOf(NotFoundException.class)
+                    .hasMessage("No existe un registro en esa fecha");
+
+            verify(recordPersistenceController, never()).delete(anyString(), anyString());
+        }
+
     }
 
     @Nested

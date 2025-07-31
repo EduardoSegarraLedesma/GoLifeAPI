@@ -1,4 +1,4 @@
-package org.GoLifeAPI.persistence;
+package org.GoLifeAPI.util;
 
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;

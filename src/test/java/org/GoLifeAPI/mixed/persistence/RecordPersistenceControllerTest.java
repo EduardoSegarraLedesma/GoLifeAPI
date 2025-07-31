@@ -1,4 +1,4 @@
-package org.GoLifeAPI.persistence;
+package org.GoLifeAPI.mixed.persistence;
 
 import com.mongodb.client.ClientSession;
 import org.GoLifeAPI.exception.NotFoundException;
@@ -12,6 +12,7 @@ import org.GoLifeAPI.model.record.NumRecord;
 import org.GoLifeAPI.persistence.implementation.RecordPersistenceController;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLifeAPI.util.MongoContainer;
 import org.assertj.core.api.Assertions;
 import org.bson.Document;
 import org.junit.jupiter.api.*;
@@ -176,6 +177,31 @@ public class RecordPersistenceControllerTest {
                     ).isInstanceOf(NotFoundException.class)
                     .hasMessage("Meta del registro no encontrada");
         }
+
+        @Test
+        public void createBoolrecord_whenMapperThrows_thenThrowsRuntimeException() {
+            LocalDate date = LocalDate.of(2025, 7, 5);
+            BoolRecord record = new BoolRecord(true, date);
+            Document statsUpdate = new Document("valorAlcanzado", true);
+
+            Document dummyGoalDoc = new Document("someKey", "someValue");
+            doReturn(dummyGoalDoc)
+                    .when(goalDAO).insertRecordInListByGoalId(any(ClientSession.class), eq(boolMid), any(Document.class));
+
+            doReturn(dummyGoalDoc)
+                    .when(goalDAO).updateGoalSatsByGoalId(any(ClientSession.class), eq(boolMid), eq(statsUpdate));
+
+            doThrow(new IllegalStateException("mapper failure"))
+                    .when(goalDocMapper).mapDocToBoolGoal(dummyGoalDoc);
+
+            Assertions.assertThatThrownBy(() ->
+                            recordPersistenceController.createBoolrecord(record, statsUpdate, boolMid)
+                    )
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("Error interno al crear el registro")
+                    .hasCauseInstanceOf(IllegalStateException.class)
+                    .hasRootCauseMessage("mapper failure");
+        }
     }
 
     @Order(2)
@@ -276,6 +302,35 @@ public class RecordPersistenceControllerTest {
                     ).isInstanceOf(NotFoundException.class)
                     .hasMessage("Meta del registro no encontrada");
         }
+
+        @Test
+        @DisplayName("createNumRecord_whenMapperThrows_thenThrowsRuntimeException")
+        public void createNumRecord_whenMapperThrows_thenThrowsRuntimeException() {
+            LocalDate date = LocalDate.of(2025, 7, 5);
+            double valor = 42.0;
+            NumRecord record = new NumRecord(valor, date);
+            Document statsUpdate = new Document("valorAlcanzado", true);
+
+            Document dummyGoalDoc = new Document("foo", "bar");
+            doReturn(dummyGoalDoc).when(goalDAO).insertRecordInListByGoalId(any(ClientSession.class),
+                    eq(numMid),
+                    any(Document.class));
+
+            doReturn(dummyGoalDoc).when(goalDAO).updateGoalSatsByGoalId(any(ClientSession.class),
+                    eq(numMid),
+                    eq(statsUpdate));
+
+            doThrow(new IllegalStateException("mapper failure")).when(goalDocMapper).mapDocToNumGoal(dummyGoalDoc);
+
+            Assertions.assertThatThrownBy(() ->
+                            recordPersistenceController.createNumRecord(record, statsUpdate, numMid)
+                    )
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("Error interno al crear el registro")
+                    .hasCauseInstanceOf(IllegalStateException.class)
+                    .hasRootCauseMessage("mapper failure");
+        }
+
     }
 
     @Order(3)

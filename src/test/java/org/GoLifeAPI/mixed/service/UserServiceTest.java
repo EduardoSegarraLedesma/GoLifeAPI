@@ -1,4 +1,4 @@
-package org.GoLifeAPI.service;
+package org.GoLifeAPI.mixed.service;
 
 import org.GoLifeAPI.dto.user.CreateUserDTO;
 import org.GoLifeAPI.dto.user.PatchUserDTO;
