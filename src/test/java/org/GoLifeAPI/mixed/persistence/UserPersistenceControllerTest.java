@@ -1,4 +1,4 @@
-package org.GoLifeAPI.persistence;
+package org.GoLifeAPI.mixed.persistence;
 
 import com.mongodb.MongoWriteException;
 import com.mongodb.ServerAddress;
@@ -17,6 +17,7 @@ import org.GoLifeAPI.persistence.implementation.UserPersistenceController;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.dao.UserDAO;
 import org.GoLifeAPI.persistence.implementation.transaction.TransactionRunner;
+import org.GoLifeAPI.util.MongoContainer;
 import org.assertj.core.api.Assertions;
 import org.bson.BsonDocument;
 import org.bson.Document;

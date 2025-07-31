@@ -1,4 +1,4 @@
-package org.GoLifeAPI.web;
+package org.GoLifeAPI.mixed.web;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,6 +11,7 @@ import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLifeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IRecordService;
+import org.GoLifeAPI.web.RecordRestController;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

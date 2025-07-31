@@ -1,4 +1,4 @@
-package org.GoLifeAPI.web;
+package org.GoLifeAPI.mixed.web;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import org.GoLifeAPI.mapper.service.UserDtoMapper;
 import org.GoLifeAPI.model.user.User;
 import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IUserService;
+import org.GoLifeAPI.web.UserRestController;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;

@@ -10,7 +10,8 @@ public class PatchUserDTO {
     private String apellidos;
 
     public PatchUserDTO() {
-        apellidos = "";
+        nombre = null;
+        apellidos = null;
     }
 
     public String getApellidos() {

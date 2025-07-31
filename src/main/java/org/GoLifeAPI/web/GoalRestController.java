@@ -76,19 +76,23 @@ public class GoalRestController {
                                                      @RequestParam("tipo") Enums.Tipo tipo,
                                                      @RequestBody JsonNode jsonBody) {
         try {
-            if (tipo.toString().equalsIgnoreCase("Bool")) {
-                PatchBoolGoalDTO boolDto = objectMapper.treeToValue(jsonBody, PatchBoolGoalDTO.class);
-                validateDTO(boolDto);
-                return ResponseEntity.ok(goalService.updateBoolGoal(boolDto, uid, mid));
-            } else if (tipo.toString().equalsIgnoreCase("Num")) {
-                PatchNumGoalDTO numDto = objectMapper.treeToValue(jsonBody, PatchNumGoalDTO.class);
-                validateDTO(numDto);
-                return ResponseEntity.ok(goalService.updateNumGoal(numDto, uid, mid));
-            } else
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de meta no soportado");
+            ResponseUserDTO updated = switch (tipo) {
+                case Bool -> {
+                    PatchBoolGoalDTO boolDto = objectMapper.treeToValue(jsonBody, PatchBoolGoalDTO.class);
+                    validateDTO(boolDto);
+                    yield goalService.updateBoolGoal(boolDto, uid, mid);
+                }
+                case Num -> {
+                    PatchNumGoalDTO numDto = objectMapper.treeToValue(jsonBody, PatchNumGoalDTO.class);
+                    validateDTO(numDto);
+                    yield goalService.updateNumGoal(numDto, uid, mid);
+                }
+            };
+            return ResponseEntity.ok(updated);
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cuerpo de la petición malformado o invalido", e);
         }
+
     }
 
     @DeleteMapping(path = "/{mid}", produces = MediaType.APPLICATION_JSON_VALUE)

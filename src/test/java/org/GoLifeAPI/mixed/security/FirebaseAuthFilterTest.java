@@ -1,7 +1,8 @@
-package org.GoLifeAPI.security;
+package org.GoLifeAPI.mixed.security;
 
 import org.GoLifeAPI.handler.GlobalExceptionHandler;
 import org.GoLifeAPI.infrastructure.FirebaseService;
+import org.GoLifeAPI.security.FirebaseAuthFilter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

@@ -1,12 +1,14 @@
-package org.GoLifeAPI.security;
+package org.GoLifeAPI.mixed.security;
 
 import jakarta.servlet.FilterChain;
+import org.GoLifeAPI.security.RateLimitingFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
@@ -50,6 +52,32 @@ class RateLimitingFilterTest {
             assertThat(response.getStatus()).isEqualTo(200);
         }
         verify(chain, times(30)).doFilter(any(), any());
+    }
+
+    @Test
+    void whenAuthPresentButNotAuthenticated_treatedAsUnauthenticated() throws Exception {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(false);
+        when(auth.getName()).thenReturn("ignored");
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void whenAuthNameIsNull_treatedAsUnauthenticated() throws Exception {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getName()).thenReturn(null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     @Test

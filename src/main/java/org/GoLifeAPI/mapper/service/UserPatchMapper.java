@@ -12,7 +12,7 @@ public class UserPatchMapper {
         String name = dto.getNombre();
         String surename = dto.getApellidos();
         if (name != null && !name.isBlank()) doc.append("nombre", name);
-        if (surename != null && !surename.isBlank()) doc.append("apellidos", surename);
+        if (surename != null) doc.append("apellidos", surename);
         return doc;
     }
 }

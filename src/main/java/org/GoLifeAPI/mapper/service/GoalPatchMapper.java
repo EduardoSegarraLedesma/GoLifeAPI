@@ -45,7 +45,7 @@ public class GoalPatchMapper {
         String desc = dto.getDescripcion();
         Enums.Duracion durationUnit = dto.getDuracionUnidad();
         if (name != null && !name.isBlank()) doc.append("nombre", name);
-        if (desc != null && !desc.isBlank()) doc.append("descripcion", desc);
+        if (desc != null) doc.append("descripcion", desc);
         appendCorrectDuracionValor(doc, dto);
         if (durationUnit != null) doc.append("duracionUnidad", durationUnit);
     }

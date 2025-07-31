@@ -1,4 +1,4 @@
-package org.GoLifeAPI.service;
+package org.GoLifeAPI.mixed.service;
 
 import org.GoLifeAPI.dto.goal.*;
 import org.GoLifeAPI.dto.user.ResponseUserDTO;
@@ -160,6 +160,18 @@ public class GoalServiceTest {
             Assertions.assertThat(result).isNotNull();
 
             verify(goalPersistenceController).read(eq(mid));
+        }
+
+        @Test
+        public void getGoal_whenUnexpectedGoalType_throwsIllegalStateException() {
+            Goal unknown = mock(Goal.class);
+            when(unknown.getUid()).thenReturn(uid);
+            when(goalPersistenceController.read(eq(mid))).thenReturn(unknown);
+
+            Assertions.assertThatThrownBy(() ->
+                            goalService.getGoal(uid, mid)
+                    ).isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining(unknown.getClass().getName());
         }
 
     }
