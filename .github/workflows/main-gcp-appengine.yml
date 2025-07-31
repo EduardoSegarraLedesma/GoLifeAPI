@@ -29,7 +29,7 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build & run tests
-        run: mvn --batch-mode test
+        run: mvn --batch-mode clean test
 
   e2e-tests:
     name: Run E2E Tests
@@ -54,8 +54,7 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build & run E2E Tests
-        run: mvn --batch-mode verify -DskipUnitTests=true
-
+        run: mvn --batch-mode clean verify -DskipUnitTests=true
 
   deploy:
     name: Build & Deploy

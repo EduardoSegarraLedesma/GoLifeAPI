@@ -484,6 +484,54 @@ public class GoalPersistenceControllerTest {
             verify(goalDAO, never()).updateGoalSatsByGoalId(any(), anyString(), any());
         }
 
+        @Order(4)
+        @Test
+        void updateWithGoalStats_whenPartialGoalUpdate_skipsPartialGoalUpdate() {
+            Document update = new Document("fecha", "2025-12-30")
+                    .append("nombre", "nuevoNombre1");
+
+            User updated = goalPersistenceController.updateWithGoalStats(
+                    update, null, new Document(), uid, numMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            PartialGoal updatedGoal = updated.getMetas().get(1);
+            Assertions.assertThat(updatedGoal.getNombre()).isNotEqualTo("nuevoNombre1");
+            Assertions.assertThat(updatedGoal.getFecha()).isNotEqualTo(LocalDate.parse("2025-12-30"));
+            verify(userDAO, never()).updatePartialGoalInListByUidAndGoalId(any(), anyString(),anyString(), any());
+        }
+
+        @Order(5)
+        @Test
+        void updateWithGoalStats_whenPartialGoalUpdateEmpty_skipsPartialGoalUpdate() {
+            Document update = new Document("fecha", "2025-12-29")
+                    .append("nombre", "nuevoNombre2");
+
+            User updated = goalPersistenceController.updateWithGoalStats(
+                    update, new Document(), new Document(), uid, numMid
+            );
+
+            Assertions.assertThat(updated).isNotNull();
+            PartialGoal updatedGoal = updated.getMetas().get(1);
+            Assertions.assertThat(updatedGoal.getNombre()).isNotEqualTo("nuevoNombre2");
+            Assertions.assertThat(updatedGoal.getFecha()).isNotEqualTo(LocalDate.parse("2025-12-29"));
+            verify(userDAO, never()).updatePartialGoalInListByUidAndGoalId(any(), anyString(),anyString(), any());
+        }
+
+        @Test
+        void updateWithGoalStats_whenUserNotFoundAndPartialGoalEmpty_throwsNotFound() {
+            Document update = new Document("fecha", "2025-12-29")
+                    .append("nombre", "nuevoNombre2");
+
+            doReturn(null).when(userDAO).findUserByUid(anyString());
+
+            Assertions.assertThatThrownBy(() ->
+                            goalPersistenceController.updateWithGoalStats(update, new Document(), new Document(), uid, numMid)
+                    )
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("Usuario de la Meta no encontrado");
+        }
+
         @Test
         public void updateWithGoalStats_whenValidNum_updatesFechaFin() {
             Document update = new Document("fecha", "2025-12-31")

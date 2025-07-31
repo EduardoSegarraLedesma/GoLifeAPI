@@ -101,7 +101,7 @@ public class GoalRestController {
         return ResponseEntity.ok(goalService.deleteGoal(uid, mid));
     }
 
-// Auxiliary Methods
+    // Auxiliary Methods
 
     private <T> void validateDTO(T dto) {
         Set<ConstraintViolation<T>> violations = validator.validate(dto);

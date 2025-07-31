@@ -4,10 +4,7 @@ package org.GoLifeAPI.e2e;
 import org.GoLifeAPI.Main;
 import org.GoLifeAPI.infrastructure.FirebaseService;
 import org.GoLifeAPI.util.MongoContainer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,16 +32,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(CommonE2EMockIT.TestFirebaseConfig.class)
-public abstract class CommonE2EMockIT extends MongoContainer {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public abstract class CommonE2EMockIT {
 
     @Autowired
     protected MockMvc mockMvc;
 
     static {
-        mongo.start();
-        setEnv("DB_CONNECTION_STRING", getMongoURI());
+        setEnv("DB_CONNECTION_STRING", MongoContainer.getMongoURI());
         setEnv("DB_NAME", "e2e");
-        setUid("test-user");
+        MongoContainer.setUid("test-user");
     }
 
     @TestConfiguration
@@ -86,11 +83,6 @@ public abstract class CommonE2EMockIT extends MongoContainer {
         }
     }
 
-    @AfterAll
-    public static void tearDown() {
-        mongo.stop();
-    }
-
     @Order(1)
     @Test
     public void e2e_healthCheck_allServicesUp_returns200() throws Exception {
@@ -98,5 +90,4 @@ public abstract class CommonE2EMockIT extends MongoContainer {
                 .andExpect(status().isOk())
                 .andExpect(content().string("OK"));
     }
-
 }

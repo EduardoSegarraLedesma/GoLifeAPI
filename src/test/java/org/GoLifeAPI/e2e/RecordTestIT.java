@@ -1,8 +1,11 @@
 package org.GoLifeAPI.e2e;
 
-import org.junit.jupiter.api.ClassOrderer;
-import org.junit.jupiter.api.TestClassOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 
-@TestClassOrder(ClassOrderer.OrderAnnotation.class)
-public class RecordTestIT {
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class RecordTestIT extends CommonE2EMockIT {
 }

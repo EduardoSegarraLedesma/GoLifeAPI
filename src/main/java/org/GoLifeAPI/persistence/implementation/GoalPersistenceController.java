@@ -126,7 +126,13 @@ public class GoalPersistenceController extends BasePersistenceController impleme
                     goalDoc = goalDAO.updateGoalSatsByGoalId(session, mid, goalStatsUpdate);
                     if (goalDoc == null) throw new NotFoundException("Usuario de la Meta no encontrado");
                 }
-                Document userDoc = userDAO.updatePartialGoalInListByUidAndGoalId(session, uid, mid, partialGoalUpdate);
+                Document userDoc;
+                if (partialGoalUpdate != null && !partialGoalUpdate.isEmpty()) {
+                    userDoc = userDAO.updatePartialGoalInListByUidAndGoalId(session, uid, mid, partialGoalUpdate);
+                    if (userDoc == null) throw new NotFoundException("Usuario de la Meta no encontrado");
+                    return userDocMapper.mapDocToUser(userDoc);
+                }
+                userDoc = userDAO.findUserByUid(uid);
                 if (userDoc == null) throw new NotFoundException("Usuario de la Meta no encontrado");
                 return userDocMapper.mapDocToUser(userDoc);
             });
