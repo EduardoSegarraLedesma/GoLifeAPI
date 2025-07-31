@@ -202,15 +202,16 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.0.0-M9</version>
                 <configuration>
-                    <argLine>@{argLine}
+                    <argLine>
+                        @{argLine}
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                     </argLine>
                     <excludes>
                         <exclude>**/mixed/**/*.java</exclude>
-                        <include>**/e2e/UserTestIT.java</include>
-                        <include>**/e2e/GoalTestIT.java</include>
-                        <include>**/e2e/RecordTestIT.java</include>
+                        <exclude>**/e2e/UserTestIT.java</exclude>
+                        <exclude>**/e2e/GoalTestIT.java</exclude>
+                        <exclude>**/e2e/RecordTestIT.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
