@@ -11,6 +11,7 @@ import org.GoLifeAPI.config.ValidatorConfig;
 import org.GoLifeAPI.dto.goal.*;
 import org.GoLifeAPI.dto.user.ResponseUserDTO;
 import org.GoLifeAPI.dto.user.ResponseUserStatsDTO;
+import org.GoLifeAPI.handler.GlobalExceptionHandler;
 import org.GoLifeAPI.model.Enums;
 import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IGoalService;
@@ -43,7 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = GoalRestController.class)
 @AutoConfigureMockMvc
-@Import({GoalRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
+@Import({GoalRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class,
+        GlobalExceptionHandler.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GoalRestControllerTest {
 

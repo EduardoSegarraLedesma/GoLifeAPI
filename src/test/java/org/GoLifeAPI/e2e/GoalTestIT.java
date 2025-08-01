@@ -30,7 +30,7 @@ public class GoalTestIT extends CommonE2EMockIT {
         String json = mvcResult.getResponse().getContentAsString();
         String metaId = com.jayway.jsonpath.JsonPath
                 .parse(json)
-                .read("$.metas[0]._id", String.class);
+                .read("$.metas[1]._id", String.class);
         MongoContainer.setBoolMid(metaId);
 
 
@@ -51,9 +51,11 @@ public class GoalTestIT extends CommonE2EMockIT {
          json = mvcResult.getResponse().getContentAsString();
          metaId = com.jayway.jsonpath.JsonPath
                 .parse(json)
-                .read("$.metas[1]._id", String.class);
+                .read("$.metas[2]._id", String.class);
         MongoContainer.setNumMid(metaId);
     }
+
+    //Main Happy Path
 
     @Order(1)
     @Test
@@ -135,7 +137,7 @@ public class GoalTestIT extends CommonE2EMockIT {
     public void e2e_patchBoolGoal_returns200_andJsonBody() throws Exception {
         String payload = "{"
                 + "\"nombre\":\"Nuevo Nombre\","
-                + "\"descripcion\":\"Nueva Descripcion\","
+                + "\"descripcion\":\"\","
                 + "\"duracionValor\":6,"
                 + "\"duracionUnidad\":\"Semanas\""
                 + "}";
@@ -164,7 +166,7 @@ public class GoalTestIT extends CommonE2EMockIT {
     public void e2e_patchNumGoal_returns200_andJsonBody() throws Exception {
         String payload = "{"
                 + "\"nombre\":\"Nuevo Nombre\","
-                + "\"descripcion\":\"Nueva Descripcion\","
+                + "\"descripcion\":\"\","
                 + "\"duracionValor\":6,"
                 + "\"duracionUnidad\":\"Semanas\","
                 + "\"valorObjetivo\":3,"
@@ -199,7 +201,7 @@ public class GoalTestIT extends CommonE2EMockIT {
 
         response.andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Nuevo Nombre"))
-                .andExpect(jsonPath("$.descripcion").value("Nueva Descripcion"))
+                .andExpect(jsonPath("$.descripcion").value(""))
                 .andExpect(jsonPath("$.tipo").value("Bool"))
                 .andExpect(jsonPath("$.fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.finalizado").value(false))
@@ -219,7 +221,7 @@ public class GoalTestIT extends CommonE2EMockIT {
 
         response.andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Nuevo Nombre"))
-                .andExpect(jsonPath("$.descripcion").value("Nueva Descripcion"))
+                .andExpect(jsonPath("$.descripcion").value(""))
                 .andExpect(jsonPath("$.tipo").value("Num"))
                 .andExpect(jsonPath("$.fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.finalizado").value(false))
@@ -282,4 +284,33 @@ public class GoalTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.porcentajeFinalizadas").value(0));
     }
 
+    // Other Happy Path Tests
+
+    @Test
+    public void e2e_postBoolGoalIndefinido_returns201_andJsonBody() throws Exception {
+        String payload = "{"
+                + "\"nombre\":\"Beber 2 litros de agua\","
+                + "\"descripcion\":\"Recordar beber suficiente agua diariamente\","
+                + "\"fecha\":\"2025-06-19\","
+                + "\"duracionValor\":1,"
+                + "\"duracionUnidad\":\"Indefinido\""
+                + "}";
+
+        ResultActions response = mockMvc.perform(post("/api/metas/bool")
+                .header("Authorization", "Bearer good.token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload));
+
+        response.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.metas").isNotEmpty())
+                .andExpect(jsonPath("$.metas[0].nombre").value("Beber 2 litros de agua"))
+                .andExpect(jsonPath("$.metas[0].tipo").value("Bool"))
+                .andExpect(jsonPath("$.metas[0].fecha").value("2025-06-19"))
+                .andExpect(jsonPath("$.metas[0].finalizado").value(false))
+                .andExpect(jsonPath("$.metas[0].duracionValor").value(-1))
+                .andExpect(jsonPath("$.metas[0].duracionUnidad").value("Indefinido"))
+                .andExpect(jsonPath("$.estadisticas.totalMetas").value(1))
+                .andExpect(jsonPath("$.estadisticas.totalMetasFinalizadas").value(0))
+                .andExpect(jsonPath("$.estadisticas.porcentajeFinalizadas").value(0));
+    }
 }
