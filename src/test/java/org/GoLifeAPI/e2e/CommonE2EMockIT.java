@@ -4,11 +4,10 @@ package org.GoLifeAPI.e2e;
 import org.GoLifeAPI.Main;
 import org.GoLifeAPI.infrastructure.FirebaseService;
 import org.GoLifeAPI.infrastructure.MongoService;
-import org.GoLifeAPI.persistence.implementation.dao.BaseDAO;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.dao.UserDAO;
 import org.GoLifeAPI.util.MongoContainer;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,17 +18,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Testcontainers
 @SpringBootTest(
@@ -38,8 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(CommonE2EMockIT.TestFirebaseConfig.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(CommonE2EMockIT.E2ETestConfig.class)
 public abstract class CommonE2EMockIT {
 
     @Autowired
@@ -50,7 +42,7 @@ public abstract class CommonE2EMockIT {
     }
 
     @TestConfiguration
-    static class TestFirebaseConfig {
+    static class E2ETestConfig {
         @Bean
         public FirebaseService firebaseService() {
             FirebaseService mockFs = mock(FirebaseService.class);
@@ -97,13 +89,5 @@ public abstract class CommonE2EMockIT {
                     });
             return ref.get();
         }
-    }
-
-    @Order(1)
-    @Test
-    public void e2e_healthCheck_allServicesUp_returns200() throws Exception {
-        mockMvc.perform(get("/api/salud"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("OK"));
     }
 }

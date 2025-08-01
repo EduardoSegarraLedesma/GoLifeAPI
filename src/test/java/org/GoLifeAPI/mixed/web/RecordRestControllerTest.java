@@ -9,6 +9,7 @@ import org.GoLifeAPI.dto.goal.ResponseBoolGoalDTO;
 import org.GoLifeAPI.dto.goal.ResponseNumGoalDTO;
 import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
 import org.GoLifeAPI.dto.record.CreateNumRecordDTO;
+import org.GoLifeAPI.handler.GlobalExceptionHandler;
 import org.GoLifeAPI.security.RateLimitingFilter;
 import org.GoLifeAPI.service.interfaces.IRecordService;
 import org.GoLifeAPI.web.RecordRestController;
@@ -44,7 +45,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = RecordRestController.class)
 @AutoConfigureMockMvc
-@Import({RecordRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
+@Import({RecordRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class,
+        GlobalExceptionHandler.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RecordRestControllerTest {
 

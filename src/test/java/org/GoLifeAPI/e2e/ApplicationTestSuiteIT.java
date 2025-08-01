@@ -8,6 +8,7 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @IncludeEngines("junit-jupiter")
 @SelectClasses({
+        HealthTestIT.class,
         UserTestIT.class,
         GoalTestIT.class,
         RecordTestIT.class,

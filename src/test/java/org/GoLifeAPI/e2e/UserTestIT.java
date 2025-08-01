@@ -19,6 +19,8 @@ public class UserTestIT extends CommonE2EMockIT {
                 .content(payload));
     }
 
+    //Main Happy Path
+
     @Order(1)
     @Test
     public void e2e_postUsuario_returns201_andJsonBody() throws Exception {
@@ -55,7 +57,6 @@ public class UserTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.metas").isEmpty())
                 .andExpect(jsonPath("$.estadisticas").isNotEmpty());
     }
-
 
     @Order(3)
     @Test

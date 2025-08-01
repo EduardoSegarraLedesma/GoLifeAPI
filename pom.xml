@@ -209,6 +209,7 @@
                     </argLine>
                     <excludes>
                         <exclude>**/mixed/**/*.java</exclude>
+                        <exclude>**/e2e/HealthTestIT.java</exclude>
                         <exclude>**/e2e/UserTestIT.java</exclude>
                         <exclude>**/e2e/GoalTestIT.java</exclude>
                         <exclude>**/e2e/RecordTestIT.java</exclude>

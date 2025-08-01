@@ -10,6 +10,7 @@ import org.GoLifeAPI.config.ValidatorConfig;
 import org.GoLifeAPI.dto.user.CreateUserDTO;
 import org.GoLifeAPI.dto.user.PatchUserDTO;
 import org.GoLifeAPI.dto.user.ResponseUserDTO;
+import org.GoLifeAPI.handler.GlobalExceptionHandler;
 import org.GoLifeAPI.mapper.service.GoalDtoMapper;
 import org.GoLifeAPI.mapper.service.RecordDtoMapper;
 import org.GoLifeAPI.mapper.service.UserDtoMapper;
@@ -50,7 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = UserRestController.class)
 @AutoConfigureMockMvc
 @Import({UserDtoMapper.class, GoalDtoMapper.class, RecordDtoMapper.class,
-        UserRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class})
+        UserRestControllerTest.TestSecurityConfig.class, ValidatorConfig.class,
+        GlobalExceptionHandler.class})
 @ImportAutoConfiguration({
         ValidationAutoConfiguration.class
 })
