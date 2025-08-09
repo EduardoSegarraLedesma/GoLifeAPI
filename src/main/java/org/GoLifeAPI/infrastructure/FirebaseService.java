@@ -6,6 +6,8 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -13,17 +15,44 @@ import javax.annotation.PostConstruct;
 @Component
 public class FirebaseService {
 
+    private static final Logger log = LoggerFactory.getLogger(FirebaseService.class);
+
     @PostConstruct
     private void initializeFirebaseService() {
+        final long t0 = System.currentTimeMillis();
+        final String fbProject = System.getenv("FIREBASE_PROJECT_ID");
+        boolean ok = false;
+
         try {
+            if (fbProject == null || fbProject.isBlank()) {
+                throw new IllegalStateException("FIREBASE_PROJECT_ID no está definido");
+            }
+
+            GoogleCredentials cred = GoogleCredentials.getApplicationDefault();
+            log.info("[FB] init starting | fbProject={}, credsClass={}",
+                    fbProject, cred.getClass().getSimpleName());
+
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.getApplicationDefault())
-                    .setProjectId(System.getenv("FIREBASE_PROJECT_ID"))
+                    .setCredentials(cred)
+                    .setProjectId(fbProject)
                     .build();
-            FirebaseApp.initializeApp(options);
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+                log.info("[FB] initialized OK | optionsProject={}",
+                        FirebaseApp.getInstance().getOptions().getProjectId());
+            } else {
+                log.info("[FB] already initialized | optionsProject={}",
+                        FirebaseApp.getInstance().getOptions().getProjectId());
+            }
+
+            ok = true;
         } catch (Exception e) {
-            System.err.println("Error al inicializar Firebase: " + e.getMessage());
-            throw new RuntimeException("No se pudo inicializar Firebase", e);
+            log.error("[FB] init FAILED | fbProject={}", fbProject, e);
+            throw new IllegalStateException("No se pudo inicializar Firebase", e);
+        } finally {
+            log.info("[FB] init finished | status={}, elapsedMs={}",
+                    ok ? "OK" : "FAILED", System.currentTimeMillis() - t0);
         }
     }
 
