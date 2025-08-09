@@ -82,7 +82,6 @@ public class FirebaseService {
             FirebaseAuth.getInstance().deleteUser(uid);
             return true;
         } catch (FirebaseAuthException e) {
-            log.error("[FB] Delete Error:", e);
             return false;
         }
     }
