@@ -7,6 +7,7 @@ import org.GoLifeAPI.infrastructure.MongoService;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.dao.UserDAO;
 import org.GoLifeAPI.util.MongoContainer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -22,7 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @Testcontainers
 @SpringBootTest(
@@ -37,21 +40,22 @@ public abstract class CommonE2EMockIT {
     @Autowired
     protected MockMvc mockMvc;
 
+    @MockitoBean
+    protected FirebaseService firebaseService;
+
     static {
         MongoContainer.setUid("test-user");
     }
 
+    @BeforeEach
+    void stubFirebase() {
+        when(firebaseService.isAvailable()).thenReturn(true);
+        when(firebaseService.verifyBearerToken("Bearer good.token")).thenReturn("test-user");
+        when(firebaseService.deleteFirebaseUser(anyString())).thenReturn(true);
+    }
+
     @TestConfiguration
     static class E2ETestConfig {
-        @Bean
-        public FirebaseService firebaseService() {
-            FirebaseService mockFs = mock(FirebaseService.class);
-            when(mockFs.isAvailable()).thenReturn(true);
-            when(mockFs.verifyBearerToken("Bearer good.token")).thenReturn("test-user");
-            when(mockFs.deleteFirebaseUser(anyString())).thenReturn(true);
-            return mockFs;
-        }
-
         @Bean
         public MongoService mongoService() {
             try {

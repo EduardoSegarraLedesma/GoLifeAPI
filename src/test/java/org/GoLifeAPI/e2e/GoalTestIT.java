@@ -6,6 +6,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -15,6 +18,9 @@ public class GoalTestIT extends CommonE2EMockIT {
 
     @AfterAll
     public void nextTestSetUp() throws Exception {
+        when(firebaseService.isAvailable()).thenReturn(true);
+        when(firebaseService.verifyBearerToken(any())).thenReturn("test-user");
+        when(firebaseService.deleteFirebaseUser(anyString())).thenReturn(true);
         String payload = "{"
                 + "\"nombre\":\"Beber 2 litros de agua\","
                 + "\"descripcion\":\"Recordar beber suficiente agua diariamente\","
