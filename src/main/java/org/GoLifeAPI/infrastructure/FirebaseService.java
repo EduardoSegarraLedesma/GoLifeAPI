@@ -9,8 +9,6 @@ import com.google.firebase.auth.FirebaseToken;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 @Component
 public class FirebaseService {
@@ -18,12 +16,12 @@ public class FirebaseService {
     @PostConstruct
     private void initializeFirebaseService() {
         try {
-            FileInputStream serviceAccount = new FileInputStream("src/main/resources/firebase/serviceAccountKey.json");
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.getApplicationDefault())
+                    .setProjectId(System.getenv("FIREBASE_PROJECT_ID"))
                     .build();
             FirebaseApp.initializeApp(options);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error al inicializar Firebase: " + e.getMessage());
             throw new RuntimeException("No se pudo inicializar Firebase", e);
         }
