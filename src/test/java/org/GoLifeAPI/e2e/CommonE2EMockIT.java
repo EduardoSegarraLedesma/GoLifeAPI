@@ -3,6 +3,7 @@ package org.GoLifeAPI.e2e;
 
 import org.GoLifeAPI.Main;
 import org.GoLifeAPI.infrastructure.FirebaseService;
+import org.GoLifeAPI.infrastructure.KeyManagementService;
 import org.GoLifeAPI.infrastructure.MongoService;
 import org.GoLifeAPI.persistence.implementation.dao.GoalDAO;
 import org.GoLifeAPI.persistence.implementation.dao.UserDAO;
@@ -42,16 +43,21 @@ public abstract class CommonE2EMockIT {
 
     @MockitoBean
     protected FirebaseService firebaseService;
+    @MockitoBean
+    protected KeyManagementService keyManagementService;
 
     static {
         MongoContainer.setUid("test-user");
     }
 
     @BeforeEach
-    void stubFirebase() {
+    public void stubServices() {
         when(firebaseService.isAvailable()).thenReturn(true);
         when(firebaseService.verifyBearerToken("Bearer good.token")).thenReturn("test-user");
         when(firebaseService.deleteFirebaseUser(anyString())).thenReturn(true);
+        when(keyManagementService.ping()).thenReturn(true);
+        when(keyManagementService.sign("test-user")).thenReturn("signed-test-user");
+        when(keyManagementService.verify("test-user", "signed-test-user")).thenReturn(true);
     }
 
     @TestConfiguration

@@ -1,5 +1,6 @@
 package org.GoLifeAPI.service.implementation;
 
+import org.GoLifeAPI.infrastructure.KeyManagementService;
 import org.GoLifeAPI.service.interfaces.IGoalService;
 import org.GoLifeAPI.dto.goal.CreateBoolGoalDTO;
 import org.GoLifeAPI.dto.goal.CreateNumGoalDTO;
@@ -30,6 +31,7 @@ public class GoalService implements IGoalService {
     private final GoalDtoMapper goalDtoMapper;
     private final GoalPatchMapper goalPatchMapper;
     private final StatsService statsService;
+    private final KeyManagementService keyManagementService;
     private final IGoalPersistenceController goalPersistenceController;
 
     @Autowired
@@ -37,11 +39,13 @@ public class GoalService implements IGoalService {
                        GoalDtoMapper goalDtoMapper,
                        GoalPatchMapper goalPatchMapper,
                        StatsService statsService,
+                       KeyManagementService keyManagementService,
                        IGoalPersistenceController goalPersistenceController) {
         this.userDtoMapper = userDtoMapper;
         this.goalDtoMapper = goalDtoMapper;
         this.goalPatchMapper = goalPatchMapper;
         this.statsService = statsService;
+        this.keyManagementService = keyManagementService;
         this.goalPersistenceController = goalPersistenceController;
     }
 
@@ -51,12 +55,13 @@ public class GoalService implements IGoalService {
                 dto.getFecha(),
                 dto.getDuracionValor(),
                 dto.getDuracionUnidad());
-        BoolGoal goal = goalDtoMapper.mapCreateBoolGoalDtoToBoolGoal(dto, uid, finalDate);
+        String signedUid = keyManagementService.sign(uid);
+        BoolGoal goal = goalDtoMapper.mapCreateBoolGoalDtoToBoolGoal(dto, signedUid, finalDate);
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.createBoolGoal(
                         goal,
                         statsService.getUserStatsUpdateDoc(+1, 0),
-                        uid));
+                        signedUid));
     }
 
     @Override
@@ -65,12 +70,13 @@ public class GoalService implements IGoalService {
                 dto.getFecha(),
                 dto.getDuracionValor(),
                 dto.getDuracionUnidad());
-        NumGoal goal = goalDtoMapper.mapCreateNumGoalDtoToNumGoal(dto, uid, finalDate);
+        String signedUid = keyManagementService.sign(uid);
+        NumGoal goal = goalDtoMapper.mapCreateNumGoalDtoToNumGoal(dto, signedUid, finalDate);
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.createNumGoal(
                         goal,
                         statsService.getUserStatsUpdateDoc(+1, 0),
-                        uid));
+                        signedUid));
     }
 
     @Override
@@ -91,11 +97,12 @@ public class GoalService implements IGoalService {
         if (goal.getFinalizado())
             throw new ConflictException("La meta ya esta finalizada");
         Document update = goalPatchMapper.mapFinalizePatchToDoc();
+        String signedUid = keyManagementService.sign(uid);
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.updateWithUserStats(
                         update, update,
                         statsService.getUserStatsUpdateDoc(0, +1),
-                        uid, mid));
+                        signedUid, mid));
     }
 
     @Override
@@ -105,12 +112,13 @@ public class GoalService implements IGoalService {
             throw new ConflictException("La meta ya esta finalizada, no puedes modificarla");
         if (!goal.getTipo().toString().equalsIgnoreCase("Bool"))
             throw new BadRequestException("Tipo incorrecto para la meta");
+        String signedUid = keyManagementService.sign(uid);
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.updateWithGoalStats(
                         goalPatchMapper.mapPatchBoolGoalDtoToDoc(dto),
                         goalPatchMapper.mapPatchGoalDtoToPartialDoc(dto),
                         statsService.getGoalStatsFinalDateUpdateDoc(dto, goal),
-                        uid, mid));
+                        signedUid, mid));
     }
 
     @Override
@@ -120,12 +128,13 @@ public class GoalService implements IGoalService {
             throw new ConflictException("La meta ya esta finalizada, no puedes modificarla");
         if (!goal.getTipo().toString().equalsIgnoreCase("Num"))
             throw new BadRequestException("Tipo incorrecto para la meta");
+        String signedUid = keyManagementService.sign(uid);
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.updateWithGoalStats(
                         goalPatchMapper.mapPatchNumGoalDtoToDoc(dto),
                         goalPatchMapper.mapPatchGoalDtoToPartialDoc(dto),
                         statsService.getGoalStatsFinalDateUpdateDoc(dto, goal),
-                        uid, mid));
+                        signedUid, mid));
     }
 
     @Override
@@ -136,15 +145,16 @@ public class GoalService implements IGoalService {
             deltaUserStatsDoc = statsService.getUserStatsUpdateDoc(-1, -1);
         else
             deltaUserStatsDoc = statsService.getUserStatsUpdateDoc(-1, 0);
+        String signedUid = keyManagementService.sign(uid);
         return userDtoMapper.mapUserStatsToResponseUserStatsDTO(
                 goalPersistenceController.delete(
                         deltaUserStatsDoc,
-                        uid, mid));
+                        signedUid, mid));
     }
 
     public Goal validateAndGetGoal(String uid, String mid) {
         Goal goal = goalPersistenceController.read(mid);
-        if (!uid.equals(goal.getUid()))
+        if(!keyManagementService.verify(uid,goal.getUid()))
             throw new ForbiddenResourceException("No autorizado para acceder a esta meta");
         return goal;
     }

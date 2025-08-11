@@ -1,6 +1,7 @@
 package org.GoLifeAPI.mixed.web;
 
 import org.GoLifeAPI.infrastructure.FirebaseService;
+import org.GoLifeAPI.infrastructure.KeyManagementService;
 import org.GoLifeAPI.infrastructure.MongoService;
 import org.GoLifeAPI.web.HealthRestController;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,8 @@ public class HealthRestControllerTest {
     private MongoService mongoService;
     @MockitoBean
     private FirebaseService firebaseService;
+    @MockitoBean
+    private KeyManagementService keyManagementService;
 
     @Nested
     @DisplayName("GET /api/salud")
@@ -40,6 +43,7 @@ public class HealthRestControllerTest {
         public void whenAllServicesUp_thenReturns200() throws Exception {
             when(mongoService.ping()).thenReturn(true);
             when(firebaseService.isAvailable()).thenReturn(true);
+            when(keyManagementService.ping()).thenReturn(true);
 
             mockMvc.perform(get("/api/salud")
                             .accept(MediaType.TEXT_PLAIN))
@@ -51,6 +55,7 @@ public class HealthRestControllerTest {
         public void whenMongoDown_thenReturns503() throws Exception {
             when(mongoService.ping()).thenReturn(false);
             when(firebaseService.isAvailable()).thenReturn(true);
+            when(keyManagementService.ping()).thenReturn(true);
 
             mockMvc.perform(get("/api/salud"))
                     .andExpect(status().isServiceUnavailable())
@@ -61,6 +66,19 @@ public class HealthRestControllerTest {
         public void whenFirebaseDown_thenReturns503() throws Exception {
             when(mongoService.ping()).thenReturn(true);
             when(firebaseService.isAvailable()).thenReturn(false);
+            when(keyManagementService.ping()).thenReturn(true);
+
+
+            mockMvc.perform(get("/api/salud"))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(content().string("Algunos servicios no estan disponibles"));
+        }
+
+        @Test
+        public void whenKMSDown_thenReturns503() throws Exception {
+            when(mongoService.ping()).thenReturn(true);
+            when(firebaseService.isAvailable()).thenReturn(true);
+            when(keyManagementService.ping()).thenReturn(false);
 
             mockMvc.perform(get("/api/salud"))
                     .andExpect(status().isServiceUnavailable())
