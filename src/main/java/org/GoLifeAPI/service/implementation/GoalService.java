@@ -132,7 +132,7 @@ public class GoalService implements IGoalService {
         return userDtoMapper.mapUserToResponseUserDTO(
                 goalPersistenceController.updateWithGoalStats(
                         goalPatchMapper.mapPatchNumGoalDtoToDoc(dto),
-                        goalPatchMapper.mapPatchGoalDtoToPartialDoc(dto),
+                        goalPatchMapper.mapPatchGoalDtoToPartialNumDoc(dto),
                         statsService.getGoalStatsFinalDateUpdateDoc(dto, goal),
                         signedUid, mid));
     }

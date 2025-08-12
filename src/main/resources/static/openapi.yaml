@@ -865,7 +865,14 @@ components:
         metas:
           type: array
           items:
-            $ref: '#/components/schemas/ResponsePartialGoal'
+            oneOf:
+              -  $ref: '#/components/schemas/ResponsePartialGoal'
+              -  $ref: '#/components/schemas/ResponsePartialNumGoal'
+            discriminator:
+              propertyName: tipo
+              mapping:
+                Bool: '#/components/schemas/ResponsePartialGoal'
+                Num: '#/components/schemas/ResponsePartialNumGoal'
         estadisticas:
           $ref: '#/components/schemas/ResponseUserStats'
 
@@ -1211,7 +1218,7 @@ components:
 
     ResponsePartialGoal:
       type: object
-      description: DTO de respuesta para devolver datos básicos de una meta cualquiera (Num o Bool)
+      description: DTO de respuesta para devolver datos básicos de una meta Booleana
       required:
         - _id
         - nombre
@@ -1247,6 +1254,55 @@ components:
           type: string
           description: Unidad de duración
           enum: [ Dias, Semanas, Meses, Años, Indefinido ]
+
+    ResponsePartialNumGoal:
+      type: object
+      description: DTO de respuesta para devolver datos básicos de una meta Numeral
+      required:
+        - _id
+        - nombre
+        - tipo
+        - fecha
+        - finalizado
+        - duracionValor
+        - duracionUnidad
+        - valorObjetivo
+        - unidad
+      properties:
+        _id:
+          type: string
+          example: "60f5a4b2e1d3f5c1a4e9d8b7"
+          description: Identificador de la meta
+        nombre:
+          type: string
+          description: Nombre de la meta
+        tipo:
+          type: string
+          description: Tipo de la meta (Bool o Num)
+          enum: [ Bool, Num ]
+        fecha:
+          type: string
+          format: date
+          description: Fecha de inicio de la meta (ISO 8601)
+        finalizado:
+          type: boolean
+          description: Si la meta está finalizada
+        duracionValor:
+          type: integer
+          description: Cantidad de unidades de duración
+          example: 3
+        duracionUnidad:
+          type: string
+          description: Unidad de duración
+          enum: [ Dias, Semanas, Meses, Años, Indefinido ]
+        valorObjetivo:
+            type: number
+            description: Valor objetivo numérico (positivo), hasta 13 dígitos enteros y 2 decimales
+            example: 5.0
+        unidad:
+            type: string
+            description: Unidad de medida para el valor objetivo
+            example: "kg"
 
     # — Registros —
     CreateBoolRecordRequest:
