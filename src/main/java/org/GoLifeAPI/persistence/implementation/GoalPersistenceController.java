@@ -58,7 +58,7 @@ public class GoalPersistenceController extends BasePersistenceController impleme
         try {
             return transactionRunner.run(session -> {
                 Document goalDoc = goalDocMapper.mapNumGoalToDoc(goal);
-                Document partialGoalDoc = goalDocMapper.mapGoalToPartialGoalDoc(goal);
+                Document partialGoalDoc = goalDocMapper.mapGoalToPartialNumGoalDoc(goal);
                 Document userDoc = create(session, goalDoc, partialGoalDoc, userStatsUpdate, uid);
                 return userDocMapper.mapDocToUser(userDoc);
             });

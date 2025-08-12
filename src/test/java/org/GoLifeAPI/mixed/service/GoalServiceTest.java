@@ -6,6 +6,7 @@ import org.GoLifeAPI.dto.user.ResponseUserStatsDTO;
 import org.GoLifeAPI.exception.BadRequestException;
 import org.GoLifeAPI.exception.ConflictException;
 import org.GoLifeAPI.exception.ForbiddenResourceException;
+import org.GoLifeAPI.infrastructure.KeyManagementService;
 import org.GoLifeAPI.mapper.service.GoalDtoMapper;
 import org.GoLifeAPI.mapper.service.GoalPatchMapper;
 import org.GoLifeAPI.mapper.service.RecordDtoMapper;
@@ -32,6 +33,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ import java.util.ArrayList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class GoalServiceTest {
 
     @Spy
@@ -51,11 +55,14 @@ public class GoalServiceTest {
     private StatsService statsService = new StatsService();
 
     @Mock
+    private KeyManagementService keyManagementService;
+    @Mock
     private IGoalPersistenceController goalPersistenceController;
 
     @InjectMocks
     private GoalService goalService;
 
+    private String signedUid;
     private String uid;
     private String mid;
 
@@ -65,6 +72,9 @@ public class GoalServiceTest {
         clearInvocations(statsService);
         uid = "test-uid";
         mid = "test-mid";
+        signedUid = "signed-"+uid;
+        when(keyManagementService.sign(uid)).thenReturn(signedUid);
+        when(keyManagementService.verify(uid, signedUid)).thenReturn(true);
     }
 
     @Nested
@@ -78,9 +88,9 @@ public class GoalServiceTest {
                     7, Enums.Duracion.Dias
             );
 
-            User user = new User(uid, "apellidos", "nombre");
+            User user = new User(signedUid, "apellidos", "nombre");
             when(goalPersistenceController.createBoolGoal(
-                    any(BoolGoal.class), any(Document.class), eq(uid)
+                    any(BoolGoal.class), any(Document.class), eq(signedUid)
             )).thenReturn(user);
 
             ResponseUserDTO result = goalService.createBoolGoal(dto, uid);
@@ -90,7 +100,7 @@ public class GoalServiceTest {
                     dto.getFecha(), dto.getDuracionValor(), dto.getDuracionUnidad()
             );
             verify(goalPersistenceController).createBoolGoal(
-                    any(BoolGoal.class), any(Document.class), eq(uid)
+                    any(BoolGoal.class), any(Document.class), eq(signedUid)
             );
             verify(statsService).getUserStatsUpdateDoc(1, 0);
             verify(userDtoMapper).mapUserToResponseUserDTO(user);
@@ -110,9 +120,9 @@ public class GoalServiceTest {
                     123.45, "km"
             );
 
-            User user = new User(uid, "apellidos", "nombre");
+            User user = new User(signedUid, "apellidos", "nombre");
             when(goalPersistenceController.createNumGoal(
-                    any(NumGoal.class), any(Document.class), eq(uid)
+                    any(NumGoal.class), any(Document.class), eq(signedUid)
             )).thenReturn(user);
 
             ResponseUserDTO result = goalService.createNumGoal(dto, uid);
@@ -123,7 +133,7 @@ public class GoalServiceTest {
             );
             verify(statsService).getUserStatsUpdateDoc(1, 0);
             verify(goalPersistenceController).createNumGoal(
-                    any(NumGoal.class), any(Document.class), eq(uid)
+                    any(NumGoal.class), any(Document.class), eq(signedUid)
             );
             verify(userDtoMapper).mapUserToResponseUserDTO(user);
         }
@@ -135,7 +145,7 @@ public class GoalServiceTest {
         @Test
         public void getGoal_whenNumGoal_returnsDTOWithCorrectFields() {
             LocalDate date = LocalDate.of(2025, 7, 1);
-            NumGoal goal = new NumGoal(uid, new ObjectId(), "name", "desc",
+            NumGoal goal = new NumGoal(signedUid, new ObjectId(), "name", "desc",
                     date, true, 5, Enums.Duracion.Semanas,
                     new GoalStats(true, date), new ArrayList<>(), 123.45, "unit");
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -150,7 +160,7 @@ public class GoalServiceTest {
         @Test
         public void getGoal_whenBoolGoal_returnsDTOWithCorrectFields() {
             LocalDate date = LocalDate.of(2025, 6, 15);
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "boolName", "boolDesc",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "boolName", "boolDesc",
                     date, false, 10, Enums.Duracion.Meses,
                     new GoalStats(false, date), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -165,7 +175,7 @@ public class GoalServiceTest {
         @Test
         public void getGoal_whenUnexpectedGoalType_throwsIllegalStateException() {
             Goal unknown = mock(Goal.class);
-            when(unknown.getUid()).thenReturn(uid);
+            when(unknown.getUid()).thenReturn(signedUid);
             when(goalPersistenceController.read(eq(mid))).thenReturn(unknown);
 
             Assertions.assertThatThrownBy(() ->
@@ -181,14 +191,14 @@ public class GoalServiceTest {
     class finalizeGoal {
         @Test
         public void finalizeGoal_whenNotFinalized_delegatesToPersistenceAndReturnsDTO() {
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), false, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
 
-            User user = new User(uid, "apellidos", "nombre");
+            User user = new User(signedUid, "apellidos", "nombre");
             when(goalPersistenceController.updateWithUserStats(
-                    any(Document.class), any(Document.class), any(Document.class), eq(uid), eq(mid)
+                    any(Document.class), any(Document.class), any(Document.class), eq(signedUid), eq(mid)
             )).thenReturn(user);
 
             ResponseUserDTO result = goalService.finalizeGoal(uid, mid);
@@ -196,13 +206,13 @@ public class GoalServiceTest {
             Assertions.assertThat(result).isNotNull();
             verify(goalPersistenceController).read(eq(mid));
             verify(goalPersistenceController).updateWithUserStats(
-                    any(Document.class), any(Document.class), any(Document.class), eq(uid), eq(mid)
+                    any(Document.class), any(Document.class), any(Document.class), eq(signedUid), eq(mid)
             );
         }
 
         @Test
         public void finalizeGoal_whenAlreadyFinalized_throwsConflictException() {
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), true, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -227,18 +237,18 @@ public class GoalServiceTest {
             dto.setDuracionUnidad(Enums.Duracion.Semanas);
 
             LocalDate start = LocalDate.of(2025, 7, 1);
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "old", "oldDesc",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "old", "oldDesc",
                     start, false, 5, Enums.Duracion.Dias,
                     new GoalStats(false, start), new ArrayList<>());
 
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
 
-            User updatedUser = new User(uid, "apellidos", "nombre");
+            User updatedUser = new User(signedUid, "apellidos", "nombre");
             when(goalPersistenceController.updateWithGoalStats(
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)))
                     .thenReturn(updatedUser);
 
@@ -251,7 +261,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -261,7 +271,7 @@ public class GoalServiceTest {
             PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
             dto.setNombre("nuevoNombre");
 
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), true, 5, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -275,7 +285,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -285,7 +295,7 @@ public class GoalServiceTest {
             PatchBoolGoalDTO dto = new PatchBoolGoalDTO();
             dto.setNombre("nuevoNombre");
 
-            NumGoal goal = new NumGoal(uid, new ObjectId(), "n", "d",
+            NumGoal goal = new NumGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
                     100.0, "km");
@@ -300,7 +310,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -315,18 +325,18 @@ public class GoalServiceTest {
             dto.setValorObjetivo(50.0);
             dto.setUnidad("km");
 
-            NumGoal goal = new NumGoal(uid, new ObjectId(), "oldName", "oldDesc",
+            NumGoal goal = new NumGoal(signedUid, new ObjectId(), "oldName", "oldDesc",
                     LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
                     100.0, "m");
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
 
-            User updated = new User(uid, "newApellidos", "newNombre");
+            User updated = new User(signedUid, "newApellidos", "newNombre");
             when(goalPersistenceController.updateWithGoalStats(
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)))
                     .thenReturn(updated);
 
@@ -339,7 +349,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -349,7 +359,7 @@ public class GoalServiceTest {
             PatchNumGoalDTO dto = new PatchNumGoalDTO();
             dto.setValorObjetivo(50.0);
 
-            NumGoal goal = new NumGoal(uid, new ObjectId(), "n", "d",
+            NumGoal goal = new NumGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), true, 5, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
                     100.0, "m");
@@ -364,7 +374,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -374,7 +384,7 @@ public class GoalServiceTest {
             PatchNumGoalDTO dto = new PatchNumGoalDTO();
             dto.setValorObjetivo(50.0);
 
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -388,7 +398,7 @@ public class GoalServiceTest {
                     any(Document.class),
                     any(Document.class),
                     any(Document.class),
-                    eq(uid),
+                    eq(signedUid),
                     eq(mid)
             );
         }
@@ -400,11 +410,11 @@ public class GoalServiceTest {
 
         @Test
         public void deleteGoal_whenGoalFinalizado_usesStatsDeltaMinus1Minus1() {
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), true, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
-            when(goalPersistenceController.delete(any(Document.class), eq(uid), eq(mid)))
+            when(goalPersistenceController.delete(any(Document.class), eq(signedUid), eq(mid)))
                     .thenReturn(new UserStats(0, 0));
 
             ResponseUserStatsDTO result = goalService.deleteGoal(uid, mid);
@@ -413,16 +423,16 @@ public class GoalServiceTest {
 
             verify(goalPersistenceController).read(eq(mid));
             verify(statsService).getUserStatsUpdateDoc(-1, -1);
-            verify(goalPersistenceController).delete(any(Document.class), eq(uid), eq(mid));
+            verify(goalPersistenceController).delete(any(Document.class), eq(signedUid), eq(mid));
         }
 
         @Test
         public void deleteGoal_whenGoalNotFinalizado_usesStatsDeltaMinus1Zero() {
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), false, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
-            when(goalPersistenceController.delete(any(Document.class), eq(uid), eq(mid)))
+            when(goalPersistenceController.delete(any(Document.class), eq(signedUid), eq(mid)))
                     .thenReturn(new UserStats(0, 0));
 
             ResponseUserStatsDTO result = goalService.deleteGoal(uid, mid);
@@ -431,7 +441,7 @@ public class GoalServiceTest {
 
             verify(goalPersistenceController).read(eq(mid));
             verify(statsService).getUserStatsUpdateDoc(-1, 0);
-            verify(goalPersistenceController).delete(any(Document.class), eq(uid), eq(mid));
+            verify(goalPersistenceController).delete(any(Document.class), eq(signedUid), eq(mid));
         }
     }
 
@@ -440,7 +450,7 @@ public class GoalServiceTest {
     class ValidateAndGetGoal {
         @Test
         public void validateAndGetGoal_whenUidMatches_returnsGoal() {
-            BoolGoal goal = new BoolGoal(uid, new ObjectId(), "n", "d",
+            BoolGoal goal = new BoolGoal(signedUid, new ObjectId(), "n", "d",
                     LocalDate.of(2025, 7, 1), false, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
@@ -457,7 +467,7 @@ public class GoalServiceTest {
                     LocalDate.of(2025, 7, 1), false, 1, Enums.Duracion.Dias,
                     new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>());
             when(goalPersistenceController.read(eq(mid))).thenReturn(goal);
-
+            when(keyManagementService.verify(eq(uid), anyString())).thenReturn(false);
             Assertions.assertThatThrownBy(() ->
                             goalService.validateAndGetGoal(uid, mid)
                     ).isInstanceOf(ForbiddenResourceException.class)

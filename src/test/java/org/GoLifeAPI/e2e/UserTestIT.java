@@ -4,7 +4,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -16,8 +15,11 @@ public class UserTestIT extends CommonE2EMockIT {
     @AfterAll
     public void nextTestSetUp() throws Exception {
         when(firebaseService.isAvailable()).thenReturn(true);
-        when(firebaseService.verifyBearerToken(any())).thenReturn("test-user");
+        when(firebaseService.verifyBearerToken("Bearer good.token")).thenReturn("test-user");
         when(firebaseService.deleteFirebaseUser(anyString())).thenReturn(true);
+        when(keyManagementService.ping()).thenReturn(true);
+        when(keyManagementService.sign("test-user")).thenReturn("signed-test-user");
+        when(keyManagementService.verify("test-user", "signed-test-user")).thenReturn(true);
         String payload = "{\"nombre\":\"test-nombre\",\"apellidos\":\"test-apellidos\"}";
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer good.token")

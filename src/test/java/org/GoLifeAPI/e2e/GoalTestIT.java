@@ -6,11 +6,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GoalTestIT extends CommonE2EMockIT {
@@ -19,8 +19,11 @@ public class GoalTestIT extends CommonE2EMockIT {
     @AfterAll
     public void nextTestSetUp() throws Exception {
         when(firebaseService.isAvailable()).thenReturn(true);
-        when(firebaseService.verifyBearerToken(any())).thenReturn("test-user");
+        when(firebaseService.verifyBearerToken("Bearer good.token")).thenReturn("test-user");
         when(firebaseService.deleteFirebaseUser(anyString())).thenReturn(true);
+        when(keyManagementService.ping()).thenReturn(true);
+        when(keyManagementService.sign("test-user")).thenReturn("signed-test-user");
+        when(keyManagementService.verify("test-user", "signed-test-user")).thenReturn(true);
         String payload = "{"
                 + "\"nombre\":\"Beber 2 litros de agua\","
                 + "\"descripcion\":\"Recordar beber suficiente agua diariamente\","
@@ -49,13 +52,13 @@ public class GoalTestIT extends CommonE2EMockIT {
                 + "\"valorObjetivo\":2,"
                 + "\"unidad\":\"litros\""
                 + "}";
-         response = mockMvc.perform(post("/api/metas/num")
+        response = mockMvc.perform(post("/api/metas/num")
                 .header("Authorization", "Bearer good.token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload));
-         mvcResult = response.andReturn();
-         json = mvcResult.getResponse().getContentAsString();
-         metaId = com.jayway.jsonpath.JsonPath
+        mvcResult = response.andReturn();
+        json = mvcResult.getResponse().getContentAsString();
+        metaId = com.jayway.jsonpath.JsonPath
                 .parse(json)
                 .read("$.metas[2]._id", String.class);
         MongoContainer.setNumMid(metaId);

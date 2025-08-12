@@ -30,6 +30,7 @@ public class GoalPatchMapper {
         return doc;
     }
 
+
     public Document mapPatchGoalDtoToPartialDoc(PatchGoalDTO dto) {
         Document doc = new Document();
         String name = dto.getNombre();
@@ -37,6 +38,15 @@ public class GoalPatchMapper {
         if (name != null && !name.isBlank()) doc.append("nombre", name);
         appendCorrectDuracionValor(doc, dto);
         if (durationUnit != null) doc.append("duracionUnidad", durationUnit);
+        return doc;
+    }
+
+    public Document mapPatchGoalDtoToPartialNumDoc(PatchNumGoalDTO dto) {
+        Document doc = mapPatchGoalDtoToPartialDoc(dto);
+        Double goalValue = dto.getValorObjetivo();
+        String unit = dto.getUnidad();
+        if (goalValue != null) doc.append("valorObjetivo", goalValue);
+        if (unit != null && !unit.isBlank()) doc.append("unidad", unit);
         return doc;
     }
 

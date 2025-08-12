@@ -70,6 +70,15 @@ public class GoalDocMapper {
                 .append("duracionUnidad", goal.getDuracionUnidad());
     }
 
+    public Document mapGoalToPartialNumGoalDoc(Goal goal) {
+        Document partialGoalDoc = mapGoalToPartialGoalDoc(goal);
+        if (goal instanceof NumGoal num) {
+            partialGoalDoc.append("valorObjetivo", num.getValorObjetivo())
+                    .append("unidad", num.getUnidad());
+        }
+        return partialGoalDoc;
+    }
+
     public Document mapPartialGoalToDoc(PartialGoal goal) {
         return new Document()
                 .append("_id", goal.get_id())
@@ -112,7 +121,7 @@ public class GoalDocMapper {
     }
 
     public BoolGoal mapDocToBoolGoal(Document boolGoalDoc) {
-        if(boolGoalDoc == null || boolGoalDoc.isEmpty()) return null;
+        if (boolGoalDoc == null || boolGoalDoc.isEmpty()) return null;
         List<Document> boolRecords = boolGoalDoc.getList("registros", Document.class);
         List<BoolRecord> registros = Collections.emptyList();
         if (boolRecords != null) {
@@ -136,7 +145,7 @@ public class GoalDocMapper {
     }
 
     public NumGoal mapDocToNumGoal(Document numGoalDoc) {
-        if(numGoalDoc == null || numGoalDoc.isEmpty()) return null;
+        if (numGoalDoc == null || numGoalDoc.isEmpty()) return null;
         List<Document> numrecords = numGoalDoc.getList("registros", Document.class);
         List<NumRecord> registros = Collections.emptyList();
         if (numrecords != null) {
@@ -158,11 +167,18 @@ public class GoalDocMapper {
                 registros,
                 numGoalDoc.getDouble("valorObjetivo"),
                 numGoalDoc.getString("unidad")
-                );
+        );
+    }
+
+    public PartialGoal mapDocToPartialGoal(Document partialGoalDoc) {
+        if (partialGoalDoc.getDouble("valorObjetivo") != null)
+            return mapDocToPartialNumGoal(partialGoalDoc);
+        else
+            return mapDocToPartialBoolGoal(partialGoalDoc);
     }
 
 
-    public PartialGoal mapDocToPartialGoal(Document partialGoalDoc) {
+    public PartialGoal mapDocToPartialBoolGoal(Document partialGoalDoc) {
         return new PartialGoal(
                 partialGoalDoc.getObjectId("_id"),
                 partialGoalDoc.getString("nombre"),
@@ -174,9 +190,23 @@ public class GoalDocMapper {
         );
     }
 
+    public PartialGoal mapDocToPartialNumGoal(Document partialGoalDoc) {
+        return new PartialNumGoal(
+                partialGoalDoc.getObjectId("_id"),
+                partialGoalDoc.getString("nombre"),
+                Enums.Tipo.valueOf(partialGoalDoc.getString("tipo")),
+                LocalDate.parse(partialGoalDoc.getString("fecha")),
+                partialGoalDoc.getBoolean("finalizado"),
+                partialGoalDoc.getInteger("duracionValor"),
+                Enums.Duracion.valueOf(partialGoalDoc.getString("duracionUnidad")),
+                partialGoalDoc.getDouble("valorObjetivo"),
+                partialGoalDoc.getString("unidad")
+        );
+    }
+
     private GoalStats mapDocToGoalStats(Document goalStatsDoc) {
         return new GoalStats(
                 goalStatsDoc.getBoolean("valorAlcanzado"),
-                !goalStatsDoc.getString("fechaFin").isEmpty()? LocalDate.parse(goalStatsDoc.getString("fechaFin")) : null );
+                !goalStatsDoc.getString("fechaFin").isEmpty() ? LocalDate.parse(goalStatsDoc.getString("fechaFin")) : null);
     }
 }

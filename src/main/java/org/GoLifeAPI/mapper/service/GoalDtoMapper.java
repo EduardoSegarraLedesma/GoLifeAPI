@@ -3,10 +3,7 @@ package org.GoLifeAPI.mapper.service;
 import org.GoLifeAPI.dto.goal.*;
 import org.GoLifeAPI.dto.record.ResponseBoolRecordDTO;
 import org.GoLifeAPI.dto.record.ResponseNumRecordDTO;
-import org.GoLifeAPI.model.goal.BoolGoal;
-import org.GoLifeAPI.model.goal.GoalStats;
-import org.GoLifeAPI.model.goal.NumGoal;
-import org.GoLifeAPI.model.goal.PartialGoal;
+import org.GoLifeAPI.model.goal.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -95,6 +92,13 @@ public class GoalDtoMapper {
     }
 
     public ResponsePartialGoalDTO mapPartialGoalToResponsePartialGoalDTO(PartialGoal partialGoal) {
+        if (partialGoal instanceof PartialNumGoal partialNumGoal)
+            return mapPartialGoalToResponsePartialNumGoalDTO(partialNumGoal);
+        else
+            return mapPartialGoalToResponsePartialBoolGoalDTO(partialGoal);
+    }
+
+    public ResponsePartialGoalDTO mapPartialGoalToResponsePartialBoolGoalDTO(PartialGoal partialGoal) {
         return new ResponsePartialGoalDTO(
                 partialGoal.get_id(),
                 partialGoal.getNombre(),
@@ -103,6 +107,20 @@ public class GoalDtoMapper {
                 partialGoal.getFinalizado(),
                 partialGoal.getDuracionValor(),
                 partialGoal.getDuracionUnidad()
+        );
+    }
+
+    public ResponsePartialNumGoalDTO mapPartialGoalToResponsePartialNumGoalDTO(PartialNumGoal partialGoal) {
+        return new ResponsePartialNumGoalDTO(
+                partialGoal.get_id(),
+                partialGoal.getNombre(),
+                partialGoal.getTipo(),
+                partialGoal.getFecha().format(formatter),
+                partialGoal.getFinalizado(),
+                partialGoal.getDuracionValor(),
+                partialGoal.getDuracionUnidad(),
+                partialGoal.getValorObjetivo(),
+                partialGoal.getUnidad()
         );
     }
 }

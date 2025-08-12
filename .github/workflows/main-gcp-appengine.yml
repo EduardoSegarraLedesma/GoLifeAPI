@@ -85,12 +85,14 @@ jobs:
       - name: Replace env vars in app.yaml
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-          DB_NAME:               ${{ secrets.DB_NAME }}
-          FIREBASE_PROJECT_ID:               ${{ secrets.FIREBASE_PROJECT_ID }}
+          DB_NAME:              ${{ secrets.DB_NAME }}
+          FIREBASE_PROJECT_ID:  ${{ secrets.FIREBASE_PROJECT_ID }}
+          KMS_CRYPTO_KEY:       ${{ secrets.KMS_CRYPTO_KEY }}
         run: |
           sed -i "s|DB_CONNECTION_STRING_PLACEHOLDER|$DB_CONNECTION_STRING|g" app.yaml
           sed -i "s|DB_NAME_PLACEHOLDER|$DB_NAME|g" app.yaml
           sed -i "s|FIREBASE_PROJECT_ID_PLACEHOLDER|$FIREBASE_PROJECT_ID|g" app.yaml
+          sed -i "s|KMS_CRYPTO_KEY_PLACEHOLDER|$KMS_CRYPTO_KEY|g" app.yaml
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
