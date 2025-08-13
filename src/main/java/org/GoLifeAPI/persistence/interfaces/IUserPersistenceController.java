@@ -11,5 +11,5 @@ public interface IUserPersistenceController {
 
     User update(Document update, String uid);
 
-    void delete(String uid);
+    void delete(String dbUid, String fbUid);
 }

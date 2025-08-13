@@ -83,15 +83,15 @@ public class UserPersistenceController extends BasePersistenceController impleme
     }
 
     @Override
-    public void delete(String uid) {
+    public void delete(String dbUid, String fbUid) {
         try {
             transactionRunner.run(session -> {
-                DeleteResult deleteUser = userDAO.deleteUserByUid(session, uid);
+                DeleteResult deleteUser = userDAO.deleteUserByUid(session, dbUid);
                 if (!deleteUser.wasAcknowledged()) throw new RuntimeException();
                 if (deleteUser.getDeletedCount() == 0) throw new NotFoundException("Usuario no encontrado");
-                DeleteResult deleteGoals = goalDAO.deleteManyGoalsByUid(session, uid);
+                DeleteResult deleteGoals = goalDAO.deleteManyGoalsByUid(session, dbUid);
                 if (!deleteGoals.wasAcknowledged()) throw new RuntimeException();
-                if (!firebaseService.deleteFirebaseUser(uid)) throw new RuntimeException();
+                if (!firebaseService.deleteFirebaseUser(fbUid)) throw new RuntimeException();
                 return null;
             });
         } catch (NotFoundException e) {

@@ -60,6 +60,6 @@ public class UserService implements IUserService {
     @Override
     public void deleteUser(String uid) {
         String signedUid = keyManagementService.sign(uid);
-        userPersistenceController.delete(signedUid);
+        userPersistenceController.delete(signedUid, uid);
     }
 }
