@@ -144,7 +144,7 @@ public class UserServiceTest {
         @Test
         public void deleteUser_whenValidUid_delegatesToPersistence() {
             userService.deleteUser(uid);
-            verify(userPersistenceController).delete(eq(signedUid));
+            verify(userPersistenceController).delete(eq(signedUid),eq(uid));
         }
     }
 }
