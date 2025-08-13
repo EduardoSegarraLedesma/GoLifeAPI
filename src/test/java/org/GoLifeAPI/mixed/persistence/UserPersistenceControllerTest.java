@@ -268,7 +268,7 @@ public class UserPersistenceControllerTest {
         public void delete_whenAllOperationsSucceed_noException() {
             when(firebaseService.deleteFirebaseUser(any())).thenReturn(true);
 
-            Assertions.assertThatCode(() -> userPersistenceController.delete(uid))
+            Assertions.assertThatCode(() -> userPersistenceController.delete(uid,uid))
                     .doesNotThrowAnyException();
 
             verify(userDAO).deleteUserByUid(any(ClientSession.class), eq(uid));
@@ -281,7 +281,7 @@ public class UserPersistenceControllerTest {
             doReturn(DeleteResult.unacknowledged())
                     .when(userDAO).deleteUserByUid(any(ClientSession.class), eq(uid));
 
-            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid))
+            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid,uid))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("Error interno al borrar el usuario");
 
@@ -293,7 +293,7 @@ public class UserPersistenceControllerTest {
             doReturn(DeleteResult.acknowledged(0))
                     .when(userDAO).deleteUserByUid(any(ClientSession.class), eq(uid));
 
-            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid))
+            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid,uid))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessage("Usuario no encontrado");
 
@@ -307,7 +307,7 @@ public class UserPersistenceControllerTest {
             doReturn(DeleteResult.unacknowledged())
                     .when(goalDAO).deleteManyGoalsByUid(any(ClientSession.class), eq(uid));
 
-            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid))
+            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid,uid))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("Error interno al borrar el usuario");
 
@@ -322,7 +322,7 @@ public class UserPersistenceControllerTest {
                     .when(goalDAO).deleteManyGoalsByUid(any(ClientSession.class), eq(uid));
             when(firebaseService.deleteFirebaseUser(eq(uid))).thenReturn(false);
 
-            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid))
+            Assertions.assertThatThrownBy(() -> userPersistenceController.delete(uid,uid))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("Error interno al borrar el usuario");
 
