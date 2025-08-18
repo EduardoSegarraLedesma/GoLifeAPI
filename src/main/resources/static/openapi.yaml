@@ -1198,19 +1198,16 @@ components:
       type: object
       description: DTO de respuesta para devolver estadísticas/mediciones de una meta
       required:
-        - valorAlcanzado
-        - acabaDeAlcanzarse
+        - tienePrimerRegistro
+        - acabaDeCrearsePrimerRegistro
         - fechaFin
       properties:
-        valorAlcanzado:
+        tienePrimerRegistro:
           type: boolean
-          description: |
-            Indica si se ha alcanzado objetivo al menos una vez.
-            - En metas booleanas implica que ha habido al menos un registro true
-            - En metas numéricas implica que ha habido al menos un registro con valor mayor o igual al valor objetivo de la meta
-        acabaDeAlcanzarse:
+          description: Indica si se ha habido al menos un  objetivo una vez, una vez true no vuelve a false
+        acabaDeCrearsePrimerRegistro:
           type: boolean
-          description: Flag que indica si el objetivo acaba de alcanzarse por primera vez
+          description: Flag que indica si se acaba de crear un registro por primera vez
         fechaFin:
           type: string
           format: date
