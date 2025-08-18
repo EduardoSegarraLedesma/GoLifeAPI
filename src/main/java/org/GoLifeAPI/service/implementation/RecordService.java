@@ -57,7 +57,7 @@ public class RecordService implements IRecordService {
             return goalDtoMapper.mapBoolGoalToResponseBoolGoalDTO(
                     recordPersistenceController.createBoolrecord(
                             boolRecord,
-                            statsService.getGoalStatsReachedBoolValueUpdateDoc(dto, bool),
+                            statsService.getGoalStatsHasFirstRecordUpdateDoc(bool),
                             mid),
                     bool);
         } else
@@ -74,7 +74,7 @@ public class RecordService implements IRecordService {
             return goalDtoMapper.mapNumGoalToResponseNumGoalDTO(
                     recordPersistenceController.createNumRecord(
                             numRecord,
-                            statsService.getGoalStatsReachedNumValueUpdateDoc(dto, num),
+                            statsService.getGoalStatsHasFirstRecordUpdateDoc(num),
                             mid),
                     num);
         } else if (goal instanceof BoolGoal) {

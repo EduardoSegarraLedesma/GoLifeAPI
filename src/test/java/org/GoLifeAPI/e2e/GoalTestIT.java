@@ -217,7 +217,7 @@ public class GoalTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.duracionValor").value(6))
                 .andExpect(jsonPath("$.duracionUnidad").value("Semanas"))
                 .andExpect(jsonPath("$.registros").isEmpty())
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(false))
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(false))
                 .andExpect(jsonPath("$.estadisticas.fechaFin").value("2025-07-31"));
     }
 
@@ -239,7 +239,7 @@ public class GoalTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.valorObjetivo").value("3.0"))
                 .andExpect(jsonPath("$.unidad").value("Cosas"))
                 .andExpect(jsonPath("$.registros").isEmpty())
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(false))
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(false))
                 .andExpect(jsonPath("$.estadisticas.fechaFin").value("2025-07-31"));
     }
 

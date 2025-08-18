@@ -18,9 +18,9 @@ public class BoolGoal extends Goal {
 
     public BoolGoal(String uid, String nombre, String descripcion,
                     LocalDate fecha, Boolean finalizado, int duracionValor,
-                    Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin) {
+                    Enums.Duracion duracionUnidad, Boolean tienePrimerRegistro, LocalDate fechaFin) {
         super(uid, nombre, Enums.Tipo.Bool, descripcion, fecha,
-                finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
+                finalizado, duracionValor, duracionUnidad, tienePrimerRegistro, fechaFin);
     }
 
     public BoolGoal(String uid, ObjectId _id, String nombre, String descripcion,

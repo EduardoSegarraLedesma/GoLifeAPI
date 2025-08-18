@@ -36,7 +36,7 @@ public class RecordTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.registros").isNotEmpty())
                 .andExpect(jsonPath("$.registros[0].fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.registros[0].valorBool").value(false))
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(false));
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(true));
     }
 
     @Order(2)
@@ -58,7 +58,7 @@ public class RecordTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.registros").isNotEmpty())
                 .andExpect(jsonPath("$.registros[0].fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.registros[0].valorNum").value(0))
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(false));
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(true));
     }
 
     @Order(3)
@@ -106,7 +106,7 @@ public class RecordTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.registros").isNotEmpty())
                 .andExpect(jsonPath("$.registros[0].fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.registros[0].valorBool").value(true))
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(true));
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(true));
     }
 
     @Test
@@ -127,6 +127,6 @@ public class RecordTestIT extends CommonE2EMockIT {
                 .andExpect(jsonPath("$.registros").isNotEmpty())
                 .andExpect(jsonPath("$.registros[0].fecha").value("2025-06-19"))
                 .andExpect(jsonPath("$.registros[0].valorNum").value(10))
-                .andExpect(jsonPath("$.estadisticas.valorAlcanzado").value(true));
+                .andExpect(jsonPath("$.estadisticas.tienePrimerRegistro").value(true));
     }
 }

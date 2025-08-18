@@ -2,22 +2,22 @@ package org.GoLifeAPI.dto.goal;
 
 public class ResponseGoalStatsDTO {
 
-    private Boolean valorAlcanzado;
-    private Boolean acabaDeAlcanzarse;
+    private Boolean tienePrimerRegistro;
+    private Boolean acabaDeCrearsePrimerRegistro;
     private String fechaFin;
 
-    public ResponseGoalStatsDTO(Boolean valorAlcanzado, Boolean acabaDeAlcanzarse, String fechaFin) {
-        this.valorAlcanzado = valorAlcanzado;
-        this.acabaDeAlcanzarse = acabaDeAlcanzarse;
+    public ResponseGoalStatsDTO(Boolean tienePrimerRegistro, Boolean acabaDeCrearse, String fechaFin) {
+        this.tienePrimerRegistro = tienePrimerRegistro;
+        this.acabaDeCrearsePrimerRegistro = acabaDeCrearse;
         this.fechaFin = fechaFin;
     }
 
-    public Boolean getValorAlcanzado() {
-        return valorAlcanzado;
+    public Boolean getTienePrimerRegistro() {
+        return tienePrimerRegistro;
     }
 
-    public Boolean getAcabaDeAlcanzarse() {
-        return acabaDeAlcanzarse;
+    public Boolean getAcabaDeCrearsePrimerRegistro() {
+        return acabaDeCrearsePrimerRegistro;
     }
 
     public String getFechaFin() {
