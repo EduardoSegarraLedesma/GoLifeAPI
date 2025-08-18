@@ -99,7 +99,7 @@ public class RecordPersistenceControllerTest {
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).hasSize(1);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isFalse();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isFalse();
             BoolRecord inserted = result.getRegistros().get(0);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.isValorBool()).isFalse();
@@ -117,7 +117,7 @@ public class RecordPersistenceControllerTest {
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).hasSize(2);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isFalse();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isFalse();
             BoolRecord inserted = result.getRegistros().get(1);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.isValorBool()).isFalse();
@@ -130,14 +130,14 @@ public class RecordPersistenceControllerTest {
         public void createBoolrecord_whenValid_insertsRecordAndReturnsGoal() {
             LocalDate date = LocalDate.of(2025, 7, 2);
             BoolRecord record = new BoolRecord(true, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             BoolGoal result = recordPersistenceController.createBoolrecord(record, statsUpdate, boolMid);
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).isNotEmpty();
             Assertions.assertThat(result.getRegistros()).hasSize(3);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isTrue();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isTrue();
             BoolRecord inserted = result.getRegistros().get(2);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.isValorBool()).isTrue();
@@ -149,7 +149,7 @@ public class RecordPersistenceControllerTest {
         public void createBoolrecord_whenInsertRecordReturnsNull_throwsNotFoundException() {
             LocalDate date = LocalDate.of(2025, 7, 2);
             BoolRecord record = new BoolRecord(true, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             doReturn(null)
                     .when(goalDAO).insertRecordInListByGoalId(any(ClientSession.class), eq(boolMid), any(Document.class));
@@ -164,7 +164,7 @@ public class RecordPersistenceControllerTest {
         public void createBoolrecord_whenUpdateStatsReturnsNull_throwsNotFoundException() {
             LocalDate date = LocalDate.of(2025, 7, 2);
             BoolRecord record = new BoolRecord(true, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
             Document dummyGoalDoc = new Document();
 
             doReturn(dummyGoalDoc)
@@ -182,7 +182,7 @@ public class RecordPersistenceControllerTest {
         public void createBoolrecord_whenMapperThrows_thenThrowsRuntimeException() {
             LocalDate date = LocalDate.of(2025, 7, 5);
             BoolRecord record = new BoolRecord(true, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             Document dummyGoalDoc = new Document("someKey", "someValue");
             doReturn(dummyGoalDoc)
@@ -221,7 +221,7 @@ public class RecordPersistenceControllerTest {
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).hasSize(1);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isFalse();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isFalse();
             NumRecord inserted = result.getRegistros().get(0);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.getValorNum()).isEqualTo(valor);
@@ -240,7 +240,7 @@ public class RecordPersistenceControllerTest {
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).hasSize(2);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isFalse();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isFalse();
             NumRecord inserted = result.getRegistros().get(1);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.getValorNum()).isEqualTo(valor);
@@ -254,13 +254,13 @@ public class RecordPersistenceControllerTest {
             LocalDate date = LocalDate.of(2025, 7, 2);
             double valor = 77.7;
             NumRecord record = new NumRecord(valor, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             NumGoal result = recordPersistenceController.createNumRecord(record, statsUpdate, numMid);
 
             Assertions.assertThat(result).isNotNull();
             Assertions.assertThat(result.getRegistros()).hasSize(3);
-            Assertions.assertThat(result.getEstadisticas().getValorAlcanzado()).isTrue();
+            Assertions.assertThat(result.getEstadisticas().getTienePrimerRegistro()).isTrue();
             NumRecord inserted = result.getRegistros().get(2);
             Assertions.assertThat(inserted.getFecha()).isEqualTo(date);
             Assertions.assertThat(inserted.getValorNum()).isEqualTo(valor);
@@ -273,7 +273,7 @@ public class RecordPersistenceControllerTest {
             LocalDate date = LocalDate.of(2025, 7, 2);
             double valor = 77.7;
             NumRecord record = new NumRecord(valor, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             doReturn(null)
                     .when(goalDAO).insertRecordInListByGoalId(any(ClientSession.class), eq(numMid), any(Document.class));
@@ -289,7 +289,7 @@ public class RecordPersistenceControllerTest {
             LocalDate date = LocalDate.of(2025, 7, 2);
             double valor = 77.7;
             NumRecord record = new NumRecord(valor, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
             Document dummyGoalDoc = new Document();
 
             doReturn(dummyGoalDoc)
@@ -309,7 +309,7 @@ public class RecordPersistenceControllerTest {
             LocalDate date = LocalDate.of(2025, 7, 5);
             double valor = 42.0;
             NumRecord record = new NumRecord(valor, date);
-            Document statsUpdate = new Document("valorAlcanzado", true);
+            Document statsUpdate = new Document("tienePrimerRegistro", true);
 
             Document dummyGoalDoc = new Document("foo", "bar");
             doReturn(dummyGoalDoc).when(goalDAO).insertRecordInListByGoalId(any(ClientSession.class),

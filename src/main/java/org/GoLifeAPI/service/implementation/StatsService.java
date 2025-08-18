@@ -1,8 +1,6 @@
 package org.GoLifeAPI.service.implementation;
 
 import org.GoLifeAPI.dto.goal.PatchGoalDTO;
-import org.GoLifeAPI.dto.record.CreateBoolRecordDTO;
-import org.GoLifeAPI.dto.record.CreateNumRecordDTO;
 import org.GoLifeAPI.model.Enums;
 import org.GoLifeAPI.model.goal.BoolGoal;
 import org.GoLifeAPI.model.goal.Goal;
@@ -56,26 +54,16 @@ public class StatsService {
         return goalStatsUpdates;
     }
 
-    public Document getGoalStatsReachedBoolValueUpdateDoc(CreateBoolRecordDTO recordDto, BoolGoal boolGoal) {
+    public Document getGoalStatsHasFirstRecordUpdateDoc(Goal goal) {
         Document goalStatsUpdates = new Document();
-        Boolean ReachedValue = boolGoal.getEstadisticas().getValorAlcanzado();
-        if (!ReachedValue && recordDto.isValorBool())
-            goalStatsUpdates.append("valorAlcanzado", true);
+        if (!goal.getEstadisticas().getTienePrimerRegistro())
+            if (goal instanceof BoolGoal bool) {
+                if (bool.getRegistros() != null && bool.getRegistros().isEmpty())
+                    goalStatsUpdates.append("tienePrimerRegistro", true);
+            } else if (goal instanceof NumGoal num) {
+                if (num.getRegistros() != null && num.getRegistros().isEmpty())
+                    goalStatsUpdates.append("tienePrimerRegistro", true);
+            }
         return goalStatsUpdates;
-    }
-
-    public Document getGoalStatsReachedNumValueUpdateDoc(CreateNumRecordDTO recordDto, NumGoal numGoal) {
-        Document goalStatsUpdates = new Document();
-        Boolean ReachedValue = numGoal.getEstadisticas().getValorAlcanzado();
-        double goalValue = numGoal.getValorObjetivo();
-        if (!ReachedValue && compareDoublesWithTwoDecimals(recordDto.getValorNum(), goalValue))
-            goalStatsUpdates.append("valorAlcanzado", true);
-        return goalStatsUpdates;
-    }
-
-    private Boolean compareDoublesWithTwoDecimals(Double value1, Double value2) {
-        long v1 = Math.round(value1 * 100);
-        long v2 = Math.round(value2 * 100);
-        return v1 >= v2;
     }
 }

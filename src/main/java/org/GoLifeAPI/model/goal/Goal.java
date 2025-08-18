@@ -26,7 +26,7 @@ public abstract class Goal {
 
     public Goal(String uid, String nombre, Enums.Tipo tipo,
                 String descripcion, LocalDate fecha, Boolean finalizado,
-                int duracionValor, Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin) {
+                int duracionValor, Enums.Duracion duracionUnidad, Boolean tienePrimerRegistro, LocalDate fechaFin) {
         this.uid = uid;
         this.nombre = nombre;
         this.tipo = tipo;
@@ -38,7 +38,7 @@ public abstract class Goal {
             this.duracionValor = -1;
         else
             this.duracionValor = duracionValor;
-        estadisticas = new GoalStats(valorAlcanzado, fechaFin);
+        estadisticas = new GoalStats(tienePrimerRegistro, fechaFin);
     }
 
     public Goal(String uid, ObjectId _id, String nombre, Enums.Tipo tipo,

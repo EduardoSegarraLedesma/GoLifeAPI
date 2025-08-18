@@ -4,16 +4,16 @@ import java.time.LocalDate;
 
 public class GoalStats {
 
-    private Boolean valorAlcanzado;
+    private Boolean tienePrimerRegistro;
     private LocalDate fechaFin;
 
     public GoalStats(LocalDate fechaFin) {
-        valorAlcanzado = false;
+        tienePrimerRegistro = false;
         this.fechaFin = fechaFin;
     }
 
-    public GoalStats(Boolean valorAlcanzado, LocalDate fechaFin) {
-        this.valorAlcanzado = valorAlcanzado;
+    public GoalStats(Boolean tienePrimerRegistro, LocalDate fechaFin) {
+        this.tienePrimerRegistro = tienePrimerRegistro;
         this.fechaFin = fechaFin;
     }
 
@@ -25,11 +25,11 @@ public class GoalStats {
         this.fechaFin = fechaFin;
     }
 
-    public Boolean getValorAlcanzado() {
-        return valorAlcanzado;
+    public Boolean getTienePrimerRegistro() {
+        return tienePrimerRegistro;
     }
 
-    public void setValorAlcanzado(Boolean valorAlcanzado) {
-        this.valorAlcanzado = valorAlcanzado;
+    public void setTienePrimerRegistro(Boolean tienePrimerRegistro) {
+        this.tienePrimerRegistro = tienePrimerRegistro;
     }
 }

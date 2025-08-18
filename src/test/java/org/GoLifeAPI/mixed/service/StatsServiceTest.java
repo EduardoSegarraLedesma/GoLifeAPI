@@ -8,6 +8,8 @@ import org.GoLifeAPI.model.Enums;
 import org.GoLifeAPI.model.goal.BoolGoal;
 import org.GoLifeAPI.model.goal.GoalStats;
 import org.GoLifeAPI.model.goal.NumGoal;
+import org.GoLifeAPI.model.record.BoolRecord;
+import org.GoLifeAPI.model.record.NumRecord;
 import org.GoLifeAPI.service.implementation.StatsService;
 import org.assertj.core.api.Assertions;
 import org.bson.Document;
@@ -24,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class StatsServiceTest {
@@ -264,165 +267,119 @@ public class StatsServiceTest {
     }
 
     @Nested
-    @DisplayName("getGoalStatsReachedBoolValueUpdateDoc")
-    class GetGoalStatsReachedBoolValueUpdateDoc {
+    @DisplayName("getGoalStatsHasFirstRecordUpdateDoc")
+    class GetGoalStatsHasFirstRecordUpdateDoc {
+
         @Test
-        public void getGoalStatsReachedBoolValueUpdateDoc_whenNotReachedAndRecordTrue_returnsDocWithTrue() {
-            CreateBoolRecordDTO recordDto = new CreateBoolRecordDTO(true, LocalDate.now());
-            BoolGoal boolGoal = new BoolGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.now(), false, 1, Enums.Duracion.Dias,
-                    new GoalStats(false, LocalDate.now()), new ArrayList<>());
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenBoolNoFirstAndEmptyList_setsFlagTrue() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            BoolGoal goal = new BoolGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 3, Enums.Duracion.Semanas,
+                    new GoalStats(false, start), new ArrayList<>()
+            );
 
-            Document doc = statsService.getGoalStatsReachedBoolValueUpdateDoc(recordDto, boolGoal);
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
 
-            Assertions.assertThat(doc.containsKey("valorAlcanzado")).isTrue();
-            Assertions.assertThat(doc.getBoolean("valorAlcanzado")).isTrue();
+            Assertions.assertThat(doc.containsKey("tienePrimerRegistro")).isTrue();
+            Assertions.assertThat(doc.getBoolean("tienePrimerRegistro")).isTrue();
         }
 
         @Test
-        public void getGoalStatsReachedBoolValueUpdateDoc_whenAlreadyReachedAndRecordTrue_returnsEmptyDoc() {
-            CreateBoolRecordDTO recordDto = new CreateBoolRecordDTO(true, LocalDate.now());
-            BoolGoal boolGoal = new BoolGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.now(), false, 1, Enums.Duracion.Dias,
-                    new GoalStats(true, LocalDate.now()), new ArrayList<>());
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenNumNoFirstAndEmptyList_setsFlagTrue() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            NumGoal goal = new NumGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 2, Enums.Duracion.Meses,
+                    new GoalStats(false, start), new ArrayList<>(),
+                    10.0, "u"
+            );
 
-            Document doc = statsService.getGoalStatsReachedBoolValueUpdateDoc(recordDto, boolGoal);
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
+
+            Assertions.assertThat(doc.containsKey("tienePrimerRegistro")).isTrue();
+            Assertions.assertThat(doc.getBoolean("tienePrimerRegistro")).isTrue();
+        }
+
+        @Test
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenAlreadyHasFirstRecord_returnsEmptyDoc() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            BoolGoal goal = new BoolGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 5, Enums.Duracion.Dias,
+                    new GoalStats(false, start), new ArrayList<>()
+            );
+            // Forzamos tienePrimerRegistro = true
+            ReflectionTestUtils.setField(goal.getEstadisticas(), "tienePrimerRegistro", true);
+
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
 
             Assertions.assertThat(doc.isEmpty()).isTrue();
         }
 
         @Test
-        public void getGoalStatsReachedBoolValueUpdateDoc_whenNotReachedAndRecordFalse_returnsEmptyDoc() {
-            CreateBoolRecordDTO recordDto = new CreateBoolRecordDTO(false, LocalDate.now());
-            BoolGoal boolGoal = new BoolGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.now(), false, 1, Enums.Duracion.Dias,
-                    new GoalStats(false, LocalDate.now()), new ArrayList<>());
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenBoolListIsNull_returnsEmptyDoc() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            BoolGoal goal = new BoolGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 3, Enums.Duracion.Semanas,
+                    new GoalStats(false, start), null
+            );
 
-            Document doc = statsService.getGoalStatsReachedBoolValueUpdateDoc(recordDto, boolGoal);
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
+
+            Assertions.assertThat(doc.isEmpty()).isTrue();
+        }
+
+        @Test
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenBoolListNotEmpty_returnsEmptyDoc() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            List<BoolRecord> registros = new ArrayList<>();
+            registros.add(new BoolRecord(true, start));
+
+            BoolGoal goal = new BoolGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 3, Enums.Duracion.Semanas,
+                    new GoalStats(false, start), registros
+            );
+
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
+
+            Assertions.assertThat(doc.isEmpty()).isTrue();
+        }
+
+        @Test
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenNumListIsNull_returnsEmptyDoc() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            NumGoal goal = new NumGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 2, Enums.Duracion.Meses,
+                    new GoalStats(false, start), null,
+                    10.0, "u"
+            );
+
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
+
+            Assertions.assertThat(doc.isEmpty()).isTrue();
+        }
+
+        @Test
+        public void getGoalStatsHasFirstRecordUpdateDoc_whenNumListNotEmpty_returnsEmptyDoc() {
+            LocalDate start = LocalDate.of(2025, 7, 1);
+            List<NumRecord> registros = new ArrayList<>();
+            registros.add(new NumRecord(3.14, start));
+
+            NumGoal goal = new NumGoal(
+                    uid, new ObjectId(), "n", "d",
+                    start, false, 2, Enums.Duracion.Meses,
+                    new GoalStats(false, start), registros,
+                    10.0, "u"
+            );
+
+            Document doc = statsService.getGoalStatsHasFirstRecordUpdateDoc(goal);
 
             Assertions.assertThat(doc.isEmpty()).isTrue();
         }
     }
 
-    @Nested
-    @DisplayName("getGoalStatsReachedNumValueUpdateDoc")
-    class GetGoalStatsReachedNumValueUpdateDoc {
-        @Test
-        public void getGoalStatsReachedNumValueUpdateDoc_whenNotReachedAndValueEqualsGoal_returnsDocWithTrue() {
-            CreateNumRecordDTO recordDto = new CreateNumRecordDTO(123.45, LocalDate.of(2025, 7, 1));
-            NumGoal numGoal = new NumGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
-                    new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
-                    123.45, "unit");
-            Document doc = statsService.getGoalStatsReachedNumValueUpdateDoc(recordDto, numGoal);
-            Assertions.assertThat(doc.containsKey("valorAlcanzado")).isTrue();
-            Assertions.assertThat(doc.getBoolean("valorAlcanzado")).isTrue();
-        }
-
-        @Test
-        public void getGoalStatsReachedNumValueUpdateDoc_whenAlreadyReached_returnsEmptyDoc() {
-            CreateNumRecordDTO recordDto = new CreateNumRecordDTO(123.45, LocalDate.of(2025, 7, 1));
-            NumGoal numGoal = new NumGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
-                    new GoalStats(true, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
-                    123.45, "unit");
-            Document doc = statsService.getGoalStatsReachedNumValueUpdateDoc(recordDto, numGoal);
-            Assertions.assertThat(doc.isEmpty()).isTrue();
-        }
-
-        @Test
-        public void getGoalStatsReachedNumValueUpdateDoc_whenValueDiffers_returnsEmptyDoc() {
-            CreateNumRecordDTO recordDto = new CreateNumRecordDTO(100.00, LocalDate.of(2025, 7, 1));
-            NumGoal numGoal = new NumGoal(uid, new ObjectId(), "n", "d",
-                    LocalDate.of(2025, 7, 1), false, 5, Enums.Duracion.Dias,
-                    new GoalStats(false, LocalDate.of(2025, 7, 1)), new ArrayList<>(),
-                    123.45, "unit");
-            Document doc = statsService.getGoalStatsReachedNumValueUpdateDoc(recordDto, numGoal);
-            Assertions.assertThat(doc.isEmpty()).isTrue();
-        }
-    }
-
-    @Nested
-    @DisplayName("compareDoublesWithTwoDecimals")
-    class CompareDoublesWithTwoDecimals {
-        @Test
-        public void compareDoublesWithTwoDecimals_whenEqualValues_returnsTrue() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    1.23, 1.23
-            );
-            Assertions.assertThat(result).isTrue();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenValue1Greater_returnsTrue() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    1.235, 1.23
-            );
-            Assertions.assertThat(result).isTrue();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenValue1Less_returnsFalse() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    1.234, 1.24
-            );
-            Assertions.assertThat(result).isFalse();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenRoundedUpEdge_returnsTrue() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    1.005, 1.00
-            );
-            Assertions.assertThat(result).isTrue();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenValuesEqual_returnsTrue() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    2.345, 2.345
-            );
-            Assertions.assertThat(result).isTrue();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenValue1JustBelowThreshold_returnsFalse() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    1.2349, 1.235
-            );
-            Assertions.assertThat(result).isFalse();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenZeroAndVerySmall_returnsTrue() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    0.004, 0.0
-            );
-            Assertions.assertThat(result).isTrue();
-        }
-
-        @Test
-        public void compareDoublesWithTwoDecimals_whenNegativeValue1LessThanValue2_returnsFalse() {
-            Boolean result = ReflectionTestUtils.invokeMethod(
-                    statsService,
-                    "compareDoublesWithTwoDecimals",
-                    -1.236, -1.23
-            );
-            Assertions.assertThat(result).isFalse();
-        }
-    }
 }

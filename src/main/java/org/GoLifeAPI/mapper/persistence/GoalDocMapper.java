@@ -104,7 +104,7 @@ public class GoalDocMapper {
     private Document mapGoalStatsToDoc(GoalStats goalStats) {
         LocalDate finalDate = goalStats.getFechaFin();
         return new Document()
-                .append("valorAlcanzado", goalStats.getValorAlcanzado())
+                .append("tienePrimerRegistro", goalStats.getTienePrimerRegistro())
                 .append("fechaFin", finalDate != null ? finalDate.format(formatter) : "");
     }
 
@@ -206,7 +206,7 @@ public class GoalDocMapper {
 
     private GoalStats mapDocToGoalStats(Document goalStatsDoc) {
         return new GoalStats(
-                goalStatsDoc.getBoolean("valorAlcanzado"),
+                goalStatsDoc.getBoolean("tienePrimerRegistro"),
                 !goalStatsDoc.getString("fechaFin").isEmpty() ? LocalDate.parse(goalStatsDoc.getString("fechaFin")) : null);
     }
 }

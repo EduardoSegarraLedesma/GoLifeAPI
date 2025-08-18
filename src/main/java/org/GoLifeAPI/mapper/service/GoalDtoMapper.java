@@ -86,8 +86,8 @@ public class GoalDtoMapper {
 
     private ResponseGoalStatsDTO mapGoalStatsToResponseGoalStatsDTO(GoalStats newGoalStats, GoalStats oldGoalStats) {
         return new ResponseGoalStatsDTO(
-                newGoalStats.getValorAlcanzado(),
-                (newGoalStats.getValorAlcanzado() && !oldGoalStats.getValorAlcanzado()),
+                newGoalStats.getTienePrimerRegistro(),
+                (newGoalStats.getTienePrimerRegistro() && !oldGoalStats.getTienePrimerRegistro()),
                 newGoalStats.getFechaFin() != null ? newGoalStats.getFechaFin().format(formatter) : "");
     }
 

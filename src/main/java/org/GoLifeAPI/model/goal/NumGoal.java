@@ -21,10 +21,10 @@ public class NumGoal extends Goal {
 
     public NumGoal(String uid, String nombre, String descripcion,
                    LocalDate fecha, Boolean finalizado, int duracionValor,
-                   Enums.Duracion duracionUnidad, Boolean valorAlcanzado, LocalDate fechaFin,
+                   Enums.Duracion duracionUnidad, Boolean tienePrimerRegistro, LocalDate fechaFin,
                    Double valorObjetivo, String unidad) {
         super(uid, nombre, Enums.Tipo.Num, descripcion, fecha,
-                finalizado, duracionValor, duracionUnidad, valorAlcanzado, fechaFin);
+                finalizado, duracionValor, duracionUnidad, tienePrimerRegistro, fechaFin);
         this.valorObjetivo = valorObjetivo;
         this.unidad = unidad;
     }
