@@ -40,7 +40,7 @@ public class MongoService {
 
     public boolean ping() {
         try {
-            Document result = mongoClient.getDatabase("admin")
+            Document result = mongoClient.getDatabase("GoLife")
                     .runCommand(new Document("ping", 1));
             Object okValue = result.get("ok");
             if (okValue instanceof Number) {
