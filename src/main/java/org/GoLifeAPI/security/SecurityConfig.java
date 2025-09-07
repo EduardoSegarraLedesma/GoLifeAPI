@@ -67,7 +67,7 @@ public class SecurityConfig {
         cfg.setAllowedOrigins(List.of(
                 "https://golife-deployment.web.app",
                 "https://golife-462914.oa.r.appspot.com",
-                "http://localhost:3000"
+                "https://golife-deployment.firebaseapp.com"
         ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type"));
